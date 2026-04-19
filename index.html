@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -273,6 +274,75 @@
       animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1);
     }
 
+    /* ── OCR Recognition styles ── */
+    .ocr-video-wrap {
+      width: 100%; aspect-ratio: 4/3;
+      background: var(--accent);
+      border-radius: 16px; overflow: hidden;
+      position: relative; margin-bottom: 16px;
+    }
+    .ocr-video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ocr-video-wrap .scan-line { animation-duration: 2.4s; }
+
+    .ocr-status-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(26,26,46,0.84); backdrop-filter: blur(6px);
+      border-radius: 100px; padding: 9px 18px;
+      color: white; font-size: 13px; font-weight: 600;
+      position: absolute; bottom: 12px; left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .ocr-status-bar.hidden { opacity: 0; }
+    .ocr-spinner {
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+      border: 2.5px solid rgba(255,255,255,0.25);
+      border-top-color: var(--primary);
+      animation: ocrSpin 0.75s linear infinite;
+    }
+    @keyframes ocrSpin { to { transform: rotate(360deg); } }
+
+    .ocr-result-box {
+      width: 100%; background: var(--primary-light);
+      border: 2px solid var(--secondary);
+      border-radius: 14px; padding: 14px 18px;
+      display: none; margin-bottom: 14px;
+    }
+    .ocr-result-box.visible { display: block; }
+    .ocr-result-label { font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .ocr-result-name  { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
+
+    /* shutter flash */
+    @keyframes shutterFlash {
+      0%   { opacity: 1; }
+      15%  { opacity: 0.05; }
+      100% { opacity: 1; }
+    }
+    .shutter-flash { animation: shutterFlash 0.3s ease; }
+
+    .btn-capture {
+      width: 100%; background: var(--primary); color: white;
+      border: none; border-radius: 14px;
+      padding: 13px 20px; font-family: 'Noto Sans KR', sans-serif;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
+      transition: all 0.2s; margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-capture:hover:not(:disabled) { background: #e85a26; transform: translateY(-1px); }
+    .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-skip {
+      width: 100%; background: transparent; color: var(--muted);
+      border: 1.5px solid #e0d8d0; border-radius: 14px;
+      padding: 11px 20px; font-family: 'Noto Sans KR', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-skip:hover { background: #f5f0eb; color: var(--accent); }
+
     /* ── Finger detection overlay ── */
     .hand-overlay-wrap {
       position: relative;
@@ -394,19 +464,38 @@
     <!-- Page: Recognition -->
     <div class="page active fade-up" id="page-recognition">
       <div class="card center">
-        <div class="card-title">🔍 안면 인식</div>
-        <div class="video-wrap">
+        <div class="card-title">🔍 학생증 / 명찰 OCR 인식</div>
+
+        <!-- Live camera with scan animation -->
+        <div class="ocr-video-wrap" id="ocr-video-wrap">
           <video id="video-recog" autoplay muted playsinline></video>
           <div class="scan-line"></div>
           <div class="scan-corners">
-            <div class="sc sc-tl"></div>
-            <div class="sc sc-tr"></div>
-            <div class="sc sc-bl"></div>
-            <div class="sc sc-br"></div>
+            <div class="sc sc-tl"></div><div class="sc sc-tr"></div>
+            <div class="sc sc-bl"></div><div class="sc sc-br"></div>
+          </div>
+          <!-- status pill inside video -->
+          <div class="ocr-status-bar hidden" id="ocr-status-bar">
+            <div class="ocr-spinner" id="ocr-spinner"></div>
+            <span id="ocr-status-text">인식 중...</span>
           </div>
         </div>
-        <div class="hero-text">인식 중...</div>
-        <div class="hero-sub">카메라를 정면으로 바라봐 주세요.<br>잠시 기다리면 자동으로 인식됩니다.</div>
+
+        <!-- OCR result (shown after recognition) -->
+        <div class="ocr-result-box" id="ocr-result-box">
+          <div class="ocr-result-label">📝 인식된 이름</div>
+          <div class="ocr-result-name" id="ocr-result-name">—</div>
+        </div>
+
+        <button class="btn-capture" id="btn-capture" onclick="captureAndOCR()">
+          📷 사진 찍어 이름 인식
+        </button>
+        <button class="btn-skip" onclick="skipRecognition()">
+          이름 없이 계속하기 →
+        </button>
+
+        <!-- hidden canvas used for frame capture -->
+        <canvas id="ocr-canvas" style="display:none"></canvas>
       </div>
     </div>
 
@@ -424,7 +513,7 @@
         </div>
         <div class="row">
           <button class="btn btn-primary" onclick="goPage('dashboard')">맞아요 👍</button>
-          <button class="btn btn-danger" onclick="goPage('recognition')">아니에요</button>
+          <button class="btn btn-danger" onclick="goPage('recognition'); initRecognition();">아니에요</button>
         </div>
       </div>
     </div>
@@ -577,9 +666,152 @@
       .catch(() => {});
   }
 
+  function stopCamera(videoId) {
+    const video = document.getElementById(videoId);
+    if (video && video.srcObject) {
+      video.srcObject.getTracks().forEach(t => t.stop());
+      video.srcObject = null;
+    }
+  }
 
+  /* ─── OCR Recognition ─── */
+  let ocrWorker = null;
+  let recogStream = null;
 
-  /* Draw skeleton on canvas */
+  async function initRecognition() {
+    updateUserBar(null);
+    // Reset UI state
+    const bar = document.getElementById('ocr-status-bar');
+    if (bar) bar.classList.add('hidden');
+    const resultBox = document.getElementById('ocr-result-box');
+    if (resultBox) resultBox.classList.remove('visible');
+    const btn = document.getElementById('btn-capture');
+    if (btn) { btn.disabled = false; btn.textContent = '📷 사진 찍어 이름 인식'; btn.onclick = captureAndOCR; }
+
+    // Start camera (prefer rear camera for scanning documents; fallback to front)
+    const video = document.getElementById('video-recog');
+    try {
+      recogStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      video.srcObject = recogStream;
+    } catch (e) {
+      try {
+        recogStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = recogStream;
+      } catch (e2) { /* camera unavailable */ }
+    }
+
+    // Warm up Tesseract in the background (kor + eng)
+    if (!ocrWorker) {
+      Tesseract.createWorker('kor+eng', 1, { logger: () => {} })
+        .then(w => { ocrWorker = w; })
+        .catch(() => { ocrWorker = null; });
+    }
+  }
+
+  function stopRecogCamera() {
+    if (recogStream) {
+      recogStream.getTracks().forEach(t => t.stop());
+      recogStream = null;
+    }
+  }
+
+  function setOcrStatus(state, text) {
+    const bar     = document.getElementById('ocr-status-bar');
+    const spinner = document.getElementById('ocr-spinner');
+    const txt     = document.getElementById('ocr-status-text');
+    if (!bar) return;
+    if (state === 'hidden') { bar.classList.add('hidden'); return; }
+    bar.classList.remove('hidden');
+    if (txt) txt.textContent = text || '';
+    if (spinner) spinner.style.display = (state === 'loading') ? 'block' : 'none';
+  }
+
+  async function captureAndOCR() {
+    const video  = document.getElementById('video-recog');
+    const canvas = document.getElementById('ocr-canvas');
+    const btn    = document.getElementById('btn-capture');
+
+    // Shutter flash effect
+    const wrap = document.getElementById('ocr-video-wrap');
+    if (wrap) { wrap.classList.add('shutter-flash'); setTimeout(() => wrap.classList.remove('shutter-flash'), 350); }
+
+    btn.disabled = true;
+    btn.textContent = '🔍 인식 중...';
+    setOcrStatus('loading', 'OCR 처리 중...');
+
+    // Capture frame
+    canvas.width  = video.videoWidth  || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Greyscale + contrast boost for better OCR accuracy
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+      const c = Math.min(255, Math.max(0, (g - 128) * 1.6 + 128));
+      d[i] = d[i+1] = d[i+2] = c;
+    }
+    ctx.putImageData(imgData, 0, 0);
+
+    let recognizedName = null;
+    try {
+      // Lazy-load worker if warmup didn't finish yet
+      if (!ocrWorker) {
+        ocrWorker = await Tesseract.createWorker('kor+eng', 1, { logger: () => {} });
+      }
+      const { data: { text } } = await ocrWorker.recognize(canvas);
+
+      // Extract Korean name: 2–4 consecutive Hangul characters
+      const stopWords = new Set([
+        '학생','학교','이름','반','번호','학번','학년','급식',
+        '출입','카드','인증','확인','학생증','명찰','식권','연도','번'
+      ]);
+      const matches = text.match(/[가-힣]{2,4}/g) || [];
+      const candidates = matches.filter(w => !stopWords.has(w));
+      if (candidates.length > 0) recognizedName = candidates[0];
+    } catch (e) {
+      recognizedName = null;
+    }
+
+    if (recognizedName) {
+      setOcrStatus('hidden');
+      document.getElementById('ocr-result-name').textContent = recognizedName;
+      document.getElementById('ocr-result-box').classList.add('visible');
+      btn.textContent = '✅ 이름으로 계속하기';
+      btn.disabled = false;
+      btn.onclick = () => proceedWithName(recognizedName);
+    } else {
+      setOcrStatus('error', '이름을 찾을 수 없어요');
+      setTimeout(() => setOcrStatus('hidden'), 2200);
+      btn.textContent = '📷 다시 찍기';
+      btn.disabled = false;
+      btn.onclick = captureAndOCR;
+    }
+  }
+
+  function proceedWithName(name) {
+    user = { grade: 1, classNum: 2, number: 10, name };
+    stopRecogCamera();
+    document.getElementById('confirm-name').textContent = name;
+    document.getElementById('confirm-sub').textContent  = `${user.grade}학년 ${user.classNum}반 ${user.number}번`;
+    updateUserBar(user);
+    goPage('confirm');
+  }
+
+  function skipRecognition() {
+    user = { grade: 1, classNum: 2, number: 10, name: '(이름 없음)' };
+    stopRecogCamera();
+    document.getElementById('confirm-name').textContent = user.name;
+    document.getElementById('confirm-sub').textContent  = '이름 미인식 — 직접 확인하세요';
+    updateUserBar(user);
+    goPage('confirm');
+  }
+
+  
   function drawHandOverlay(canvas, video, results) {
     canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
@@ -1114,6 +1346,7 @@
   function resetAll() {
     stopHandDetector();
     stopCamera('video-serve');
+    stopRecogCamera();
     counts = Array(6).fill(0);
     serveStep = 0;
     goPage('recognition');
