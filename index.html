@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- Tesseract 제거 → Claude Vision API 사용 -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -609,7 +609,6 @@
   const CIRCUMFERENCE  = 75.4; // 2π×12
 
   /* OCR state */
-  let ocrWorker   = null;
   let recogStream = null;
 
   /* ══════════════════════════════════════════
@@ -682,12 +681,7 @@
       } catch (e2) { /* camera unavailable */ }
     }
 
-    // Warm up Tesseract in background
-    if (!ocrWorker) {
-      Tesseract.createWorker('kor+eng', 1, { logger: () => {} })
-        .then(w => { ocrWorker = w; })
-        .catch(() => { ocrWorker = null; });
-    }
+    // Claude Vision API 사용 — 별도 워밍업 불필요
   }
 
   function stopRecogCamera() {
@@ -719,38 +713,46 @@
 
     btn.disabled = true;
     btn.textContent = '🔍 인식 중...';
-    setOcrStatus('loading', 'OCR 처리 중...');
+    setOcrStatus('loading', 'AI가 이름을 찾는 중...');
 
-    // Capture frame
+    // Capture frame → base64 JPEG (품질 0.92)
     canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Greyscale + contrast boost
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-      const c = Math.min(255, Math.max(0, (g - 128) * 1.6 + 128));
-      d[i] = d[i+1] = d[i+2] = c;
-    }
-    ctx.putImageData(imgData, 0, 0);
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const base64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
 
     let recognizedName = null;
     try {
-      if (!ocrWorker) {
-        ocrWorker = await Tesseract.createWorker('kor+eng', 1, { logger: () => {} });
-      }
-      const { data: { text } } = await ocrWorker.recognize(canvas);
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 100,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: { type: 'base64', media_type: 'image/jpeg', data: base64 }
+              },
+              {
+                type: 'text',
+                text: `이 이미지는 학생증, 명찰, 또는 이름표입니다.
+이미지에서 사람 이름(한국어 또는 영어)을 찾아서 이름만 딱 한 단어로 답하세요.
+이름이 없거나 읽을 수 없으면 정확히 "NONE" 이라고만 답하세요.
+다른 말은 절대 하지 마세요.`
+              }
+            ]
+          }]
+        })
+      });
 
-      const stopWords = new Set([
-        '학생','학교','이름','반','번호','학번','학년','급식',
-        '출입','카드','인증','확인','학생증','명찰','식권','연도','번'
-      ]);
-      const matches = text.match(/[가-힣]{2,4}/g) || [];
-      const candidates = matches.filter(w => !stopWords.has(w));
-      if (candidates.length > 0) recognizedName = candidates[0];
+      const data = await res.json();
+      const raw = (data.content?.[0]?.text || '').trim();
+      if (raw && raw !== 'NONE' && raw.length >= 2 && raw.length <= 10) {
+        recognizedName = raw;
+      }
     } catch (e) {
       recognizedName = null;
     }
