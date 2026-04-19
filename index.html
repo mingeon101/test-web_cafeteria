@@ -144,14 +144,14 @@
     .btn-count.green { background: #e8f5e9; color: #388e3c; font-size: 22px; }
     .btn-count.orange { background: #fff3e0; color: #f57c00; font-size: 12px; font-weight: 700; }
 
-    /* ── Video ── */
-    .video-wrap {
+    /* ── OCR Recognition styles ── */
+    .ocr-video-wrap {
       width: 100%; aspect-ratio: 4/3;
       background: var(--accent);
       border-radius: 16px; overflow: hidden;
-      position: relative; margin-bottom: 20px;
+      position: relative; margin-bottom: 16px;
     }
-    .video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ocr-video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .scan-line {
       position: absolute; top: 0; left: 0; right: 0;
@@ -169,6 +169,130 @@
     .sc-tr { top:0; right:0; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
     .sc-bl { bottom:0; left:0;  border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
     .sc-br { bottom:0; right:0; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+    .ocr-status-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(26,26,46,0.84); backdrop-filter: blur(6px);
+      border-radius: 100px; padding: 9px 18px;
+      color: white; font-size: 13px; font-weight: 600;
+      position: absolute; bottom: 12px; left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .ocr-status-bar.hidden { opacity: 0; pointer-events: none; }
+    .ocr-spinner {
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+      border: 2.5px solid rgba(255,255,255,0.25);
+      border-top-color: var(--primary);
+      animation: ocrSpin 0.75s linear infinite;
+    }
+    @keyframes ocrSpin { to { transform: rotate(360deg); } }
+
+    .ocr-result-box {
+      width: 100%; background: var(--primary-light);
+      border: 2px solid var(--secondary);
+      border-radius: 14px; padding: 14px 18px;
+      display: none; margin-bottom: 14px;
+    }
+    .ocr-result-box.visible { display: block; }
+    .ocr-result-label { font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .ocr-result-name  { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
+
+    @keyframes shutterFlash {
+      0%   { opacity: 1; }
+      15%  { opacity: 0.05; }
+      100% { opacity: 1; }
+    }
+    .shutter-flash { animation: shutterFlash 0.3s ease; }
+
+    .btn-capture {
+      width: 100%; background: var(--primary); color: white;
+      border: none; border-radius: 14px;
+      padding: 13px 20px; font-family: 'Noto Sans KR', sans-serif;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
+      transition: all 0.2s; margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-capture:hover:not(:disabled) { background: #e85a26; transform: translateY(-1px); }
+    .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-skip {
+      width: 100%; background: transparent; color: var(--muted);
+      border: 1.5px solid #e0d8d0; border-radius: 14px;
+      padding: 11px 20px; font-family: 'Noto Sans KR', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-skip:hover { background: #f5f0eb; color: var(--accent); }
+
+    /* ── Hand detection overlay ── */
+    .hand-overlay-wrap {
+      position: relative;
+      width: 100%; aspect-ratio: 4/3;
+      background: var(--accent);
+      border-radius: 16px; overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .hand-overlay-wrap video,
+    .hand-overlay-wrap canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hand-overlay-wrap canvas { pointer-events: none; }
+
+    .finger-status {
+      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(26,26,46,0.78); backdrop-filter: blur(6px);
+      border-radius: 100px; padding: 8px 18px;
+      color: white; font-size: 13px; font-weight: 600;
+      white-space: nowrap; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .finger-status.hidden { opacity: 0; }
+
+    .countdown-ring {
+      position: relative; width: 28px; height: 28px; flex-shrink: 0;
+    }
+    .countdown-ring svg { transform: rotate(-90deg); }
+    .countdown-ring .ring-bg { fill: none; stroke: rgba(255,255,255,0.2); stroke-width: 3; }
+    .countdown-ring .ring-fill {
+      fill: none; stroke: var(--primary); stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 75.4;
+      stroke-dashoffset: 75.4;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+    .countdown-ring .ring-text {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px; font-weight: 700; color: white;
+    }
+
+    @keyframes confirmFlash {
+      0%   { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); }
+      30%  { box-shadow: inset 0 0 0 4px rgba(76,175,80,0.9); }
+      100% { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); }
+    }
+    .confirmed-flash { animation: confirmFlash 0.6s ease; }
+
+    .finger-detected-badge {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      background: var(--primary); color: white;
+      border-radius: 100px; padding: 5px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 700;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .finger-detected-badge.visible { opacity: 1; }
 
     /* ── Typography ── */
     .hero-text { font-size: 30px; font-weight: 900; letter-spacing: -1px; line-height: 1.1; color: var(--accent); }
@@ -234,7 +358,7 @@
       font-size: 14px; line-height: 1.7;
     }
 
-    /* ── Pie chart (canvas) ── */
+    /* ── Pie chart ── */
     #pie-canvas { display: block; margin: 0 auto; }
     .legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
@@ -274,144 +398,6 @@
       animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1);
     }
 
-    /* ── OCR Recognition styles ── */
-    .ocr-video-wrap {
-      width: 100%; aspect-ratio: 4/3;
-      background: var(--accent);
-      border-radius: 16px; overflow: hidden;
-      position: relative; margin-bottom: 16px;
-    }
-    .ocr-video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .ocr-video-wrap .scan-line { animation-duration: 2.4s; }
-
-    .ocr-status-bar {
-      display: flex; align-items: center; gap: 10px;
-      background: rgba(26,26,46,0.84); backdrop-filter: blur(6px);
-      border-radius: 100px; padding: 9px 18px;
-      color: white; font-size: 13px; font-weight: 600;
-      position: absolute; bottom: 12px; left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap; pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    .ocr-status-bar.hidden { opacity: 0; }
-    .ocr-spinner {
-      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-      border: 2.5px solid rgba(255,255,255,0.25);
-      border-top-color: var(--primary);
-      animation: ocrSpin 0.75s linear infinite;
-    }
-    @keyframes ocrSpin { to { transform: rotate(360deg); } }
-
-    .ocr-result-box {
-      width: 100%; background: var(--primary-light);
-      border: 2px solid var(--secondary);
-      border-radius: 14px; padding: 14px 18px;
-      display: none; margin-bottom: 14px;
-    }
-    .ocr-result-box.visible { display: block; }
-    .ocr-result-label { font-size: 11px; font-weight: 700; letter-spacing: 1px;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-    .ocr-result-name  { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
-
-    /* shutter flash */
-    @keyframes shutterFlash {
-      0%   { opacity: 1; }
-      15%  { opacity: 0.05; }
-      100% { opacity: 1; }
-    }
-    .shutter-flash { animation: shutterFlash 0.3s ease; }
-
-    .btn-capture {
-      width: 100%; background: var(--primary); color: white;
-      border: none; border-radius: 14px;
-      padding: 13px 20px; font-family: 'Noto Sans KR', sans-serif;
-      font-size: 15px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
-      transition: all 0.2s; margin-bottom: 10px;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-capture:hover:not(:disabled) { background: #e85a26; transform: translateY(-1px); }
-    .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn-skip {
-      width: 100%; background: transparent; color: var(--muted);
-      border: 1.5px solid #e0d8d0; border-radius: 14px;
-      padding: 11px 20px; font-family: 'Noto Sans KR', sans-serif;
-      font-size: 14px; font-weight: 500; cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-skip:hover { background: #f5f0eb; color: var(--accent); }
-
-    /* ── Finger detection overlay ── */
-    .hand-overlay-wrap {
-      position: relative;
-      width: 100%; aspect-ratio: 4/3;
-      background: var(--accent);
-      border-radius: 16px; overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .hand-overlay-wrap video,
-    .hand-overlay-wrap canvas {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .hand-overlay-wrap canvas { pointer-events: none; }
-
-    /* countdown ring */
-    .finger-status {
-      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 10px;
-      background: rgba(26,26,46,0.78); backdrop-filter: blur(6px);
-      border-radius: 100px; padding: 8px 18px;
-      color: white; font-size: 13px; font-weight: 600;
-      white-space: nowrap; pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    .finger-status.hidden { opacity: 0; }
-
-    .countdown-ring {
-      position: relative; width: 28px; height: 28px; flex-shrink: 0;
-    }
-    .countdown-ring svg { transform: rotate(-90deg); }
-    .countdown-ring .ring-bg { fill: none; stroke: rgba(255,255,255,0.2); stroke-width: 3; }
-    .countdown-ring .ring-fill {
-      fill: none; stroke: var(--primary); stroke-width: 3;
-      stroke-linecap: round;
-      stroke-dasharray: 75.4;
-      stroke-dashoffset: 75.4;
-      transition: stroke-dashoffset 0.1s linear;
-    }
-    .countdown-ring .ring-text {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 11px; font-weight: 700; color: white;
-    }
-
-    /* confirmed flash */
-    @keyframes confirmFlash {
-      0%   { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); }
-      30%  { box-shadow: inset 0 0 0 4px rgba(76,175,80,0.9); }
-      100% { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); }
-    }
-    .confirmed-flash { animation: confirmFlash 0.6s ease; }
-
-    /* finger detected badge */
-    .finger-detected-badge {
-      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      background: var(--primary); color: white;
-      border-radius: 100px; padding: 5px 16px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 22px; font-weight: 700;
-      pointer-events: none; opacity: 0;
-      transition: opacity 0.2s;
-      white-space: nowrap;
-    }
-    .finger-detected-badge.visible { opacity: 1; }
-
     /* ── Input ── */
     .styled-input {
       border: 2px solid #e8e0d8; border-radius: 12px;
@@ -422,11 +408,11 @@
     }
     .styled-input:focus { border-color: var(--primary); }
 
-    /* ── Page hidden ── */
+    /* ── Pages ── */
     .page { display: none; }
     .page.active { display: block; }
 
-    /* ── Util ── */
+    /* ── Utils ── */
     .row { display: flex; gap: 12px; align-items: center; justify-content: center; }
     .mt8 { margin-top: 8px; }
     .mt16 { margin-top: 16px; }
@@ -465,8 +451,6 @@
     <div class="page active fade-up" id="page-recognition">
       <div class="card center">
         <div class="card-title">🔍 학생증 / 명찰 OCR 인식</div>
-
-        <!-- Live camera with scan animation -->
         <div class="ocr-video-wrap" id="ocr-video-wrap">
           <video id="video-recog" autoplay muted playsinline></video>
           <div class="scan-line"></div>
@@ -474,27 +458,21 @@
             <div class="sc sc-tl"></div><div class="sc sc-tr"></div>
             <div class="sc sc-bl"></div><div class="sc sc-br"></div>
           </div>
-          <!-- status pill inside video -->
           <div class="ocr-status-bar hidden" id="ocr-status-bar">
             <div class="ocr-spinner" id="ocr-spinner"></div>
             <span id="ocr-status-text">인식 중...</span>
           </div>
         </div>
-
-        <!-- OCR result (shown after recognition) -->
         <div class="ocr-result-box" id="ocr-result-box">
           <div class="ocr-result-label">📝 인식된 이름</div>
           <div class="ocr-result-name" id="ocr-result-name">—</div>
         </div>
-
-        <button class="btn-capture" id="btn-capture" onclick="captureAndOCR()">
+        <button class="btn-capture" id="btn-capture">
           📷 사진 찍어 이름 인식
         </button>
         <button class="btn-skip" onclick="skipRecognition()">
           이름 없이 계속하기 →
         </button>
-
-        <!-- hidden canvas used for frame capture -->
         <canvas id="ocr-canvas" style="display:none"></canvas>
       </div>
     </div>
@@ -551,16 +529,10 @@
     <div class="page fade-up" id="page-serve">
       <div class="card mb16">
         <div class="food-steps" id="food-steps"></div>
-
-        <!-- Hand detection overlay -->
         <div class="hand-overlay-wrap" id="hand-overlay-wrap">
           <video id="video-serve" autoplay muted playsinline style="transform: scaleX(-1);"></video>
           <canvas id="hand-canvas"></canvas>
-
-          <!-- top badge: detected finger count -->
           <div class="finger-detected-badge" id="finger-badge">✋ 0</div>
-
-          <!-- bottom status bar with countdown ring -->
           <div class="finger-status hidden" id="finger-status">
             <div class="countdown-ring" id="countdown-ring">
               <svg width="28" height="28" viewBox="0 0 28 28">
@@ -576,18 +548,15 @@
       <div class="card center">
         <div class="card-title">🥢 배식 횟수 선택</div>
         <div class="fw700 fs18 mb4" id="serve-food-name">🍚 밥</div>
-
         <div id="serve-normal">
           <div class="count-display" id="serve-count-display">0</div>
           <div class="count-label">회 배식 &nbsp;|&nbsp; <span style="color:var(--primary)">✋ 손가락으로도 입력 가능</span></div>
           <div class="count-grid" id="count-buttons"></div>
         </div>
-
         <div id="serve-custom" style="display:none; margin: 16px 0;">
           <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">직접 입력</div>
           <input type="number" class="styled-input" id="custom-input" placeholder="0" min="0" />
         </div>
-
         <button class="btn btn-primary btn-full" id="serve-next-btn" onclick="serveNext()">다음 →</button>
       </div>
     </div>
@@ -617,37 +586,48 @@
 </div><!-- /app -->
 
 <script>
-  /* ─── State ─── */
+  /* ══════════════════════════════════════════
+     STATE
+  ══════════════════════════════════════════ */
   const FOODS  = ["밥","국","김치","반찬","우유","디저트"];
   const EMOJIS = ["🍚","🍲","🥬","🥘","🥛","🍮"];
-  let user   = { grade:1, classNum:2, number:10, name:"홍길동" };
-  let counts = Array(6).fill(0);
-  let serveStep = 0;
-  let customMode = false;
+  let user        = { grade:1, classNum:2, number:10, name:"홍길동" };
+  let counts      = Array(6).fill(0);
+  let serveStep   = 0;
+  let customMode  = false;
   let progressStep = 0;
   let progressTimer = null;
 
-  /* ─── Finger detection state ─── */
-  let handsDetector = null;
-  let handsCameraUtil = null;
-  let lastStableCount = -1;      // finger count that is currently stable
-  let stableStartTime = null;    // when current count became stable
+  /* ── Finger detection state ── */
+  let handsDetector    = null;
+  let handsCameraUtil  = null;
+  let lastStableCount  = -1;
+  let stableStartTime  = null;
   let countdownInterval = null;
-  let fingerLocked = false;      // true while waiting for next food step
-  const HOLD_MS = 3000;
-  const CIRCUMFERENCE = 75.4;   // 2π×12
+  let fingerLocked     = false;
+  const HOLD_MS        = 3000;
+  const CIRCUMFERENCE  = 75.4; // 2π×12
 
-  /* ─── Page routing ─── */
+  /* OCR state */
+  let ocrWorker   = null;
+  let recogStream = null;
+
+  /* ══════════════════════════════════════════
+     PAGE ROUTING
+  ══════════════════════════════════════════ */
   function goPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const el = document.getElementById('page-' + id);
+    if (!el) return;
     el.classList.add('active');
     el.classList.remove('fade-up');
     void el.offsetWidth;
     el.classList.add('fade-up');
   }
 
-  /* ─── User bar update ─── */
+  /* ══════════════════════════════════════════
+     USER BAR
+  ══════════════════════════════════════════ */
   function updateUserBar(u) {
     if (u) {
       document.getElementById('bar-name').textContent = u.name;
@@ -658,14 +638,9 @@
     }
   }
 
-  /* ─── Camera helpers ─── */
-  function startCamera(videoId) {
-    const video = document.getElementById(videoId);
-    return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-      .then(stream => { video.srcObject = stream; return stream; })
-      .catch(() => {});
-  }
-
+  /* ══════════════════════════════════════════
+     CAMERA HELPERS
+  ══════════════════════════════════════════ */
   function stopCamera(videoId) {
     const video = document.getElementById(videoId);
     if (video && video.srcObject) {
@@ -674,21 +649,26 @@
     }
   }
 
-  /* ─── OCR Recognition ─── */
-  let ocrWorker = null;
-  let recogStream = null;
-
+  /* ══════════════════════════════════════════
+     OCR RECOGNITION
+  ══════════════════════════════════════════ */
   async function initRecognition() {
     updateUserBar(null);
-    // Reset UI state
+
+    // Reset UI
     const bar = document.getElementById('ocr-status-bar');
     if (bar) bar.classList.add('hidden');
     const resultBox = document.getElementById('ocr-result-box');
     if (resultBox) resultBox.classList.remove('visible');
-    const btn = document.getElementById('btn-capture');
-    if (btn) { btn.disabled = false; btn.textContent = '📷 사진 찍어 이름 인식'; btn.onclick = captureAndOCR; }
 
-    // Start camera (prefer rear camera for scanning documents; fallback to front)
+    const btn = document.getElementById('btn-capture');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '📷 사진 찍어 이름 인식';
+      btn.onclick = captureAndOCR;
+    }
+
+    // Start camera (prefer rear for document scanning)
     const video = document.getElementById('video-recog');
     try {
       recogStream = await navigator.mediaDevices.getUserMedia({
@@ -702,7 +682,7 @@
       } catch (e2) { /* camera unavailable */ }
     }
 
-    // Warm up Tesseract in the background (kor + eng)
+    // Warm up Tesseract in background
     if (!ocrWorker) {
       Tesseract.createWorker('kor+eng', 1, { logger: () => {} })
         .then(w => { ocrWorker = w; })
@@ -733,7 +713,7 @@
     const canvas = document.getElementById('ocr-canvas');
     const btn    = document.getElementById('btn-capture');
 
-    // Shutter flash effect
+    // Shutter flash
     const wrap = document.getElementById('ocr-video-wrap');
     if (wrap) { wrap.classList.add('shutter-flash'); setTimeout(() => wrap.classList.remove('shutter-flash'), 350); }
 
@@ -747,7 +727,7 @@
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Greyscale + contrast boost for better OCR accuracy
+    // Greyscale + contrast boost
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const d = imgData.data;
     for (let i = 0; i < d.length; i += 4) {
@@ -759,13 +739,11 @@
 
     let recognizedName = null;
     try {
-      // Lazy-load worker if warmup didn't finish yet
       if (!ocrWorker) {
         ocrWorker = await Tesseract.createWorker('kor+eng', 1, { logger: () => {} });
       }
       const { data: { text } } = await ocrWorker.recognize(canvas);
 
-      // Extract Korean name: 2–4 consecutive Hangul characters
       const stopWords = new Set([
         '학생','학교','이름','반','번호','학번','학년','급식',
         '출입','카드','인증','확인','학생증','명찰','식권','연도','번'
@@ -811,16 +789,112 @@
     goPage('confirm');
   }
 
-  
+  /* ══════════════════════════════════════════
+     DASHBOARD PIE CHART
+  ══════════════════════════════════════════ */
+  function drawPie() {
+    const canvas = document.getElementById('pie-canvas');
+    const ctx = canvas.getContext('2d');
+    const data   = [4, 2, 3];
+    const colors = ['#FF6B35', '#F7C59F', '#1A1A2E'];
+    const total  = data.reduce((a,b) => a+b, 0);
+    const cx = 110, cy = 110, r = 88, ir = 44;
+
+    ctx.clearRect(0, 0, 220, 220);
+    let start = -Math.PI / 2;
+    data.forEach((val, i) => {
+      const slice = (val / total) * 2 * Math.PI;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, start, start + slice);
+      ctx.closePath();
+      ctx.fillStyle = colors[i];
+      ctx.fill();
+
+      const mid = start + slice / 2;
+      const lr  = ir + (r - ir) * 0.6;
+      const lx  = cx + lr * Math.cos(mid);
+      const ly  = cy + lr * Math.sin(mid);
+      ctx.fillStyle = i === 1 ? '#1A1A2E' : '#fff';
+      ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(Math.round((val/total)*100) + '%', lx, ly);
+      start += slice;
+    });
+
+    // Donut hole
+    ctx.beginPath();
+    ctx.arc(cx, cy, ir, 0, 2 * Math.PI);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+  }
+
+  /* ══════════════════════════════════════════
+     HAND / FINGER DETECTION
+  ══════════════════════════════════════════ */
+  function initHandDetector(videoEl, canvasEl) {
+    if (!window.Hands || !window.Camera) return;
+
+    handsDetector = new Hands({
+      locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+    handsDetector.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.5
+    });
+    handsDetector.onResults(results => {
+      drawHandOverlay(canvasEl, videoEl, results);
+
+      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+        updateCountdownState(-1);
+        return;
+      }
+
+      const landmarks = results.multiHandLandmarks[0];
+      const n = countExtendedFingers(landmarks);
+      if (!fingerLocked) updateCountdownState(n);
+    });
+
+    handsCameraUtil = new Camera(videoEl, {
+      onFrame: async () => { if (handsDetector) await handsDetector.send({ image: videoEl }); },
+      width: 640, height: 480
+    });
+    handsCameraUtil.start();
+  }
+
+  function stopHandDetector() {
+    if (handsCameraUtil) { handsCameraUtil.stop(); handsCameraUtil = null; }
+    if (handsDetector)   { handsDetector.close();  handsDetector = null; }
+    resetCountdownState();
+    resetCountdownUI();
+  }
+
+  /* Count how many fingers are extended */
+  function countExtendedFingers(landmarks) {
+    // Finger tip & pip landmark indices: [tip, pip]
+    const fingers = [
+      [8,  6],  // index
+      [12, 10], // middle
+      [16, 14], // ring
+      [20, 18]  // pinky
+    ];
+    let count = fingers.filter(([tip, pip]) => landmarks[tip].y < landmarks[pip].y).length;
+
+    // Thumb: compare x (mirrored feed)
+    if (landmarks[4].x > landmarks[3].x) count++;
+    return count;
+  }
+
   function drawHandOverlay(canvas, video, results) {
     canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     if (!results.multiHandLandmarks) return;
 
-    // Mirror canvas to match mirrored video
     ctx.save();
     ctx.scale(-1, 1);
     ctx.translate(-canvas.width, 0);
@@ -833,13 +907,9 @@
       [13,17],[17,18],[18,19],[19,20],[0,17]
     ];
 
-    results.multiHandLandmarks.forEach(landmarks => {
-      const pts = landmarks.map(lm => ({
-        x: lm.x * canvas.width,
-        y: lm.y * canvas.height
-      }));
+    results.multiHandLandmarks.forEach(lms => {
+      const pts = lms.map(lm => ({ x: lm.x * canvas.width, y: lm.y * canvas.height }));
 
-      // Connections
       ctx.strokeStyle = 'rgba(255,107,53,0.7)';
       ctx.lineWidth = 2.5;
       CONNECTIONS.forEach(([a,b]) => {
@@ -849,7 +919,6 @@
         ctx.stroke();
       });
 
-      // Joints
       pts.forEach((p, i) => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, i === 0 ? 6 : 4, 0, 2*Math.PI);
@@ -864,7 +933,7 @@
     ctx.restore();
   }
 
-  /* Manage 3-second hold countdown */
+  /* ── Countdown state management ── */
   function updateCountdownState(detected) {
     const statusEl  = document.getElementById('finger-status');
     const badgeEl   = document.getElementById('finger-badge');
@@ -873,63 +942,44 @@
     const ringText  = document.getElementById('ring-text');
 
     if (detected < 0) {
-      // No hand detected
       badgeEl.classList.remove('visible');
       statusEl.classList.add('hidden');
       resetCountdownState();
       return;
     }
 
-    // Show badge
     badgeEl.textContent = detected + ' ✋';
     badgeEl.classList.add('visible');
 
     if (detected !== lastStableCount) {
-      // Finger count changed – restart countdown
       lastStableCount = detected;
       stableStartTime = Date.now();
-      clearInterval(countdownInterval);
       countdownInterval = null;
       ringFill.style.strokeDashoffset = CIRCUMFERENCE;
       ringText.textContent = '3';
     }
 
-    if (lastStableCount >= 0 && stableStartTime !== null) {
-      const elapsed = Date.now() - stableStartTime;
-      const remaining = Math.max(0, HOLD_MS - elapsed);
-      const progress = elapsed / HOLD_MS; // 0→1
-      const offset = CIRCUMFERENCE * (1 - Math.min(progress, 1));
-      ringFill.style.strokeDashoffset = offset;
-      ringText.textContent = Math.ceil(remaining / 1000) || '✓';
-
+    if (lastStableCount >= 0 && stableStartTime !== null && countdownInterval !== 'done') {
       statusEl.classList.remove('hidden');
-      statusTxt.textContent = `${lastStableCount}개 유지 중... (${Math.ceil(remaining/1000)}초)`;
 
-      if (elapsed >= HOLD_MS && !countdownInterval) {
-        // Confirmed!
-        countdownInterval = 'done'; // sentinel to avoid re-triggering
-        confirmFingerCount(lastStableCount);
-      }
+      if (!countdownInterval) {
+        countdownInterval = 'ticking';
+        (function tick() {
+          if (fingerLocked || countdownInterval === 'done') return;
+          const elapsed = Date.now() - stableStartTime;
+          const remaining = Math.max(0, HOLD_MS - elapsed);
+          const offset = CIRCUMFERENCE * (1 - Math.min(elapsed / HOLD_MS, 1));
+          ringFill.style.strokeDashoffset = offset;
+          ringText.textContent = Math.ceil(remaining / 1000) || '✓';
+          if (statusTxt) statusTxt.textContent = `${lastStableCount}개 유지 중... (${Math.ceil(remaining/1000)}초)`;
 
-      // Kick off a fast rAF loop to keep ring animating
-      if (!countdownInterval || countdownInterval === 'ticking') {
-        if (countdownInterval !== 'ticking') {
-          countdownInterval = 'ticking';
-          (function tick() {
-            if (fingerLocked || countdownInterval === 'done') return;
-            const el2 = Date.now() - stableStartTime;
-            const rem2 = Math.max(0, HOLD_MS - el2);
-            const prog2 = el2 / HOLD_MS;
-            const off2 = CIRCUMFERENCE * (1 - Math.min(prog2, 1));
-            ringFill.style.strokeDashoffset = off2;
-            ringText.textContent = Math.ceil(rem2 / 1000) || '✓';
-            if (document.getElementById('finger-status-text'))
-              document.getElementById('finger-status-text').textContent =
-                `${lastStableCount}개 유지 중... (${Math.ceil(rem2/1000)}초)`;
-            if (el2 < HOLD_MS) requestAnimationFrame(tick);
-            else if (countdownInterval !== 'done') { countdownInterval = 'done'; confirmFingerCount(lastStableCount); }
-          })();
-        }
+          if (elapsed >= HOLD_MS) {
+            countdownInterval = 'done';
+            confirmFingerCount(lastStableCount);
+          } else {
+            requestAnimationFrame(tick);
+          }
+        })();
       }
     }
   }
@@ -937,8 +987,7 @@
   function resetCountdownState() {
     lastStableCount = -1;
     stableStartTime = null;
-    if (typeof countdownInterval === 'string') countdownInterval = null;
-    else { clearInterval(countdownInterval); countdownInterval = null; }
+    countdownInterval = null;
   }
 
   function resetCountdownUI() {
@@ -956,22 +1005,18 @@
     fingerLocked = true;
     resetCountdownState();
 
-    // Flash the overlay green
     const wrap = document.getElementById('hand-overlay-wrap');
-    wrap.classList.add('confirmed-flash');
-    setTimeout(() => wrap.classList.remove('confirmed-flash'), 700);
+    if (wrap) { wrap.classList.add('confirmed-flash'); setTimeout(() => wrap.classList.remove('confirmed-flash'), 700); }
 
-    // Update count
     setCount(n);
 
     const statusEl  = document.getElementById('finger-status');
     const statusTxt = document.getElementById('finger-status-text');
     const ringText  = document.getElementById('ring-text');
-    statusEl.classList.remove('hidden');
-    statusTxt.textContent = `✅ ${n}개 입력 완료!`;
-    ringText.textContent  = '✓';
+    if (statusEl)  statusEl.classList.remove('hidden');
+    if (statusTxt) statusTxt.textContent = `✅ ${n}개 입력 완료!`;
+    if (ringText)  ringText.textContent  = '✓';
 
-    // Unlock after a brief pause so user can see the confirmation
     setTimeout(() => {
       fingerLocked = false;
       resetCountdownState();
@@ -979,15 +1024,16 @@
     }, 1200);
   }
 
-  /* ─── Serve page ─── */
+  /* ══════════════════════════════════════════
+     SERVE PAGE
+  ══════════════════════════════════════════ */
   function startServe() {
     serveStep = 0;
     counts = Array(6).fill(0);
-    goPage('serve');
     fingerLocked = false;
     resetCountdownState();
+    goPage('serve');
 
-    // Wait a tick for page to be visible, then start camera+hands
     setTimeout(() => {
       const videoEl  = document.getElementById('video-serve');
       const canvasEl = document.getElementById('hand-canvas');
@@ -995,9 +1041,7 @@
         .then(stream => {
           videoEl.srcObject = stream;
           videoEl.onloadedmetadata = () => {
-            if (window.Hands && window.Camera) {
-              initHandDetector(videoEl, canvasEl);
-            }
+            if (window.Hands && window.Camera) initHandDetector(videoEl, canvasEl);
           };
         }).catch(() => {});
     }, 100);
@@ -1010,10 +1054,9 @@
     resetCountdownState();
     resetCountdownUI();
 
-    // steps indicator
     const stepsEl = document.getElementById('food-steps');
     stepsEl.innerHTML = FOODS.map((_, i) => {
-      const cls = i < serveStep ? 'done' : i === serveStep ? 'current' : '';
+      const cls     = i < serveStep ? 'done' : i === serveStep ? 'current' : '';
       const content = i < serveStep ? '✓' : EMOJIS[i];
       return `<div class="food-step ${cls}">${content}</div>`;
     }).join('');
@@ -1035,11 +1078,13 @@
       btn.onclick = () => setCount(n);
       grid.appendChild(btn);
     });
+
     const plus = document.createElement('button');
     plus.className = 'btn-count green';
     plus.textContent = '+';
     plus.onclick = () => setCount(counts[serveStep] + 1);
     grid.appendChild(plus);
+
     const cust = document.createElement('button');
     cust.className = 'btn-count orange';
     cust.textContent = '직접';
@@ -1078,7 +1123,9 @@
     }
   }
 
-  /* ─── Progress page ─── */
+  /* ══════════════════════════════════════════
+     PROGRESS PAGE
+  ══════════════════════════════════════════ */
   function startProgress() {
     progressStep = 0;
     goPage('progress');
@@ -1100,7 +1147,7 @@
     list.innerHTML = FOODS.map((food, i) => {
       const opacity = i < progressStep ? '1' : '0.3';
       let right = '';
-      if (i < progressStep) right = `<div class="summary-count">${counts[i]}회</div>`;
+      if (i < progressStep)      right = `<div class="summary-count">${counts[i]}회</div>`;
       else if (i === progressStep) right = `<div style="font-size:18px">⏳</div>`;
       return `
         <div class="summary-item" style="opacity:${opacity}">
@@ -1111,254 +1158,26 @@
     }).join('');
   }
 
-  /* ─── Reset ─── */
-  function resetAll() {
-    stopHandDetector();
-    counts = Array(6).fill(0);
-    serveStep = 0;
-    goPage('recognition');
-    initRecognition();
-  }
-
-  /* ─── Init ─── */
-  (function init() {
-    initRecognition();
-    const obs = new MutationObserver(() => {
-      if (document.getElementById('page-dashboard').classList.contains('active')) drawPie();
-    });
-    obs.observe(document.getElementById('page-dashboard'), { attributes: true, attributeFilter: ['class'] });
-  })();
-</script>
-
-  /* ─── Page routing ─── */
-  function goPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const el = document.getElementById('page-' + id);
-    el.classList.add('active');
-    el.classList.remove('fade-up');
-    void el.offsetWidth; // reflow
-    el.classList.add('fade-up');
-  }
-
-  /* ─── User bar update ─── */
-  function updateUserBar(u) {
-    if (u) {
-      document.getElementById('bar-name').textContent = u.name;
-      document.getElementById('bar-sub').textContent  = `${u.grade}학년 ${u.classNum}반 ${u.number}번`;
-    } else {
-      document.getElementById('bar-name').textContent = '사용자 인식 중';
-      document.getElementById('bar-sub').textContent  = '카메라를 바라봐 주세요';
-    }
-  }
-
-  /* ─── Camera helpers ─── */
-  function startCamera(videoId) {
-    const video = document.getElementById(videoId);
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => { video.srcObject = stream; })
-      .catch(() => {});
-  }
-
-  function stopCamera(videoId) {
-    const video = document.getElementById(videoId);
-    if (video && video.srcObject) {
-      video.srcObject.getTracks().forEach(t => t.stop());
-      video.srcObject = null;
-    }
-  }
-
-  /* ─── Recognition page ─── */
-  function initRecognition() {
-    updateUserBar(null);
-    startCamera('video-recog');
-    setTimeout(() => {
-      stopCamera('video-recog');
-      // update confirm page
-      document.getElementById('confirm-name').textContent = user.name;
-      document.getElementById('confirm-sub').textContent  = `${user.grade}학년 ${user.classNum}반 ${user.number}번`;
-      updateUserBar(user);
-      goPage('confirm');
-    }, 2500);
-  }
-
-  /* ─── Dashboard pie chart ─── */
-  function drawPie() {
-    const canvas = document.getElementById('pie-canvas');
-    const ctx = canvas.getContext('2d');
-    const data   = [4, 2, 3];
-    const colors = ['#FF6B35', '#F7C59F', '#1A1A2E'];
-    const total  = data.reduce((a,b) => a+b, 0);
-    const cx = 110, cy = 110, r = 88, ir = 44;
-
-    ctx.clearRect(0, 0, 220, 220);
-    let start = -Math.PI / 2;
-    data.forEach((val, i) => {
-      const slice = (val / total) * 2 * Math.PI;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r, start, start + slice);
-      ctx.closePath();
-      ctx.fillStyle = colors[i];
-      ctx.fill();
-
-      // percent label
-      const mid = start + slice / 2;
-      const lr  = ir + (r - ir) * 0.6;
-      const lx  = cx + lr * Math.cos(mid);
-      const ly  = cy + lr * Math.sin(mid);
-      ctx.fillStyle = i === 1 ? '#1A1A2E' : '#fff';
-      ctx.font = 'bold 13px "Space Grotesk", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(Math.round((val/total)*100) + '%', lx, ly);
-      start += slice;
-    });
-
-    // donut hole
-    ctx.beginPath();
-    ctx.arc(cx, cy, ir, 0, 2 * Math.PI);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-  }
-
-  /* ─── Serve page ─── */
-  function startServe() {
-    serveStep = 0;
-    counts = Array(6).fill(0);
-    goPage('serve');
-    startCamera('video-serve');
-    renderServeStep();
-  }
-
-  function renderServeStep() {
-    // steps indicator
-    const stepsEl = document.getElementById('food-steps');
-    stepsEl.innerHTML = FOODS.map((_, i) => {
-      const cls = i < serveStep ? 'done' : i === serveStep ? 'current' : '';
-      const content = i < serveStep ? '✓' : EMOJIS[i];
-      return `<div class="food-step ${cls}">${content}</div>`;
-    }).join('');
-
-    // food name
-    document.getElementById('serve-food-name').textContent = EMOJIS[serveStep] + ' ' + FOODS[serveStep];
-
-    // reset custom mode
-    customMode = false;
-    document.getElementById('serve-normal').style.display = '';
-    document.getElementById('serve-custom').style.display = 'none';
-    document.getElementById('custom-input').value = '';
-
-    // count display
-    document.getElementById('serve-count-display').textContent = counts[serveStep];
-
-    // count buttons
-    const grid = document.getElementById('count-buttons');
-    grid.innerHTML = '';
-    [0,1,2,3].forEach(n => {
-      const btn = document.createElement('button');
-      btn.className = 'btn-count' + (counts[serveStep] === n ? ' active' : '');
-      btn.textContent = n;
-      btn.onclick = () => setCount(n);
-      grid.appendChild(btn);
-    });
-    // +1
-    const plus = document.createElement('button');
-    plus.className = 'btn-count green';
-    plus.textContent = '+';
-    plus.onclick = () => setCount(counts[serveStep] + 1);
-    grid.appendChild(plus);
-    // custom
-    const cust = document.createElement('button');
-    cust.className = 'btn-count orange';
-    cust.textContent = '직접';
-    cust.onclick = () => {
-      customMode = true;
-      document.getElementById('serve-normal').style.display = 'none';
-      document.getElementById('serve-custom').style.display = '';
-      document.getElementById('custom-input').focus();
-    };
-    grid.appendChild(cust);
-
-    // custom input live
-    document.getElementById('custom-input').oninput = (e) => {
-      const val = parseInt(e.target.value) || 0;
-      counts[serveStep] = val;
-    };
-
-    // next button label
-    document.getElementById('serve-next-btn').textContent =
-      serveStep === FOODS.length - 1 ? '배식 완료 ✓' : '다음 →';
-  }
-
-  function setCount(n) {
-    counts[serveStep] = n;
-    document.getElementById('serve-count-display').textContent = n;
-    // refresh active state on buttons
-    document.querySelectorAll('#count-buttons .btn-count').forEach((btn, i) => {
-      if (i < 4) btn.classList.toggle('active', parseInt(btn.textContent) === n);
-    });
-  }
-
-  function serveNext() {
-    if (serveStep < FOODS.length - 1) {
-      serveStep++;
-      renderServeStep();
-    } else {
-      stopCamera('video-serve');
-      startProgress();
-    }
-  }
-
-  /* ─── Progress page ─── */
-  function startProgress() {
-    progressStep = 0;
-    goPage('progress');
-    document.getElementById('progress-fill').style.width = '0%';
-    renderProgressList();
-    progressTimer = setInterval(() => {
-      progressStep++;
-      document.getElementById('progress-fill').style.width = (progressStep / 6 * 100) + '%';
-      renderProgressList();
-      if (progressStep >= 6) {
-        clearInterval(progressTimer);
-        setTimeout(() => goPage('complete'), 600);
-      }
-    }, 900);
-  }
-
-  function renderProgressList() {
-    const list = document.getElementById('progress-list');
-    list.innerHTML = FOODS.map((food, i) => {
-      const opacity = i < progressStep ? '1' : '0.3';
-      let right = '';
-      if (i < progressStep) right = `<div class="summary-count">${counts[i]}회</div>`;
-      else if (i === progressStep) right = `<div style="font-size:18px">⏳</div>`;
-      return `
-        <div class="summary-item" style="opacity:${opacity}">
-          <div class="summary-emoji">${EMOJIS[i]}</div>
-          <div class="summary-name">${food}</div>
-          ${right}
-        </div>`;
-    }).join('');
-  }
-
-  /* ─── Reset ─── */
+  /* ══════════════════════════════════════════
+     RESET
+  ══════════════════════════════════════════ */
   function resetAll() {
     stopHandDetector();
     stopCamera('video-serve');
     stopRecogCamera();
+    if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
     counts = Array(6).fill(0);
     serveStep = 0;
     goPage('recognition');
     initRecognition();
   }
 
-  /* ─── Init ─── */
+  /* ══════════════════════════════════════════
+     INIT
+  ══════════════════════════════════════════ */
   (function init() {
-    // Recognition auto-start
     initRecognition();
 
-    // Draw pie when dashboard becomes visible (MutationObserver)
     const obs = new MutationObserver(() => {
       if (document.getElementById('page-dashboard').classList.contains('active')) drawPie();
     });
