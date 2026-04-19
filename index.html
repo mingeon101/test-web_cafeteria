@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>손가락 개수 인식</title>
+    <style>
+        body {
+            margin: 0;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            margin: 20px;
+        }
+
+        video, canvas {
+            width: 640px;
+            height: 480px;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+
+        #count {
+            font-size: 40px;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #0077ff;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>손가락 개수 인식</h1>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+    <div id="count">손가락 개수: 0</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+    <script>
+        const videoElement = document.getElementById('video');
+        const canvasElement = document.getElementById('canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const countText = document.getElementById('count');
+
+        canvasElement.width = 640;
+        canvasElement.height = 480;
+
+        function countFingers(landmarks) {
+            let count = 0;
+
+            // 엄지
+            if (landmarks[4].x < landmarks[3].x) count++;
+
+            // 검지
+            if (landmarks[8].y < landmarks[6].y) count++;
+
+            // 중지
+            if (landmarks[12].y < landmarks[10].y) count++;
+
+            // 약지
+            if (landmarks[16].y < landmarks[14].y) count++;
+
+            // 새끼
+            if (landmarks[20].y < landmarks[18].y) count++;
+
+            return count;
+        }
+
+        function onResults(results) {
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.drawImage(results.image, 0, 0, 640, 480);
+
+            let fingerCount = 0;
+
+            if (results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+
+                // 점 그리기
+                for (let point of landmarks) {
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(
+                        point.x * 640,
+                        point.y * 480,
+                        5,
+                        0,
+                        2 * Math.PI
+                    );
+                    canvasCtx.fillStyle = 'red';
+                    canvasCtx.fill();
+                }
+
+                fingerCount = countFingers(landmarks);
+            }
+
+            countText.innerText = `손가락 개수: ${fingerCount}`;
+        }
+
+        const hands = new Hands({
+            locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+            }
+        });
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
+        });
+
+        hands.onResults(onResults);
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({ image: videoElement });
+            },
+            width: 640,
+            height: 480
+        });
+
+        camera.start();
+    </script>
+
+</body>
+</html>
