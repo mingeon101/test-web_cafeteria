@@ -1,130 +1,1136 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>손가락 개수 인식</title>
-    <style>
-        body {
-            margin: 0;
-            text-align: center;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>스마트 급식 시스템</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        h1 {
-            margin: 20px;
-        }
+    :root {
+      --primary: #FF6B35;
+      --primary-light: #fff0e8;
+      --secondary: #F7C59F;
+      --accent: #1A1A2E;
+      --bg: #FFF8F3;
+      --card: #FFFFFF;
+      --muted: #8B7355;
+      --success: #4CAF50;
+      --danger: #E53935;
+    }
 
-        video, canvas {
-            width: 640px;
-            height: 480px;
-            border: 2px solid #333;
-            border-radius: 10px;
-        }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--accent);
+    }
 
-        #count {
-            font-size: 40px;
-            margin-top: 20px;
-            font-weight: bold;
-            color: #0077ff;
-        }
-    </style>
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--accent);
+      color: white;
+      padding: 18px 24px 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 24px rgba(26,26,46,0.35);
+    }
+    .header-logo { font-size: 28px; line-height: 1; }
+    .header-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    .header-sub { font-size: 11px; opacity: 0.45; letter-spacing: 0.8px; text-transform: uppercase; margin-top: 2px; }
+
+    /* ── User bar ── */
+    .user-bar {
+      background: var(--accent);
+      padding: 0 24px 16px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-avatar {
+      width: 38px; height: 38px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .user-name { font-size: 14px; font-weight: 600; }
+    .user-sub { font-size: 12px; opacity: 0.5; margin-top: 2px; }
+
+    /* ── Content ── */
+    .content {
+      padding: 20px 16px 40px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    .card.center { text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .card-title {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Fade animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.38s ease forwards; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 28px; border-radius: 14px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; border: none; outline: none;
+      letter-spacing: -0.2px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary); color: white;
+      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
+    }
+    .btn-primary:hover { background: #e85a26; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,53,0.45); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-secondary { background: #f0ebe5; color: var(--accent); }
+    .btn-secondary:hover { background: #e8e0d8; }
+    .btn-danger { background: #ffeaea; color: var(--danger); }
+    .btn-danger:hover { background: #ffd6d6; }
+    .btn-full { width: 100%; margin-top: 8px; }
+
+    .btn-count {
+      width: 50px; height: 50px;
+      border-radius: 13px;
+      background: #f5f0eb; color: var(--accent);
+      font-size: 17px; font-weight: 700;
+      cursor: pointer; border: none;
+      transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .btn-count:hover { background: var(--secondary); }
+    .btn-count.active { background: var(--primary); color: white; }
+    .btn-count.green { background: #e8f5e9; color: #388e3c; font-size: 22px; }
+    .btn-count.orange { background: #fff3e0; color: #f57c00; font-size: 12px; font-weight: 700; }
+
+    /* ── Video ── */
+    .video-wrap {
+      width: 100%; aspect-ratio: 4/3;
+      background: var(--accent);
+      border-radius: 16px; overflow: hidden;
+      position: relative; margin-bottom: 20px;
+    }
+    .video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .scan-line {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--primary); opacity: 0.9;
+      animation: scanDown 2s ease-in-out infinite;
+    }
+    @keyframes scanDown {
+      0%   { top: 0; }
+      50%  { top: calc(100% - 3px); }
+      100% { top: 0; }
+    }
+    .scan-corners { position: absolute; inset: 12px; pointer-events: none; }
+    .sc { position: absolute; width: 22px; height: 22px; border-color: var(--primary); border-style: solid; opacity: 0.9; }
+    .sc-tl { top:0; left:0;  border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+    .sc-tr { top:0; right:0; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+    .sc-bl { bottom:0; left:0;  border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+    .sc-br { bottom:0; right:0; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+    /* ── Typography ── */
+    .hero-text { font-size: 30px; font-weight: 900; letter-spacing: -1px; line-height: 1.1; color: var(--accent); }
+    .hero-sub { font-size: 15px; color: var(--muted); margin-top: 8px; line-height: 1.7; }
+
+    /* ── Food steps ── */
+    .food-steps { display: flex; gap: 7px; justify-content: center; margin-bottom: 20px; }
+    .food-step {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #f0ebe5;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; transition: all 0.3s;
+    }
+    .food-step.done { background: #d4edda; }
+    .food-step.current {
+      background: var(--primary); transform: scale(1.2);
+      box-shadow: 0 3px 12px rgba(255,107,53,0.4);
+    }
+
+    /* ── Count display ── */
+    .count-display {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 80px; font-weight: 700;
+      color: var(--accent); line-height: 1;
+      letter-spacing: -3px; margin: 14px 0 4px;
+    }
+    .count-label { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+    .count-grid { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+
+    /* ── Menu chips ── */
+    .menu-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .menu-chip {
+      background: var(--primary-light);
+      border: 1.5px solid var(--secondary);
+      color: var(--accent);
+      border-radius: 100px; padding: 7px 15px;
+      font-size: 13px; font-weight: 600;
+    }
+
+    /* ── Confirm badge ── */
+    .confirm-badge {
+      display: inline-flex; align-items: center; gap: 14px;
+      background: var(--primary-light);
+      border: 2px solid var(--secondary);
+      border-radius: 18px; padding: 16px 24px;
+      margin: 20px 0;
+    }
+    .confirm-avatar-lg {
+      width: 54px; height: 54px;
+      background: var(--primary); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+    }
+    .confirm-name { font-weight: 700; font-size: 18px; }
+    .confirm-sub { font-size: 14px; color: var(--muted); margin-top: 3px; }
+
+    /* ── Comment box ── */
+    .comment-box {
+      background: linear-gradient(135deg, #fff8f3, #fff0e8);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 12px 12px 0;
+      padding: 14px 16px;
+      font-size: 14px; line-height: 1.7;
+    }
+
+    /* ── Pie chart (canvas) ── */
+    #pie-canvas { display: block; margin: 0 auto; }
+    .legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Progress bar ── */
+    .progress-bar-wrap { background: #f0ebe5; border-radius: 100px; height: 10px; overflow: hidden; margin: 0 0 20px; width: 100%; }
+    .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 100px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+
+    /* ── Summary items ── */
+    .summary-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid #f5f0eb;
+      transition: opacity 0.4s;
+    }
+    .summary-item:last-child { border-bottom: none; }
+    .summary-emoji {
+      width: 40px; height: 40px; background: #fff8f3;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .summary-name { flex: 1; font-weight: 500; font-size: 15px; }
+    .summary-count { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; color: var(--primary); }
+
+    /* ── Complete ── */
+    @keyframes pop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .complete-icon {
+      width: 100px; height: 100px;
+      background: linear-gradient(135deg, var(--primary), #ff9a62);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 50px; margin: 0 auto 24px;
+      box-shadow: 0 12px 40px rgba(255,107,53,0.4);
+      animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    /* ── Finger detection overlay ── */
+    .hand-overlay-wrap {
+      position: relative;
+      width: 100%; aspect-ratio: 4/3;
+      background: var(--accent);
+      border-radius: 16px; overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .hand-overlay-wrap video,
+    .hand-overlay-wrap canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hand-overlay-wrap canvas { pointer-events: none; }
+
+    /* countdown ring */
+    .finger-status {
+      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(26,26,46,0.78); backdrop-filter: blur(6px);
+      border-radius: 100px; padding: 8px 18px;
+      color: white; font-size: 13px; font-weight: 600;
+      white-space: nowrap; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .finger-status.hidden { opacity: 0; }
+
+    .countdown-ring {
+      position: relative; width: 28px; height: 28px; flex-shrink: 0;
+    }
+    .countdown-ring svg { transform: rotate(-90deg); }
+    .countdown-ring .ring-bg { fill: none; stroke: rgba(255,255,255,0.2); stroke-width: 3; }
+    .countdown-ring .ring-fill {
+      fill: none; stroke: var(--primary); stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 75.4;
+      stroke-dashoffset: 75.4;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+    .countdown-ring .ring-text {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px; font-weight: 700; color: white;
+    }
+
+    /* confirmed flash */
+    @keyframes confirmFlash {
+      0%   { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); }
+      30%  { box-shadow: inset 0 0 0 4px rgba(76,175,80,0.9); }
+      100% { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); }
+    }
+    .confirmed-flash { animation: confirmFlash 0.6s ease; }
+
+    /* finger detected badge */
+    .finger-detected-badge {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      background: var(--primary); color: white;
+      border-radius: 100px; padding: 5px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 700;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .finger-detected-badge.visible { opacity: 1; }
+
+    /* ── Input ── */
+    .styled-input {
+      border: 2px solid #e8e0d8; border-radius: 12px;
+      padding: 12px 16px; font-family: 'Noto Sans KR', sans-serif;
+      font-size: 20px; font-weight: 700; color: var(--accent);
+      text-align: center; width: 130px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .styled-input:focus { border-color: var(--primary); }
+
+    /* ── Page hidden ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Util ── */
+    .row { display: flex; gap: 12px; align-items: center; justify-content: center; }
+    .mt8 { margin-top: 8px; }
+    .mt16 { margin-top: 16px; }
+    .mt20 { margin-top: 20px; }
+    .mb4  { margin-bottom: 4px; }
+    .mb16 { margin-bottom: 16px; }
+    .fw700 { font-weight: 700; }
+    .fs18  { font-size: 18px; }
+  </style>
 </head>
 <body>
+<div id="app">
 
-    <h1>손가락 개수 인식</h1>
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas"></canvas>
-    <div id="count">손가락 개수: 0</div>
+  <!-- ══ HEADER ══ -->
+  <div class="header">
+    <div class="header-logo">🍱</div>
+    <div>
+      <div class="header-title">스마트 급식 시스템</div>
+      <div class="header-sub">Smart Cafeteria</div>
+    </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <!-- ══ USER BAR ══ -->
+  <div class="user-bar" id="user-bar">
+    <div class="user-avatar">👤</div>
+    <div>
+      <div class="user-name" id="bar-name">사용자 인식 중</div>
+      <div class="user-sub" id="bar-sub">카메라를 바라봐 주세요</div>
+    </div>
+  </div>
 
-    <script>
-        const videoElement = document.getElementById('video');
-        const canvasElement = document.getElementById('canvas');
-        const canvasCtx = canvasElement.getContext('2d');
-        const countText = document.getElementById('count');
+  <!-- ══ CONTENT ══ -->
+  <div class="content">
 
-        canvasElement.width = 640;
-        canvasElement.height = 480;
+    <!-- Page: Recognition -->
+    <div class="page active fade-up" id="page-recognition">
+      <div class="card center">
+        <div class="card-title">🔍 안면 인식</div>
+        <div class="video-wrap">
+          <video id="video-recog" autoplay muted playsinline></video>
+          <div class="scan-line"></div>
+          <div class="scan-corners">
+            <div class="sc sc-tl"></div>
+            <div class="sc sc-tr"></div>
+            <div class="sc sc-bl"></div>
+            <div class="sc sc-br"></div>
+          </div>
+        </div>
+        <div class="hero-text">인식 중...</div>
+        <div class="hero-sub">카메라를 정면으로 바라봐 주세요.<br>잠시 기다리면 자동으로 인식됩니다.</div>
+      </div>
+    </div>
 
-        function countFingers(landmarks) {
-            let count = 0;
+    <!-- Page: Confirm -->
+    <div class="page fade-up" id="page-confirm">
+      <div class="card center">
+        <div class="card-title">✅ 사용자 확인</div>
+        <div class="hero-text" style="font-size:24px">이 학생이 맞나요?</div>
+        <div class="confirm-badge">
+          <div class="confirm-avatar-lg">😊</div>
+          <div style="text-align:left">
+            <div class="confirm-name" id="confirm-name">홍길동</div>
+            <div class="confirm-sub" id="confirm-sub">1학년 2반 10번</div>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" onclick="goPage('dashboard')">맞아요 👍</button>
+          <button class="btn btn-danger" onclick="goPage('recognition')">아니에요</button>
+        </div>
+      </div>
+    </div>
 
-            // 엄지
-            if (landmarks[4].x < landmarks[3].x) count++;
+    <!-- Page: Dashboard -->
+    <div class="page fade-up" id="page-dashboard">
+      <div class="card mb16">
+        <div class="card-title">🍽️ 오늘의 메뉴</div>
+        <div class="menu-chips">
+          <span class="menu-chip">🍚 밥</span>
+          <span class="menu-chip">🍲 국</span>
+          <span class="menu-chip">🥬 김치</span>
+          <span class="menu-chip">🥘 반찬</span>
+          <span class="menu-chip">🥛 우유</span>
+          <span class="menu-chip">🍮 디저트</span>
+        </div>
+      </div>
+      <div class="card mb16">
+        <div class="card-title">📊 식습관 현황</div>
+        <canvas id="pie-canvas" width="220" height="220"></canvas>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#FF6B35"></div>밥류</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#F7C59F"></div>국류</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1A1A2E"></div>반찬류</div>
+        </div>
+      </div>
+      <div class="card mb16">
+        <div class="card-title">💬 오늘의 코멘트</div>
+        <div class="comment-box">오늘은 국을 조금 더 먹어보는 건 어때요? 국에는 영양소가 가득해요! 🌿</div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="startServe()">배식 시작하기 →</button>
+    </div>
 
-            // 검지
-            if (landmarks[8].y < landmarks[6].y) count++;
+    <!-- Page: Serve -->
+    <div class="page fade-up" id="page-serve">
+      <div class="card mb16">
+        <div class="food-steps" id="food-steps"></div>
 
-            // 중지
-            if (landmarks[12].y < landmarks[10].y) count++;
+        <!-- Hand detection overlay -->
+        <div class="hand-overlay-wrap" id="hand-overlay-wrap">
+          <video id="video-serve" autoplay muted playsinline style="transform: scaleX(-1);"></video>
+          <canvas id="hand-canvas"></canvas>
 
-            // 약지
-            if (landmarks[16].y < landmarks[14].y) count++;
+          <!-- top badge: detected finger count -->
+          <div class="finger-detected-badge" id="finger-badge">✋ 0</div>
 
-            // 새끼
-            if (landmarks[20].y < landmarks[18].y) count++;
+          <!-- bottom status bar with countdown ring -->
+          <div class="finger-status hidden" id="finger-status">
+            <div class="countdown-ring" id="countdown-ring">
+              <svg width="28" height="28" viewBox="0 0 28 28">
+                <circle class="ring-bg" cx="14" cy="14" r="12"/>
+                <circle class="ring-fill" id="ring-fill" cx="14" cy="14" r="12"/>
+              </svg>
+              <div class="ring-text" id="ring-text">3</div>
+            </div>
+            <span id="finger-status-text">손가락을 유지하세요...</span>
+          </div>
+        </div>
+      </div>
+      <div class="card center">
+        <div class="card-title">🥢 배식 횟수 선택</div>
+        <div class="fw700 fs18 mb4" id="serve-food-name">🍚 밥</div>
 
-            return count;
+        <div id="serve-normal">
+          <div class="count-display" id="serve-count-display">0</div>
+          <div class="count-label">회 배식 &nbsp;|&nbsp; <span style="color:var(--primary)">✋ 손가락으로도 입력 가능</span></div>
+          <div class="count-grid" id="count-buttons"></div>
+        </div>
+
+        <div id="serve-custom" style="display:none; margin: 16px 0;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">직접 입력</div>
+          <input type="number" class="styled-input" id="custom-input" placeholder="0" min="0" />
+        </div>
+
+        <button class="btn btn-primary btn-full" id="serve-next-btn" onclick="serveNext()">다음 →</button>
+      </div>
+    </div>
+
+    <!-- Page: Progress -->
+    <div class="page fade-up" id="page-progress">
+      <div class="card">
+        <div class="card-title">🍚 배식 진행 중</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div id="progress-list"></div>
+      </div>
+    </div>
+
+    <!-- Page: Complete -->
+    <div class="page fade-up" id="page-complete">
+      <div class="card center">
+        <div class="complete-icon">✅</div>
+        <div class="hero-text">배식 완료!</div>
+        <div class="hero-sub" style="margin-bottom:32px">오늘도 맛있게 드세요 😊<br>건강한 급식 생활을 응원합니다!</div>
+        <button class="btn btn-secondary" onclick="resetAll()">처음으로 돌아가기</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+  /* ─── State ─── */
+  const FOODS  = ["밥","국","김치","반찬","우유","디저트"];
+  const EMOJIS = ["🍚","🍲","🥬","🥘","🥛","🍮"];
+  let user   = { grade:1, classNum:2, number:10, name:"홍길동" };
+  let counts = Array(6).fill(0);
+  let serveStep = 0;
+  let customMode = false;
+  let progressStep = 0;
+  let progressTimer = null;
+
+  /* ─── Finger detection state ─── */
+  let handsDetector = null;
+  let handsCameraUtil = null;
+  let lastStableCount = -1;      // finger count that is currently stable
+  let stableStartTime = null;    // when current count became stable
+  let countdownInterval = null;
+  let fingerLocked = false;      // true while waiting for next food step
+  const HOLD_MS = 3000;
+  const CIRCUMFERENCE = 75.4;   // 2π×12
+
+  /* ─── Page routing ─── */
+  function goPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const el = document.getElementById('page-' + id);
+    el.classList.add('active');
+    el.classList.remove('fade-up');
+    void el.offsetWidth;
+    el.classList.add('fade-up');
+  }
+
+  /* ─── User bar update ─── */
+  function updateUserBar(u) {
+    if (u) {
+      document.getElementById('bar-name').textContent = u.name;
+      document.getElementById('bar-sub').textContent  = `${u.grade}학년 ${u.classNum}반 ${u.number}번`;
+    } else {
+      document.getElementById('bar-name').textContent = '사용자 인식 중';
+      document.getElementById('bar-sub').textContent  = '카메라를 바라봐 주세요';
+    }
+  }
+
+  /* ─── Camera helpers ─── */
+  function startCamera(videoId) {
+    const video = document.getElementById(videoId);
+    return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+      .then(stream => { video.srcObject = stream; return stream; })
+      .catch(() => {});
+  }
+
+
+
+  /* Draw skeleton on canvas */
+  function drawHandOverlay(canvas, video, results) {
+    canvas.width  = video.videoWidth  || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!results.multiHandLandmarks) return;
+
+    // Mirror canvas to match mirrored video
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.translate(-canvas.width, 0);
+
+    const CONNECTIONS = [
+      [0,1],[1,2],[2,3],[3,4],
+      [0,5],[5,6],[6,7],[7,8],
+      [5,9],[9,10],[10,11],[11,12],
+      [9,13],[13,14],[14,15],[15,16],
+      [13,17],[17,18],[18,19],[19,20],[0,17]
+    ];
+
+    results.multiHandLandmarks.forEach(landmarks => {
+      const pts = landmarks.map(lm => ({
+        x: lm.x * canvas.width,
+        y: lm.y * canvas.height
+      }));
+
+      // Connections
+      ctx.strokeStyle = 'rgba(255,107,53,0.7)';
+      ctx.lineWidth = 2.5;
+      CONNECTIONS.forEach(([a,b]) => {
+        ctx.beginPath();
+        ctx.moveTo(pts[a].x, pts[a].y);
+        ctx.lineTo(pts[b].x, pts[b].y);
+        ctx.stroke();
+      });
+
+      // Joints
+      pts.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, i === 0 ? 6 : 4, 0, 2*Math.PI);
+        ctx.fillStyle = i === 0 ? '#FF6B35' : '#fff';
+        ctx.fill();
+        ctx.strokeStyle = '#FF6B35';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+    });
+
+    ctx.restore();
+  }
+
+  /* Manage 3-second hold countdown */
+  function updateCountdownState(detected) {
+    const statusEl  = document.getElementById('finger-status');
+    const badgeEl   = document.getElementById('finger-badge');
+    const statusTxt = document.getElementById('finger-status-text');
+    const ringFill  = document.getElementById('ring-fill');
+    const ringText  = document.getElementById('ring-text');
+
+    if (detected < 0) {
+      // No hand detected
+      badgeEl.classList.remove('visible');
+      statusEl.classList.add('hidden');
+      resetCountdownState();
+      return;
+    }
+
+    // Show badge
+    badgeEl.textContent = detected + ' ✋';
+    badgeEl.classList.add('visible');
+
+    if (detected !== lastStableCount) {
+      // Finger count changed – restart countdown
+      lastStableCount = detected;
+      stableStartTime = Date.now();
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      ringFill.style.strokeDashoffset = CIRCUMFERENCE;
+      ringText.textContent = '3';
+    }
+
+    if (lastStableCount >= 0 && stableStartTime !== null) {
+      const elapsed = Date.now() - stableStartTime;
+      const remaining = Math.max(0, HOLD_MS - elapsed);
+      const progress = elapsed / HOLD_MS; // 0→1
+      const offset = CIRCUMFERENCE * (1 - Math.min(progress, 1));
+      ringFill.style.strokeDashoffset = offset;
+      ringText.textContent = Math.ceil(remaining / 1000) || '✓';
+
+      statusEl.classList.remove('hidden');
+      statusTxt.textContent = `${lastStableCount}개 유지 중... (${Math.ceil(remaining/1000)}초)`;
+
+      if (elapsed >= HOLD_MS && !countdownInterval) {
+        // Confirmed!
+        countdownInterval = 'done'; // sentinel to avoid re-triggering
+        confirmFingerCount(lastStableCount);
+      }
+
+      // Kick off a fast rAF loop to keep ring animating
+      if (!countdownInterval || countdownInterval === 'ticking') {
+        if (countdownInterval !== 'ticking') {
+          countdownInterval = 'ticking';
+          (function tick() {
+            if (fingerLocked || countdownInterval === 'done') return;
+            const el2 = Date.now() - stableStartTime;
+            const rem2 = Math.max(0, HOLD_MS - el2);
+            const prog2 = el2 / HOLD_MS;
+            const off2 = CIRCUMFERENCE * (1 - Math.min(prog2, 1));
+            ringFill.style.strokeDashoffset = off2;
+            ringText.textContent = Math.ceil(rem2 / 1000) || '✓';
+            if (document.getElementById('finger-status-text'))
+              document.getElementById('finger-status-text').textContent =
+                `${lastStableCount}개 유지 중... (${Math.ceil(rem2/1000)}초)`;
+            if (el2 < HOLD_MS) requestAnimationFrame(tick);
+            else if (countdownInterval !== 'done') { countdownInterval = 'done'; confirmFingerCount(lastStableCount); }
+          })();
         }
+      }
+    }
+  }
 
-        function onResults(results) {
-            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            canvasCtx.drawImage(results.image, 0, 0, 640, 480);
+  function resetCountdownState() {
+    lastStableCount = -1;
+    stableStartTime = null;
+    if (typeof countdownInterval === 'string') countdownInterval = null;
+    else { clearInterval(countdownInterval); countdownInterval = null; }
+  }
 
-            let fingerCount = 0;
+  function resetCountdownUI() {
+    const statusEl = document.getElementById('finger-status');
+    const badgeEl  = document.getElementById('finger-badge');
+    const ringFill = document.getElementById('ring-fill');
+    const ringText = document.getElementById('ring-text');
+    if (statusEl) statusEl.classList.add('hidden');
+    if (badgeEl)  badgeEl.classList.remove('visible');
+    if (ringFill) ringFill.style.strokeDashoffset = CIRCUMFERENCE;
+    if (ringText) ringText.textContent = '3';
+  }
 
-            if (results.multiHandLandmarks.length > 0) {
-                const landmarks = results.multiHandLandmarks[0];
+  function confirmFingerCount(n) {
+    fingerLocked = true;
+    resetCountdownState();
 
-                // 점 그리기
-                for (let point of landmarks) {
-                    canvasCtx.beginPath();
-                    canvasCtx.arc(
-                        point.x * 640,
-                        point.y * 480,
-                        5,
-                        0,
-                        2 * Math.PI
-                    );
-                    canvasCtx.fillStyle = 'red';
-                    canvasCtx.fill();
-                }
+    // Flash the overlay green
+    const wrap = document.getElementById('hand-overlay-wrap');
+    wrap.classList.add('confirmed-flash');
+    setTimeout(() => wrap.classList.remove('confirmed-flash'), 700);
 
-                fingerCount = countFingers(landmarks);
+    // Update count
+    setCount(n);
+
+    const statusEl  = document.getElementById('finger-status');
+    const statusTxt = document.getElementById('finger-status-text');
+    const ringText  = document.getElementById('ring-text');
+    statusEl.classList.remove('hidden');
+    statusTxt.textContent = `✅ ${n}개 입력 완료!`;
+    ringText.textContent  = '✓';
+
+    // Unlock after a brief pause so user can see the confirmation
+    setTimeout(() => {
+      fingerLocked = false;
+      resetCountdownState();
+      resetCountdownUI();
+    }, 1200);
+  }
+
+  /* ─── Serve page ─── */
+  function startServe() {
+    serveStep = 0;
+    counts = Array(6).fill(0);
+    goPage('serve');
+    fingerLocked = false;
+    resetCountdownState();
+
+    // Wait a tick for page to be visible, then start camera+hands
+    setTimeout(() => {
+      const videoEl  = document.getElementById('video-serve');
+      const canvasEl = document.getElementById('hand-canvas');
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+        .then(stream => {
+          videoEl.srcObject = stream;
+          videoEl.onloadedmetadata = () => {
+            if (window.Hands && window.Camera) {
+              initHandDetector(videoEl, canvasEl);
             }
+          };
+        }).catch(() => {});
+    }, 100);
 
-            countText.innerText = `손가락 개수: ${fingerCount}`;
-        }
+    renderServeStep();
+  }
 
-        const hands = new Hands({
-            locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-            }
-        });
+  function renderServeStep() {
+    fingerLocked = false;
+    resetCountdownState();
+    resetCountdownUI();
 
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.7,
-            minTrackingConfidence: 0.7
-        });
+    // steps indicator
+    const stepsEl = document.getElementById('food-steps');
+    stepsEl.innerHTML = FOODS.map((_, i) => {
+      const cls = i < serveStep ? 'done' : i === serveStep ? 'current' : '';
+      const content = i < serveStep ? '✓' : EMOJIS[i];
+      return `<div class="food-step ${cls}">${content}</div>`;
+    }).join('');
 
-        hands.onResults(onResults);
+    document.getElementById('serve-food-name').textContent = EMOJIS[serveStep] + ' ' + FOODS[serveStep];
 
-        const camera = new Camera(videoElement, {
-            onFrame: async () => {
-                await hands.send({ image: videoElement });
-            },
-            width: 640,
-            height: 480
-        });
+    customMode = false;
+    document.getElementById('serve-normal').style.display = '';
+    document.getElementById('serve-custom').style.display = 'none';
+    document.getElementById('custom-input').value = '';
+    document.getElementById('serve-count-display').textContent = counts[serveStep];
 
-        camera.start();
-    </script>
+    const grid = document.getElementById('count-buttons');
+    grid.innerHTML = '';
+    [0,1,2,3].forEach(n => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-count' + (counts[serveStep] === n ? ' active' : '');
+      btn.textContent = n;
+      btn.onclick = () => setCount(n);
+      grid.appendChild(btn);
+    });
+    const plus = document.createElement('button');
+    plus.className = 'btn-count green';
+    plus.textContent = '+';
+    plus.onclick = () => setCount(counts[serveStep] + 1);
+    grid.appendChild(plus);
+    const cust = document.createElement('button');
+    cust.className = 'btn-count orange';
+    cust.textContent = '직접';
+    cust.onclick = () => {
+      customMode = true;
+      document.getElementById('serve-normal').style.display = 'none';
+      document.getElementById('serve-custom').style.display = '';
+      document.getElementById('custom-input').focus();
+    };
+    grid.appendChild(cust);
 
+    document.getElementById('custom-input').oninput = (e) => {
+      counts[serveStep] = parseInt(e.target.value) || 0;
+    };
+
+    document.getElementById('serve-next-btn').textContent =
+      serveStep === FOODS.length - 1 ? '배식 완료 ✓' : '다음 →';
+  }
+
+  function setCount(n) {
+    counts[serveStep] = n;
+    document.getElementById('serve-count-display').textContent = n;
+    document.querySelectorAll('#count-buttons .btn-count').forEach((btn, i) => {
+      if (i < 4) btn.classList.toggle('active', parseInt(btn.textContent) === n);
+    });
+  }
+
+  function serveNext() {
+    if (serveStep < FOODS.length - 1) {
+      serveStep++;
+      renderServeStep();
+    } else {
+      stopHandDetector();
+      stopCamera('video-serve');
+      startProgress();
+    }
+  }
+
+  /* ─── Progress page ─── */
+  function startProgress() {
+    progressStep = 0;
+    goPage('progress');
+    document.getElementById('progress-fill').style.width = '0%';
+    renderProgressList();
+    progressTimer = setInterval(() => {
+      progressStep++;
+      document.getElementById('progress-fill').style.width = (progressStep / 6 * 100) + '%';
+      renderProgressList();
+      if (progressStep >= 6) {
+        clearInterval(progressTimer);
+        setTimeout(() => goPage('complete'), 600);
+      }
+    }, 900);
+  }
+
+  function renderProgressList() {
+    const list = document.getElementById('progress-list');
+    list.innerHTML = FOODS.map((food, i) => {
+      const opacity = i < progressStep ? '1' : '0.3';
+      let right = '';
+      if (i < progressStep) right = `<div class="summary-count">${counts[i]}회</div>`;
+      else if (i === progressStep) right = `<div style="font-size:18px">⏳</div>`;
+      return `
+        <div class="summary-item" style="opacity:${opacity}">
+          <div class="summary-emoji">${EMOJIS[i]}</div>
+          <div class="summary-name">${food}</div>
+          ${right}
+        </div>`;
+    }).join('');
+  }
+
+  /* ─── Reset ─── */
+  function resetAll() {
+    stopHandDetector();
+    counts = Array(6).fill(0);
+    serveStep = 0;
+    goPage('recognition');
+    initRecognition();
+  }
+
+  /* ─── Init ─── */
+  (function init() {
+    initRecognition();
+    const obs = new MutationObserver(() => {
+      if (document.getElementById('page-dashboard').classList.contains('active')) drawPie();
+    });
+    obs.observe(document.getElementById('page-dashboard'), { attributes: true, attributeFilter: ['class'] });
+  })();
+</script>
+
+  /* ─── Page routing ─── */
+  function goPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const el = document.getElementById('page-' + id);
+    el.classList.add('active');
+    el.classList.remove('fade-up');
+    void el.offsetWidth; // reflow
+    el.classList.add('fade-up');
+  }
+
+  /* ─── User bar update ─── */
+  function updateUserBar(u) {
+    if (u) {
+      document.getElementById('bar-name').textContent = u.name;
+      document.getElementById('bar-sub').textContent  = `${u.grade}학년 ${u.classNum}반 ${u.number}번`;
+    } else {
+      document.getElementById('bar-name').textContent = '사용자 인식 중';
+      document.getElementById('bar-sub').textContent  = '카메라를 바라봐 주세요';
+    }
+  }
+
+  /* ─── Camera helpers ─── */
+  function startCamera(videoId) {
+    const video = document.getElementById(videoId);
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => { video.srcObject = stream; })
+      .catch(() => {});
+  }
+
+  function stopCamera(videoId) {
+    const video = document.getElementById(videoId);
+    if (video && video.srcObject) {
+      video.srcObject.getTracks().forEach(t => t.stop());
+      video.srcObject = null;
+    }
+  }
+
+  /* ─── Recognition page ─── */
+  function initRecognition() {
+    updateUserBar(null);
+    startCamera('video-recog');
+    setTimeout(() => {
+      stopCamera('video-recog');
+      // update confirm page
+      document.getElementById('confirm-name').textContent = user.name;
+      document.getElementById('confirm-sub').textContent  = `${user.grade}학년 ${user.classNum}반 ${user.number}번`;
+      updateUserBar(user);
+      goPage('confirm');
+    }, 2500);
+  }
+
+  /* ─── Dashboard pie chart ─── */
+  function drawPie() {
+    const canvas = document.getElementById('pie-canvas');
+    const ctx = canvas.getContext('2d');
+    const data   = [4, 2, 3];
+    const colors = ['#FF6B35', '#F7C59F', '#1A1A2E'];
+    const total  = data.reduce((a,b) => a+b, 0);
+    const cx = 110, cy = 110, r = 88, ir = 44;
+
+    ctx.clearRect(0, 0, 220, 220);
+    let start = -Math.PI / 2;
+    data.forEach((val, i) => {
+      const slice = (val / total) * 2 * Math.PI;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, start, start + slice);
+      ctx.closePath();
+      ctx.fillStyle = colors[i];
+      ctx.fill();
+
+      // percent label
+      const mid = start + slice / 2;
+      const lr  = ir + (r - ir) * 0.6;
+      const lx  = cx + lr * Math.cos(mid);
+      const ly  = cy + lr * Math.sin(mid);
+      ctx.fillStyle = i === 1 ? '#1A1A2E' : '#fff';
+      ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(Math.round((val/total)*100) + '%', lx, ly);
+      start += slice;
+    });
+
+    // donut hole
+    ctx.beginPath();
+    ctx.arc(cx, cy, ir, 0, 2 * Math.PI);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+  }
+
+  /* ─── Serve page ─── */
+  function startServe() {
+    serveStep = 0;
+    counts = Array(6).fill(0);
+    goPage('serve');
+    startCamera('video-serve');
+    renderServeStep();
+  }
+
+  function renderServeStep() {
+    // steps indicator
+    const stepsEl = document.getElementById('food-steps');
+    stepsEl.innerHTML = FOODS.map((_, i) => {
+      const cls = i < serveStep ? 'done' : i === serveStep ? 'current' : '';
+      const content = i < serveStep ? '✓' : EMOJIS[i];
+      return `<div class="food-step ${cls}">${content}</div>`;
+    }).join('');
+
+    // food name
+    document.getElementById('serve-food-name').textContent = EMOJIS[serveStep] + ' ' + FOODS[serveStep];
+
+    // reset custom mode
+    customMode = false;
+    document.getElementById('serve-normal').style.display = '';
+    document.getElementById('serve-custom').style.display = 'none';
+    document.getElementById('custom-input').value = '';
+
+    // count display
+    document.getElementById('serve-count-display').textContent = counts[serveStep];
+
+    // count buttons
+    const grid = document.getElementById('count-buttons');
+    grid.innerHTML = '';
+    [0,1,2,3].forEach(n => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-count' + (counts[serveStep] === n ? ' active' : '');
+      btn.textContent = n;
+      btn.onclick = () => setCount(n);
+      grid.appendChild(btn);
+    });
+    // +1
+    const plus = document.createElement('button');
+    plus.className = 'btn-count green';
+    plus.textContent = '+';
+    plus.onclick = () => setCount(counts[serveStep] + 1);
+    grid.appendChild(plus);
+    // custom
+    const cust = document.createElement('button');
+    cust.className = 'btn-count orange';
+    cust.textContent = '직접';
+    cust.onclick = () => {
+      customMode = true;
+      document.getElementById('serve-normal').style.display = 'none';
+      document.getElementById('serve-custom').style.display = '';
+      document.getElementById('custom-input').focus();
+    };
+    grid.appendChild(cust);
+
+    // custom input live
+    document.getElementById('custom-input').oninput = (e) => {
+      const val = parseInt(e.target.value) || 0;
+      counts[serveStep] = val;
+    };
+
+    // next button label
+    document.getElementById('serve-next-btn').textContent =
+      serveStep === FOODS.length - 1 ? '배식 완료 ✓' : '다음 →';
+  }
+
+  function setCount(n) {
+    counts[serveStep] = n;
+    document.getElementById('serve-count-display').textContent = n;
+    // refresh active state on buttons
+    document.querySelectorAll('#count-buttons .btn-count').forEach((btn, i) => {
+      if (i < 4) btn.classList.toggle('active', parseInt(btn.textContent) === n);
+    });
+  }
+
+  function serveNext() {
+    if (serveStep < FOODS.length - 1) {
+      serveStep++;
+      renderServeStep();
+    } else {
+      stopCamera('video-serve');
+      startProgress();
+    }
+  }
+
+  /* ─── Progress page ─── */
+  function startProgress() {
+    progressStep = 0;
+    goPage('progress');
+    document.getElementById('progress-fill').style.width = '0%';
+    renderProgressList();
+    progressTimer = setInterval(() => {
+      progressStep++;
+      document.getElementById('progress-fill').style.width = (progressStep / 6 * 100) + '%';
+      renderProgressList();
+      if (progressStep >= 6) {
+        clearInterval(progressTimer);
+        setTimeout(() => goPage('complete'), 600);
+      }
+    }, 900);
+  }
+
+  function renderProgressList() {
+    const list = document.getElementById('progress-list');
+    list.innerHTML = FOODS.map((food, i) => {
+      const opacity = i < progressStep ? '1' : '0.3';
+      let right = '';
+      if (i < progressStep) right = `<div class="summary-count">${counts[i]}회</div>`;
+      else if (i === progressStep) right = `<div style="font-size:18px">⏳</div>`;
+      return `
+        <div class="summary-item" style="opacity:${opacity}">
+          <div class="summary-emoji">${EMOJIS[i]}</div>
+          <div class="summary-name">${food}</div>
+          ${right}
+        </div>`;
+    }).join('');
+  }
+
+  /* ─── Reset ─── */
+  function resetAll() {
+    stopHandDetector();
+    stopCamera('video-serve');
+    counts = Array(6).fill(0);
+    serveStep = 0;
+    goPage('recognition');
+    initRecognition();
+  }
+
+  /* ─── Init ─── */
+  (function init() {
+    // Recognition auto-start
+    initRecognition();
+
+    // Draw pie when dashboard becomes visible (MutationObserver)
+    const obs = new MutationObserver(() => {
+      if (document.getElementById('page-dashboard').classList.contains('active')) drawPie();
+    });
+    obs.observe(document.getElementById('page-dashboard'), { attributes: true, attributeFilter: ['class'] });
+  })();
+</script>
 </body>
 </html>
