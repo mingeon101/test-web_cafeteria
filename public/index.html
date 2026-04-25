@@ -8,7 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-  <!-- Tesseract 제거 → Claude Vision API 사용 -->
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -199,6 +201,39 @@
     .ocr-result-label { font-size: 11px; font-weight: 700; letter-spacing: 1px;
       text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
     .ocr-result-name  { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
+
+    /* ── Firebase lookup status ── */
+    .firebase-status {
+      width: 100%; border-radius: 14px; padding: 12px 16px;
+      font-size: 13px; font-weight: 600; text-align: center;
+      display: none; margin-bottom: 14px;
+      transition: all 0.3s;
+    }
+    .firebase-status.loading {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #e8f0fe; color: #1a73e8;
+    }
+    .firebase-status.found {
+      display: block;
+      background: #e8f5e9; color: #2e7d32;
+      border: 1.5px solid #a5d6a7;
+    }
+    .firebase-status.not-found {
+      display: block;
+      background: #fff3e0; color: #e65100;
+      border: 1.5px solid #ffcc80;
+    }
+    .firebase-status.error {
+      display: block;
+      background: #ffeaea; color: var(--danger);
+      border: 1.5px solid #ffcdd2;
+    }
+    .fb-spinner {
+      width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid rgba(26,115,232,0.25);
+      border-top-color: #1a73e8;
+      animation: ocrSpin 0.75s linear infinite;
+    }
 
     @keyframes shutterFlash {
       0%   { opacity: 1; }
@@ -421,6 +456,30 @@
     .mb16 { margin-bottom: 16px; }
     .fw700 { font-weight: 700; }
     .fs18  { font-size: 18px; }
+
+    /* ── Manual input fallback ── */
+    .manual-input-wrap {
+      width: 100%;
+      background: #f5f0eb;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 8px;
+      display: none;
+    }
+    .manual-input-wrap.visible { display: block; }
+    .manual-input-wrap label {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      letter-spacing: 0.8px; text-transform: uppercase;
+      display: block; margin-bottom: 8px;
+    }
+    .manual-input-wrap input {
+      width: 100%; border: 2px solid #e8e0d8; border-radius: 10px;
+      padding: 10px 14px; font-family: 'Noto Sans KR', sans-serif;
+      font-size: 16px; font-weight: 700; color: var(--accent);
+      outline: none; transition: border-color 0.2s;
+      background: white;
+    }
+    .manual-input-wrap input:focus { border-color: var(--primary); }
   </style>
 </head>
 <body>
@@ -463,13 +522,28 @@
             <span id="ocr-status-text">인식 중...</span>
           </div>
         </div>
+
+        <!-- OCR 결과 -->
         <div class="ocr-result-box" id="ocr-result-box">
           <div class="ocr-result-label">📝 인식된 이름</div>
           <div class="ocr-result-name" id="ocr-result-name">—</div>
         </div>
+
+        <!-- Firebase 조회 상태 -->
+        <div class="firebase-status" id="firebase-status"></div>
+
         <button class="btn-capture" id="btn-capture">
-          학생증 인식
+          📷 학생증 인식
         </button>
+
+        <!-- 이름 직접 입력 (인식 실패 시 대체 수단) -->
+        <div class="manual-input-wrap" id="manual-input-wrap">
+          <label>이름 직접 입력</label>
+          <input type="text" id="manual-name-input" placeholder="홍길동" maxlength="10" />
+          <button class="btn btn-primary btn-full mt8" id="btn-manual-search" style="margin-top:10px;" onclick="manualSearch()">
+            🔍 학생 조회
+          </button>
+        </div>
 
         <canvas id="ocr-canvas" style="display:none"></canvas>
       </div>
@@ -585,6 +659,22 @@
 
 <script type="module">
   /* ══════════════════════════════════════════
+     FIREBASE INIT
+  ══════════════════════════════════════════ */
+  const firebaseConfig = {
+    apiKey: "AIzaSyC3SvV8-bTyQClyZlGWybhR3z5YvLGXYL0",
+    authDomain: "smart-cafeteria-8a2ce.firebaseapp.com",
+    databaseURL: "https://smart-cafeteria-8a2ce-default-rtdb.firebaseio.com",
+    projectId: "smart-cafeteria-8a2ce",
+    storageBucket: "smart-cafeteria-8a2ce.firebasestorage.app",
+    messagingSenderId: "304671336012",
+    appId: "1:304671336012:web:0fd90cf8e6cc06884176e9",
+    measurementId: "G-JWNDVQC63K"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  /* ══════════════════════════════════════════
      STATE
   ══════════════════════════════════════════ */
   const FOODS  = ["밥","국","김치","반찬","우유","디저트"];
@@ -604,16 +694,20 @@
   let countdownInterval = null;
   let fingerLocked     = false;
   const HOLD_MS        = 3000;
-  const CIRCUMFERENCE  = 75.4; // 2π×12
+  const CIRCUMFERENCE  = 75.4;
 
   /* OCR state */
   let recogStream = null;
 
-  /* ── Gemini Vision API 설정 ── */
+  /* ── Gemini Vision API ── */
   const response = await fetch('/.netlify/functions/get-key');
+
   const data = await response.json();
+
   const GEMINI_API_KEY = data.apiKey
+
   const GEMINI_MODEL   = "gemini-3.1-flash-lite-preview";
+
   const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
   /* ══════════════════════════════════════════
@@ -635,7 +729,8 @@
   function updateUserBar(u) {
     if (u) {
       document.getElementById('bar-name').textContent = u.name;
-      document.getElementById('bar-sub').textContent  = `${u.grade}학년 ${u.classNum}반 ${u.number}번`;
+      document.getElementById('bar-sub').textContent  =
+        u.grade ? `${u.grade}학년 ${u.classNum}반 ${u.number}번` : '정보 조회 중...';
     } else {
       document.getElementById('bar-name').textContent = '사용자 인식 중';
       document.getElementById('bar-sub').textContent  = '카메라를 바라봐 주세요';
@@ -654,25 +749,155 @@
   }
 
   /* ══════════════════════════════════════════
+     FIREBASE RTDB — STUDENT LOOKUP
+     Expected DB structure:
+       /students/{uid}
+         name: "홍길동"
+         grade: 1
+         class: 2
+         number: 10
+     OR flat list searched by name.
+  ══════════════════════════════════════════ */
+  async function lookupStudentByName(name) {
+    try {
+      // Try querying by name field under /students node
+      const snapshot = await db.ref('students')
+        .orderByChild('name')
+        .equalTo(name)
+        .once('value');
+
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const key  = Object.keys(data)[0];
+        const s    = data[key];
+        return {
+          uid:      key,
+          name:     s.name     || name,
+          grade:    s.grade    || s.학년 || null,
+          classNum: s.class    || s.반   || null,
+          number:   s.number   || s.번호 || null
+        };
+      }
+      return null;
+    } catch (err) {
+      console.error('Firebase lookup error:', err);
+      throw err;
+    }
+  }
+
+  function setFirebaseStatus(state, text) {
+    const el = document.getElementById('firebase-status');
+    el.className = 'firebase-status';
+    if (state === 'hidden') { el.style.display = 'none'; return; }
+
+    if (state === 'loading') {
+      el.classList.add('loading');
+      el.innerHTML = `<div class="fb-spinner"></div> ${text}`;
+    } else {
+      el.classList.add(state);
+      el.textContent = text;
+    }
+  }
+
+  /* Main flow after OCR name is obtained */
+  async function handleNameFound(recognizedName) {
+    // Show OCR result
+    document.getElementById('ocr-result-name').textContent = recognizedName;
+    document.getElementById('ocr-result-box').classList.add('visible');
+
+    // Start Firebase lookup
+    setFirebaseStatus('loading', `"${recognizedName}" 학생 정보 조회 중...`);
+
+    const btn = document.getElementById('btn-capture');
+    btn.disabled = true;
+    btn.textContent = '⏳ Firebase 조회 중...';
+
+    try {
+      const student = await lookupStudentByName(recognizedName);
+
+      if (student) {
+        // Found!
+        setFirebaseStatus('found',
+          `✅ ${student.grade}학년 ${student.classNum}반 ${student.number}번 · ${student.name}`);
+
+        user = {
+          uid:      student.uid,
+          name:     student.name,
+          grade:    student.grade,
+          classNum: student.classNum,
+          number:   student.number
+        };
+        updateUserBar(user);
+
+        btn.textContent = '✅ 학생 확인 완료 — 계속하기';
+        btn.disabled = false;
+        btn.onclick = () => proceedToConfirm();
+
+      } else {
+        // Not found in DB
+        setFirebaseStatus('not-found',
+          `⚠️ "${recognizedName}" 학생을 DB에서 찾을 수 없어요. 이름을 직접 확인해 주세요.`);
+
+        user = { name: recognizedName, grade: null, classNum: null, number: null };
+        updateUserBar(user);
+
+        btn.textContent = '📷 다시 찍기';
+        btn.disabled = false;
+        btn.onclick = () => { resetOcrUI(); captureAndOCR(); };
+
+        // Show manual input for correction
+        document.getElementById('manual-input-wrap').classList.add('visible');
+        document.getElementById('manual-name-input').value = recognizedName;
+      }
+    } catch (err) {
+      setFirebaseStatus('error', '❌ Firebase 연결 오류. 네트워크를 확인하세요.');
+      btn.textContent = '📷 다시 시도';
+      btn.disabled = false;
+      btn.onclick = captureAndOCR;
+    }
+  }
+
+  function proceedToConfirm() {
+    stopRecogCamera();
+    document.getElementById('confirm-name').textContent = user.name;
+    document.getElementById('confirm-sub').textContent  =
+      user.grade
+        ? `${user.grade}학년 ${user.classNum}반 ${user.number}번`
+        : '정보 없음 — 직접 확인하세요';
+    updateUserBar(user);
+    goPage('confirm');
+  }
+
+  async function manualSearch() {
+    const name = document.getElementById('manual-name-input').value.trim();
+    if (!name) return;
+    document.getElementById('manual-name-input').blur();
+    await handleNameFound(name);
+  }
+
+  /* ══════════════════════════════════════════
      OCR RECOGNITION
   ══════════════════════════════════════════ */
+  function resetOcrUI() {
+    setFirebaseStatus('hidden');
+    document.getElementById('ocr-result-box').classList.remove('visible');
+    document.getElementById('manual-input-wrap').classList.remove('visible');
+  }
+
   async function initRecognition() {
     updateUserBar(null);
+    resetOcrUI();
 
-    // Reset UI
     const bar = document.getElementById('ocr-status-bar');
     if (bar) bar.classList.add('hidden');
-    const resultBox = document.getElementById('ocr-result-box');
-    if (resultBox) resultBox.classList.remove('visible');
 
     const btn = document.getElementById('btn-capture');
     if (btn) {
       btn.disabled = false;
-      btn.textContent = '학생증 인식';
+      btn.textContent = '📷 학생증 인식';
       btn.onclick = captureAndOCR;
     }
 
-    // Start camera (prefer rear for document scanning)
     const video = document.getElementById('video-recog');
     try {
       recogStream = await navigator.mediaDevices.getUserMedia({
@@ -685,8 +910,6 @@
         video.srcObject = recogStream;
       } catch (e2) { /* camera unavailable */ }
     }
-
-    // Claude Vision API 사용 — 별도 워밍업 불필요
   }
 
   function stopRecogCamera() {
@@ -712,7 +935,9 @@
     const canvas = document.getElementById('ocr-canvas');
     const btn    = document.getElementById('btn-capture');
 
-    // 셔터 플래시 효과
+    resetOcrUI();
+
+    // Shutter flash
     const wrap = document.getElementById('ocr-video-wrap');
     if (wrap) { wrap.classList.add('shutter-flash'); setTimeout(() => wrap.classList.remove('shutter-flash'), 350); }
 
@@ -720,7 +945,7 @@
     btn.textContent = '🔍 Gemini 분석 중...';
     setOcrStatus('loading', 'Gemini Vision이 이름을 찾는 중...');
 
-    // 현재 프레임 캡처 → base64 JPEG
+    // Capture frame → base64 JPEG
     canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -747,11 +972,10 @@
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error?.message || '연결 실패');
 
       const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-      if (raw && raw !== 'NONE' && raw.length >= 2 && raw.length <= 10) {
+      if (raw && raw !== 'NONE' && raw.length >= 2 && raw.length <= 15) {
         recognizedName = raw;
       }
     } catch (e) {
@@ -759,38 +983,18 @@
       recognizedName = null;
     }
 
+    setOcrStatus('hidden');
+
     if (recognizedName) {
-      setOcrStatus('hidden');
-      document.getElementById('ocr-result-name').textContent = recognizedName;
-      document.getElementById('ocr-result-box').classList.add('visible');
-      btn.textContent = '✅ 이름으로 계속하기';
-      btn.disabled = false;
-      btn.onclick = () => proceedWithName(recognizedName);
+      await handleNameFound(recognizedName);
     } else {
-      setOcrStatus('error', '이름을 찾을 수 없어요');
-      setTimeout(() => setOcrStatus('hidden'), 2200);
+      // OCR failed — show manual input
+      setFirebaseStatus('not-found', '⚠️ 이름을 인식하지 못했어요. 직접 입력해 주세요.');
       btn.textContent = '📷 다시 찍기';
       btn.disabled = false;
       btn.onclick = captureAndOCR;
+      document.getElementById('manual-input-wrap').classList.add('visible');
     }
-  }
-
-  function proceedWithName(name) {
-    user = { grade: 1, classNum: 2, number: 10, name };
-    stopRecogCamera();
-    document.getElementById('confirm-name').textContent = name;
-    document.getElementById('confirm-sub').textContent  = `${user.grade}학년 ${user.classNum}반 ${user.number}번`;
-    updateUserBar(user);
-    goPage('confirm');
-  }
-
-  function skipRecognition() {
-    user = { grade: 1, classNum: 2, number: 10, name: '(이름 없음)' };
-    stopRecogCamera();
-    document.getElementById('confirm-name').textContent = user.name;
-    document.getElementById('confirm-sub').textContent  = '이름 미인식 — 직접 확인하세요';
-    updateUserBar(user);
-    goPage('confirm');
   }
 
   /* ══════════════════════════════════════════
@@ -827,7 +1031,6 @@
       start += slice;
     });
 
-    // Donut hole
     ctx.beginPath();
     ctx.arc(cx, cy, ir, 0, 2 * Math.PI);
     ctx.fillStyle = '#FFFFFF';
@@ -876,18 +1079,14 @@
     resetCountdownUI();
   }
 
-  /* Count how many fingers are extended */
   function countExtendedFingers(landmarks) {
-    // Finger tip & pip landmark indices: [tip, pip]
     const fingers = [
-      [8,  6],  // index
-      [12, 10], // middle
-      [16, 14], // ring
-      [20, 18]  // pinky
+      [8,  6],
+      [12, 10],
+      [16, 14],
+      [20, 18]
     ];
     let count = fingers.filter(([tip, pip]) => landmarks[tip].y < landmarks[pip].y).length;
-
-    // Thumb: compare x (mirrored feed)
     if (landmarks[4].x > landmarks[3].x) count++;
     return count;
   }
@@ -937,7 +1136,6 @@
     ctx.restore();
   }
 
-  /* ── Countdown state management ── */
   function updateCountdownState(detected) {
     const statusEl  = document.getElementById('finger-status');
     const badgeEl   = document.getElementById('finger-badge');
@@ -1151,7 +1349,7 @@
     list.innerHTML = FOODS.map((food, i) => {
       const opacity = i < progressStep ? '1' : '0.3';
       let right = '';
-      if (i < progressStep)      right = `<div class="summary-count">${counts[i]}회</div>`;
+      if (i < progressStep)       right = `<div class="summary-count">${counts[i]}회</div>`;
       else if (i === progressStep) right = `<div style="font-size:18px">⏳</div>`;
       return `
         <div class="summary-item" style="opacity:${opacity}">
