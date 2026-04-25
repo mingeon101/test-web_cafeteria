@@ -611,7 +611,7 @@
 
   /* ── Gemini Vision API 설정 ── */
   const GEMINI_API_KEY = "AIzaSyBlj3Vhwbys_DtlZI9mIlL76MiEe5AOWDI";
-  const GEMINI_MODEL   = "gemini-2.0-flash";
+  const GEMINI_MODEL   = "gemini-3.1-flash-lite-preview";
   const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
   /* ══════════════════════════════════════════
@@ -666,7 +666,7 @@
     const btn = document.getElementById('btn-capture');
     if (btn) {
       btn.disabled = false;
-      btn.textContent = '📷 사진 찍어 이름 인식';
+      btn.textContent = '학생증 인식';
       btn.onclick = captureAndOCR;
     }
 
