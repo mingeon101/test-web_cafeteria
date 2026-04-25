@@ -610,13 +610,9 @@
   let recogStream = null;
 
   /* ── Gemini Vision API 설정 ── */
-  const GEMINI_API_KEY = await fetch('/.netlify/functions/gemini', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ prompt: userInput }),
-        });
+  const response = await fetch('/.netlify/functions/get-key');
+  const data = await response.json();
+  const GEMINI_API_KEY = data.apiKey
   const GEMINI_MODEL   = "gemini-3.1-flash-lite-preview";
   const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
