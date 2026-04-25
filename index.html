@@ -611,6 +611,11 @@
   /* OCR state */
   let recogStream = null;
 
+  /* ── Gemini Vision API 설정 ── */
+  const GEMINI_API_KEY = "AIzaSyBlj3Vhwbys_DtlZI9mIlL76MiEe5AOWDI";
+  const GEMINI_MODEL   = "gemini-2.0-flash";
+  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
   /* ══════════════════════════════════════════
      PAGE ROUTING
   ══════════════════════════════════════════ */
@@ -707,53 +712,50 @@
     const canvas = document.getElementById('ocr-canvas');
     const btn    = document.getElementById('btn-capture');
 
-    // Shutter flash
+    // 셔터 플래시 효과
     const wrap = document.getElementById('ocr-video-wrap');
     if (wrap) { wrap.classList.add('shutter-flash'); setTimeout(() => wrap.classList.remove('shutter-flash'), 350); }
 
     btn.disabled = true;
-    btn.textContent = '🔍 인식 중...';
-    setOcrStatus('loading', 'AI가 이름을 찾는 중...');
+    btn.textContent = '🔍 Gemini 분석 중...';
+    setOcrStatus('loading', 'Gemini Vision이 이름을 찾는 중...');
 
-    // Capture frame → base64 JPEG (품질 0.92)
+    // 현재 프레임 캡처 → base64 JPEG
     canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    const base64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+    const base64Img = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
 
     let recognizedName = null;
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch(GEMINI_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 100,
-          messages: [{
-            role: 'user',
-            content: [
+          contents: [{
+            parts: [
               {
-                type: 'image',
-                source: { type: 'base64', media_type: 'image/jpeg', data: base64 }
+                text: "이 이미지에서 사람 이름(한국어 또는 영어)만 찾아서 이름만 답하세요. 이름이 없거나 읽을 수 없으면 정확히 NONE 이라고만 답하세요. 다른 설명은 절대 하지 마세요."
               },
               {
-                type: 'text',
-                text: `이 이미지는 학생증, 명찰, 또는 이름표입니다.
-이미지에서 사람 이름(한국어 또는 영어)을 찾아서 이름만 딱 한 단어로 답하세요.
-이름이 없거나 읽을 수 없으면 정확히 "NONE" 이라고만 답하세요.
-다른 말은 절대 하지 마세요.`
+                inline_data: { mime_type: "image/jpeg", data: base64Img }
               }
             ]
-          }]
+          }],
+          generationConfig: { temperature: 0.1, topP: 1 }
         })
       });
 
       const data = await res.json();
-      const raw = (data.content?.[0]?.text || '').trim();
+
+      if (!res.ok) throw new Error(data.error?.message || '연결 실패');
+
+      const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
       if (raw && raw !== 'NONE' && raw.length >= 2 && raw.length <= 10) {
         recognizedName = raw;
       }
     } catch (e) {
+      console.error('Gemini OCR 오류:', e);
       recognizedName = null;
     }
 
