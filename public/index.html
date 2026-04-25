@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-  <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
@@ -26,103 +25,30 @@
       --danger: #E53935;
     }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      font-family: 'Noto Sans KR', sans-serif;
-      color: var(--accent);
-    }
+    html, body { height: 100%; background: var(--bg); font-family: 'Noto Sans KR', sans-serif; color: var(--accent); }
+    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
 
-    #app {
-      max-width: 480px;
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── Header ── */
-    .header {
-      background: var(--accent);
-      color: white;
-      padding: 18px 24px 15px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 4px 24px rgba(26,26,46,0.35);
-    }
+    .header { background: var(--accent); color: white; padding: 18px 24px 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 24px rgba(26,26,46,0.35); }
     .header-logo { font-size: 28px; line-height: 1; }
     .header-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
     .header-sub { font-size: 11px; opacity: 0.45; letter-spacing: 0.8px; text-transform: uppercase; margin-top: 2px; }
 
-    /* ── User bar ── */
-    .user-bar {
-      background: var(--accent);
-      padding: 0 24px 16px;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .user-avatar {
-      width: 38px; height: 38px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
-    }
+    .user-bar { background: var(--accent); padding: 0 24px 16px; color: white; display: flex; align-items: center; gap: 12px; }
+    .user-avatar { width: 38px; height: 38px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
     .user-name { font-size: 14px; font-weight: 600; }
     .user-sub { font-size: 12px; opacity: 0.5; margin-top: 2px; }
 
-    /* ── Content ── */
-    .content {
-      padding: 20px 16px 40px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    .content { padding: 20px 16px 40px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
 
-    /* ── Card ── */
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-      border: 1px solid rgba(0,0,0,0.04);
-    }
+    .card { background: var(--card); border-radius: 20px; padding: 24px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); }
     .card.center { text-align: center; display: flex; flex-direction: column; align-items: center; }
-    .card-title {
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
+    .card-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
 
-    /* ── Fade animation ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
     .fade-up { animation: fadeUp 0.38s ease forwards; }
 
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 14px 28px; border-radius: 14px;
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: 15px; font-weight: 700;
-      cursor: pointer; border: none; outline: none;
-      letter-spacing: -0.2px;
-      transition: all 0.2s;
-    }
-    .btn-primary {
-      background: var(--primary); color: white;
-      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
-    }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 28px; border-radius: 14px; font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; border: none; outline: none; letter-spacing: -0.2px; transition: all 0.2s; }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 16px rgba(255,107,53,0.35); }
     .btn-primary:hover { background: #e85a26; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,53,0.45); }
     .btn-primary:active { transform: translateY(0); }
     .btn-secondary { background: #f0ebe5; color: var(--accent); }
@@ -131,323 +57,115 @@
     .btn-danger:hover { background: #ffd6d6; }
     .btn-full { width: 100%; margin-top: 8px; }
 
-    .btn-count {
-      width: 50px; height: 50px;
-      border-radius: 13px;
-      background: #f5f0eb; color: var(--accent);
-      font-size: 17px; font-weight: 700;
-      cursor: pointer; border: none;
-      transition: all 0.15s;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Space Grotesk', sans-serif;
-    }
+    .btn-count { width: 50px; height: 50px; border-radius: 13px; background: #f5f0eb; color: var(--accent); font-size: 17px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; }
     .btn-count:hover { background: var(--secondary); }
     .btn-count.active { background: var(--primary); color: white; }
     .btn-count.green { background: #e8f5e9; color: #388e3c; font-size: 22px; }
     .btn-count.orange { background: #fff3e0; color: #f57c00; font-size: 12px; font-weight: 700; }
 
-    /* ── OCR Recognition styles ── */
-    .ocr-video-wrap {
-      width: 100%; aspect-ratio: 4/3;
-      background: var(--accent);
-      border-radius: 16px; overflow: hidden;
-      position: relative; margin-bottom: 16px;
-    }
+    .ocr-video-wrap { width: 100%; aspect-ratio: 4/3; background: var(--accent); border-radius: 16px; overflow: hidden; position: relative; margin-bottom: 16px; }
     .ocr-video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    .scan-line {
-      position: absolute; top: 0; left: 0; right: 0;
-      height: 3px; background: var(--primary); opacity: 0.9;
-      animation: scanDown 2s ease-in-out infinite;
-    }
-    @keyframes scanDown {
-      0%   { top: 0; }
-      50%  { top: calc(100% - 3px); }
-      100% { top: 0; }
-    }
+    .scan-line { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--primary); opacity: 0.9; animation: scanDown 2s ease-in-out infinite; }
+    @keyframes scanDown { 0% { top: 0; } 50% { top: calc(100% - 3px); } 100% { top: 0; } }
     .scan-corners { position: absolute; inset: 12px; pointer-events: none; }
     .sc { position: absolute; width: 22px; height: 22px; border-color: var(--primary); border-style: solid; opacity: 0.9; }
-    .sc-tl { top:0; left:0;  border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+    .sc-tl { top:0; left:0; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
     .sc-tr { top:0; right:0; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
-    .sc-bl { bottom:0; left:0;  border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+    .sc-bl { bottom:0; left:0; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
     .sc-br { bottom:0; right:0; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
 
-    .ocr-status-bar {
-      display: flex; align-items: center; gap: 10px;
-      background: rgba(26,26,46,0.84); backdrop-filter: blur(6px);
-      border-radius: 100px; padding: 9px 18px;
-      color: white; font-size: 13px; font-weight: 600;
-      position: absolute; bottom: 12px; left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap; pointer-events: none;
-      transition: opacity 0.3s;
-    }
+    .ocr-status-bar { display: flex; align-items: center; gap: 10px; background: rgba(26,26,46,0.84); backdrop-filter: blur(6px); border-radius: 100px; padding: 9px 18px; color: white; font-size: 13px; font-weight: 600; position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); white-space: nowrap; pointer-events: none; transition: opacity 0.3s; }
     .ocr-status-bar.hidden { opacity: 0; pointer-events: none; }
-    .ocr-spinner {
-      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-      border: 2.5px solid rgba(255,255,255,0.25);
-      border-top-color: var(--primary);
-      animation: ocrSpin 0.75s linear infinite;
-    }
+    .ocr-spinner { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; border: 2.5px solid rgba(255,255,255,0.25); border-top-color: var(--primary); animation: ocrSpin 0.75s linear infinite; }
     @keyframes ocrSpin { to { transform: rotate(360deg); } }
 
-    .ocr-result-box {
-      width: 100%; background: var(--primary-light);
-      border: 2px solid var(--secondary);
-      border-radius: 14px; padding: 14px 18px;
-      display: none; margin-bottom: 14px;
-    }
+    .ocr-result-box { width: 100%; background: var(--primary-light); border: 2px solid var(--secondary); border-radius: 14px; padding: 14px 18px; display: none; margin-bottom: 14px; }
     .ocr-result-box.visible { display: block; }
-    .ocr-result-label { font-size: 11px; font-weight: 700; letter-spacing: 1px;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-    .ocr-result-name  { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
+    .ocr-result-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .ocr-result-name { font-size: 24px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
 
-    /* ── Firebase lookup status ── */
-    .firebase-status {
-      width: 100%; border-radius: 14px; padding: 12px 16px;
-      font-size: 13px; font-weight: 600; text-align: center;
-      display: none; margin-bottom: 14px;
-      transition: all 0.3s;
-    }
-    .firebase-status.loading {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      background: #e8f0fe; color: #1a73e8;
-    }
-    .firebase-status.found {
-      display: block;
-      background: #e8f5e9; color: #2e7d32;
-      border: 1.5px solid #a5d6a7;
-    }
-    .firebase-status.not-found {
-      display: block;
-      background: #fff3e0; color: #e65100;
-      border: 1.5px solid #ffcc80;
-    }
-    .firebase-status.error {
-      display: block;
-      background: #ffeaea; color: var(--danger);
-      border: 1.5px solid #ffcdd2;
-    }
-    .fb-spinner {
-      width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
-      border: 2px solid rgba(26,115,232,0.25);
-      border-top-color: #1a73e8;
-      animation: ocrSpin 0.75s linear infinite;
-    }
+    .firebase-status { width: 100%; border-radius: 14px; padding: 12px 16px; font-size: 13px; font-weight: 600; text-align: center; display: none; margin-bottom: 14px; transition: all 0.3s; }
+    .firebase-status.loading { display: flex; align-items: center; justify-content: center; gap: 8px; background: #e8f0fe; color: #1a73e8; }
+    .firebase-status.found { display: block; background: #e8f5e9; color: #2e7d32; border: 1.5px solid #a5d6a7; }
+    .firebase-status.not-found { display: block; background: #fff3e0; color: #e65100; border: 1.5px solid #ffcc80; }
+    .firebase-status.error { display: block; background: #ffeaea; color: var(--danger); border: 1.5px solid #ffcdd2; }
+    .fb-spinner { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(26,115,232,0.25); border-top-color: #1a73e8; animation: ocrSpin 0.75s linear infinite; }
 
-    @keyframes shutterFlash {
-      0%   { opacity: 1; }
-      15%  { opacity: 0.05; }
-      100% { opacity: 1; }
-    }
+    @keyframes shutterFlash { 0% { opacity: 1; } 15% { opacity: 0.05; } 100% { opacity: 1; } }
     .shutter-flash { animation: shutterFlash 0.3s ease; }
 
-    .btn-capture {
-      width: 100%; background: var(--primary); color: white;
-      border: none; border-radius: 14px;
-      padding: 13px 20px; font-family: 'Noto Sans KR', sans-serif;
-      font-size: 15px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
-      transition: all 0.2s; margin-bottom: 10px;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
+    .btn-capture { width: 100%; background: var(--primary); color: white; border: none; border-radius: 14px; padding: 13px 20px; font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(255,107,53,0.35); transition: all 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-capture:hover:not(:disabled) { background: #e85a26; transform: translateY(-1px); }
     .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .btn-skip {
-      width: 100%; background: transparent; color: var(--muted);
-      border: 1.5px solid #e0d8d0; border-radius: 14px;
-      padding: 11px 20px; font-family: 'Noto Sans KR', sans-serif;
-      font-size: 14px; font-weight: 500; cursor: pointer;
-      transition: all 0.2s;
-    }
+    .btn-skip { width: 100%; background: transparent; color: var(--muted); border: 1.5px solid #e0d8d0; border-radius: 14px; padding: 11px 20px; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .btn-skip:hover { background: #f5f0eb; color: var(--accent); }
 
-    /* ── Hand detection overlay ── */
-    .hand-overlay-wrap {
-      position: relative;
-      width: 100%; aspect-ratio: 4/3;
-      background: var(--accent);
-      border-radius: 16px; overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .hand-overlay-wrap video,
-    .hand-overlay-wrap canvas {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .hand-overlay-wrap { position: relative; width: 100%; aspect-ratio: 4/3; background: var(--accent); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+    .hand-overlay-wrap video, .hand-overlay-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
     .hand-overlay-wrap canvas { pointer-events: none; }
 
-    .finger-status {
-      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 10px;
-      background: rgba(26,26,46,0.78); backdrop-filter: blur(6px);
-      border-radius: 100px; padding: 8px 18px;
-      color: white; font-size: 13px; font-weight: 600;
-      white-space: nowrap; pointer-events: none;
-      transition: opacity 0.3s;
-    }
+    .finger-status { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: rgba(26,26,46,0.78); backdrop-filter: blur(6px); border-radius: 100px; padding: 8px 18px; color: white; font-size: 13px; font-weight: 600; white-space: nowrap; pointer-events: none; transition: opacity 0.3s; }
     .finger-status.hidden { opacity: 0; }
 
-    .countdown-ring {
-      position: relative; width: 28px; height: 28px; flex-shrink: 0;
-    }
+    .countdown-ring { position: relative; width: 28px; height: 28px; flex-shrink: 0; }
     .countdown-ring svg { transform: rotate(-90deg); }
     .countdown-ring .ring-bg { fill: none; stroke: rgba(255,255,255,0.2); stroke-width: 3; }
-    .countdown-ring .ring-fill {
-      fill: none; stroke: var(--primary); stroke-width: 3;
-      stroke-linecap: round;
-      stroke-dasharray: 75.4;
-      stroke-dashoffset: 75.4;
-      transition: stroke-dashoffset 0.1s linear;
-    }
-    .countdown-ring .ring-text {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 11px; font-weight: 700; color: white;
-    }
+    .countdown-ring .ring-fill { fill: none; stroke: var(--primary); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 75.4; stroke-dashoffset: 75.4; transition: stroke-dashoffset 0.1s linear; }
+    .countdown-ring .ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; color: white; }
 
-    @keyframes confirmFlash {
-      0%   { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); }
-      30%  { box-shadow: inset 0 0 0 4px rgba(76,175,80,0.9); }
-      100% { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); }
-    }
+    @keyframes confirmFlash { 0% { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); } 30% { box-shadow: inset 0 0 0 4px rgba(76,175,80,0.9); } 100% { box-shadow: inset 0 0 0 4px rgba(76,175,80,0); } }
     .confirmed-flash { animation: confirmFlash 0.6s ease; }
 
-    .finger-detected-badge {
-      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      background: var(--primary); color: white;
-      border-radius: 100px; padding: 5px 16px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 22px; font-weight: 700;
-      pointer-events: none; opacity: 0;
-      transition: opacity 0.2s;
-      white-space: nowrap;
-    }
+    .finger-detected-badge { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; border-radius: 100px; padding: 5px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
     .finger-detected-badge.visible { opacity: 1; }
 
-    /* ── Typography ── */
     .hero-text { font-size: 30px; font-weight: 900; letter-spacing: -1px; line-height: 1.1; color: var(--accent); }
     .hero-sub { font-size: 15px; color: var(--muted); margin-top: 8px; line-height: 1.7; }
 
-    /* ── Food steps ── */
     .food-steps { display: flex; gap: 7px; justify-content: center; margin-bottom: 20px; }
-    .food-step {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: #f0ebe5;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; transition: all 0.3s;
-    }
+    .food-step { width: 34px; height: 34px; border-radius: 50%; background: #f0ebe5; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.3s; }
     .food-step.done { background: #d4edda; }
-    .food-step.current {
-      background: var(--primary); transform: scale(1.2);
-      box-shadow: 0 3px 12px rgba(255,107,53,0.4);
-    }
+    .food-step.current { background: var(--primary); transform: scale(1.2); box-shadow: 0 3px 12px rgba(255,107,53,0.4); }
 
-    /* ── Count display ── */
-    .count-display {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 80px; font-weight: 700;
-      color: var(--accent); line-height: 1;
-      letter-spacing: -3px; margin: 14px 0 4px;
-    }
+    .count-display { font-family: 'Space Grotesk', sans-serif; font-size: 80px; font-weight: 700; color: var(--accent); line-height: 1; letter-spacing: -3px; margin: 14px 0 4px; }
     .count-label { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
     .count-grid { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
 
-    /* ── Menu chips ── */
     .menu-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .menu-chip {
-      background: var(--primary-light);
-      border: 1.5px solid var(--secondary);
-      color: var(--accent);
-      border-radius: 100px; padding: 7px 15px;
-      font-size: 13px; font-weight: 600;
-    }
+    .menu-chip { background: var(--primary-light); border: 1.5px solid var(--secondary); color: var(--accent); border-radius: 100px; padding: 7px 15px; font-size: 13px; font-weight: 600; }
 
-    /* ── Confirm badge ── */
-    .confirm-badge {
-      display: inline-flex; align-items: center; gap: 14px;
-      background: var(--primary-light);
-      border: 2px solid var(--secondary);
-      border-radius: 18px; padding: 16px 24px;
-      margin: 20px 0;
-    }
-    .confirm-avatar-lg {
-      width: 54px; height: 54px;
-      background: var(--primary); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
-    }
+    .confirm-badge { display: inline-flex; align-items: center; gap: 14px; background: var(--primary-light); border: 2px solid var(--secondary); border-radius: 18px; padding: 16px 24px; margin: 20px 0; }
+    .confirm-avatar-lg { width: 54px; height: 54px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
     .confirm-name { font-weight: 700; font-size: 18px; }
     .confirm-sub { font-size: 14px; color: var(--muted); margin-top: 3px; }
 
-    /* ── Comment box ── */
-    .comment-box {
-      background: linear-gradient(135deg, #fff8f3, #fff0e8);
-      border-left: 4px solid var(--primary);
-      border-radius: 0 12px 12px 0;
-      padding: 14px 16px;
-      font-size: 14px; line-height: 1.7;
-    }
+    .comment-box { background: linear-gradient(135deg, #fff8f3, #fff0e8); border-left: 4px solid var(--primary); border-radius: 0 12px 12px 0; padding: 14px 16px; font-size: 14px; line-height: 1.7; }
 
-    /* ── Pie chart ── */
     #pie-canvas { display: block; margin: 0 auto; }
     .legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-    /* ── Progress bar ── */
     .progress-bar-wrap { background: #f0ebe5; border-radius: 100px; height: 10px; overflow: hidden; margin: 0 0 20px; width: 100%; }
     .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 100px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
 
-    /* ── Summary items ── */
-    .summary-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 0; border-bottom: 1px solid #f5f0eb;
-      transition: opacity 0.4s;
-    }
+    .summary-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f0eb; transition: opacity 0.4s; }
     .summary-item:last-child { border-bottom: none; }
-    .summary-emoji {
-      width: 40px; height: 40px; background: #fff8f3;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center; font-size: 20px;
-    }
+    .summary-emoji { width: 40px; height: 40px; background: #fff8f3; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
     .summary-name { flex: 1; font-weight: 500; font-size: 15px; }
     .summary-count { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; color: var(--primary); }
 
-    /* ── Complete ── */
-    @keyframes pop {
-      from { transform: scale(0); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-    .complete-icon {
-      width: 100px; height: 100px;
-      background: linear-gradient(135deg, var(--primary), #ff9a62);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 50px; margin: 0 auto 24px;
-      box-shadow: 0 12px 40px rgba(255,107,53,0.4);
-      animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1);
-    }
+    @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .complete-icon { width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), #ff9a62); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; margin: 0 auto 24px; box-shadow: 0 12px 40px rgba(255,107,53,0.4); animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
 
-    /* ── Input ── */
-    .styled-input {
-      border: 2px solid #e8e0d8; border-radius: 12px;
-      padding: 12px 16px; font-family: 'Noto Sans KR', sans-serif;
-      font-size: 20px; font-weight: 700; color: var(--accent);
-      text-align: center; width: 130px; outline: none;
-      transition: border-color 0.2s;
-    }
+    .styled-input { border: 2px solid #e8e0d8; border-radius: 12px; padding: 12px 16px; font-family: 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 700; color: var(--accent); text-align: center; width: 130px; outline: none; transition: border-color 0.2s; }
     .styled-input:focus { border-color: var(--primary); }
 
-    /* ── Pages ── */
     .page { display: none; }
     .page.active { display: block; }
 
-    /* ── Utils ── */
     .row { display: flex; gap: 12px; align-items: center; justify-content: center; }
     .mt8 { margin-top: 8px; }
     .mt16 { margin-top: 16px; }
@@ -457,35 +175,16 @@
     .fw700 { font-weight: 700; }
     .fs18  { font-size: 18px; }
 
-    /* ── Manual input fallback ── */
-    .manual-input-wrap {
-      width: 100%;
-      background: #f5f0eb;
-      border-radius: 14px;
-      padding: 16px;
-      margin-top: 8px;
-      display: none;
-    }
+    .manual-input-wrap { width: 100%; background: #f5f0eb; border-radius: 14px; padding: 16px; margin-top: 8px; display: none; }
     .manual-input-wrap.visible { display: block; }
-    .manual-input-wrap label {
-      font-size: 12px; font-weight: 700; color: var(--muted);
-      letter-spacing: 0.8px; text-transform: uppercase;
-      display: block; margin-bottom: 8px;
-    }
-    .manual-input-wrap input {
-      width: 100%; border: 2px solid #e8e0d8; border-radius: 10px;
-      padding: 10px 14px; font-family: 'Noto Sans KR', sans-serif;
-      font-size: 16px; font-weight: 700; color: var(--accent);
-      outline: none; transition: border-color 0.2s;
-      background: white;
-    }
+    .manual-input-wrap label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; display: block; margin-bottom: 8px; }
+    .manual-input-wrap input { width: 100%; border: 2px solid #e8e0d8; border-radius: 10px; padding: 10px 14px; font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent); outline: none; transition: border-color 0.2s; background: white; }
     .manual-input-wrap input:focus { border-color: var(--primary); }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- ══ HEADER ══ -->
   <div class="header">
     <div class="header-logo">🍱</div>
     <div>
@@ -494,7 +193,6 @@
     </div>
   </div>
 
-  <!-- ══ USER BAR ══ -->
   <div class="user-bar" id="user-bar">
     <div class="user-avatar">👤</div>
     <div>
@@ -503,7 +201,6 @@
     </div>
   </div>
 
-  <!-- ══ CONTENT ══ -->
   <div class="content">
 
     <!-- Page: Recognition -->
@@ -522,29 +219,17 @@
             <span id="ocr-status-text">인식 중...</span>
           </div>
         </div>
-
-        <!-- OCR 결과 -->
         <div class="ocr-result-box" id="ocr-result-box">
           <div class="ocr-result-label">📝 인식된 이름</div>
           <div class="ocr-result-name" id="ocr-result-name">—</div>
         </div>
-
-        <!-- Firebase 조회 상태 -->
         <div class="firebase-status" id="firebase-status"></div>
-
-        <button class="btn-capture" id="btn-capture">
-          📷 학생증 인식
-        </button>
-
-        <!-- 이름 직접 입력 (인식 실패 시 대체 수단) -->
+        <button class="btn-capture" id="btn-capture">📷 학생증 인식</button>
         <div class="manual-input-wrap" id="manual-input-wrap">
           <label>이름 직접 입력</label>
           <input type="text" id="manual-name-input" placeholder="홍길동" maxlength="10" />
-          <button class="btn btn-primary btn-full mt8" id="btn-manual-search" style="margin-top:10px;" onclick="manualSearch()">
-            🔍 학생 조회
-          </button>
+          <button class="btn btn-primary btn-full" style="margin-top:10px;" onclick="manualSearch()">🔍 학생 조회</button>
         </div>
-
         <canvas id="ocr-canvas" style="display:none"></canvas>
       </div>
     </div>
@@ -654,10 +339,10 @@
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /app -->
+  </div>
+</div>
 
-<script type="module">
+<script>
   /* ══════════════════════════════════════════
      FIREBASE INIT
   ══════════════════════════════════════════ */
@@ -686,7 +371,6 @@
   let progressStep = 0;
   let progressTimer = null;
 
-  /* ── Finger detection state ── */
   let handsDetector    = null;
   let handsCameraUtil  = null;
   let lastStableCount  = -1;
@@ -696,19 +380,27 @@
   const HOLD_MS        = 3000;
   const CIRCUMFERENCE  = 75.4;
 
-  /* OCR state */
   let recogStream = null;
 
-  /* ── Gemini Vision API ── */
-  const response = await fetch('/.netlify/functions/get-key');
+  /* ── Gemini Vision API ──
+     Netlify 함수에서 키를 받아옴. 실패 시 빈 문자열로 폴백.
+  ── */
+  let GEMINI_API_KEY = "";
+  const GEMINI_MODEL = "gemini-2.0-flash-lite";
+  let GEMINI_ENDPOINT = "";
 
-  const data = await response.json();
-
-  const GEMINI_API_KEY = data.apiKey
-
-  const GEMINI_MODEL   = "gemini-3.1-flash-lite-preview";
-
-  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  async function initGeminiKey() {
+    try {
+      const res = await fetch('/.netlify/functions/get-key');
+      if (res.ok) {
+        const json = await res.json();
+        GEMINI_API_KEY = json.apiKey || "";
+      }
+    } catch (e) {
+      console.warn("Netlify key fetch 실패:", e);
+    }
+    GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  }
 
   /* ══════════════════════════════════════════
      PAGE ROUTING
@@ -750,17 +442,9 @@
 
   /* ══════════════════════════════════════════
      FIREBASE RTDB — STUDENT LOOKUP
-     Expected DB structure:
-       /students/{uid}
-         name: "홍길동"
-         grade: 1
-         class: 2
-         number: 10
-     OR flat list searched by name.
   ══════════════════════════════════════════ */
   async function lookupStudentByName(name) {
     try {
-      // Try querying by name field under /students node
       const snapshot = await db.ref('students')
         .orderByChild('name')
         .equalTo(name)
@@ -773,9 +457,9 @@
         return {
           uid:      key,
           name:     s.name     || name,
-          grade:    s.grade    || s.학년 || null,
-          classNum: s.class    || s.반   || null,
-          number:   s.number   || s.번호 || null
+          grade:    s.grade    || s['학년'] || null,
+          classNum: s.class    || s['반']   || null,
+          number:   s.number   || s['번호'] || null
         };
       }
       return null;
@@ -799,13 +483,10 @@
     }
   }
 
-  /* Main flow after OCR name is obtained */
   async function handleNameFound(recognizedName) {
-    // Show OCR result
     document.getElementById('ocr-result-name').textContent = recognizedName;
     document.getElementById('ocr-result-box').classList.add('visible');
 
-    // Start Firebase lookup
     setFirebaseStatus('loading', `"${recognizedName}" 학생 정보 조회 중...`);
 
     const btn = document.getElementById('btn-capture');
@@ -816,7 +497,6 @@
       const student = await lookupStudentByName(recognizedName);
 
       if (student) {
-        // Found!
         setFirebaseStatus('found',
           `✅ ${student.grade}학년 ${student.classNum}반 ${student.number}번 · ${student.name}`);
 
@@ -834,9 +514,8 @@
         btn.onclick = () => proceedToConfirm();
 
       } else {
-        // Not found in DB
         setFirebaseStatus('not-found',
-          `⚠️ "${recognizedName}" 학생을 DB에서 찾을 수 없어요. 이름을 직접 확인해 주세요.`);
+          `⚠️ "${recognizedName}" 학생을 DB에서 찾을 수 없어요.`);
 
         user = { name: recognizedName, grade: null, classNum: null, number: null };
         updateUserBar(user);
@@ -845,7 +524,6 @@
         btn.disabled = false;
         btn.onclick = () => { resetOcrUI(); captureAndOCR(); };
 
-        // Show manual input for correction
         document.getElementById('manual-input-wrap').classList.add('visible');
         document.getElementById('manual-name-input').value = recognizedName;
       }
@@ -908,7 +586,7 @@
       try {
         recogStream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = recogStream;
-      } catch (e2) { /* camera unavailable */ }
+      } catch (e2) {}
     }
   }
 
@@ -937,7 +615,6 @@
 
     resetOcrUI();
 
-    // Shutter flash
     const wrap = document.getElementById('ocr-video-wrap');
     if (wrap) { wrap.classList.add('shutter-flash'); setTimeout(() => wrap.classList.remove('shutter-flash'), 350); }
 
@@ -945,7 +622,6 @@
     btn.textContent = '🔍 Gemini 분석 중...';
     setOcrStatus('loading', 'Gemini Vision이 이름을 찾는 중...');
 
-    // Capture frame → base64 JPEG
     canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -959,12 +635,8 @@
         body: JSON.stringify({
           contents: [{
             parts: [
-              {
-                text: "이 이미지에서 사람 이름(한국어 또는 영어)만 찾아서 이름만 답하세요. 이름이 없거나 읽을 수 없으면 정확히 NONE 이라고만 답하세요. 다른 설명은 절대 하지 마세요."
-              },
-              {
-                inline_data: { mime_type: "image/jpeg", data: base64Img }
-              }
+              { text: "이 이미지에서 사람 이름(한국어 또는 영어)만 찾아서 이름만 답하세요. 이름이 없거나 읽을 수 없으면 정확히 NONE 이라고만 답하세요. 다른 설명은 절대 하지 마세요." },
+              { inline_data: { mime_type: "image/jpeg", data: base64Img } }
             ]
           }],
           generationConfig: { temperature: 0.1, topP: 1 }
@@ -988,7 +660,6 @@
     if (recognizedName) {
       await handleNameFound(recognizedName);
     } else {
-      // OCR failed — show manual input
       setFirebaseStatus('not-found', '⚠️ 이름을 인식하지 못했어요. 직접 입력해 주세요.');
       btn.textContent = '📷 다시 찍기';
       btn.disabled = false;
@@ -1054,12 +725,10 @@
     });
     handsDetector.onResults(results => {
       drawHandOverlay(canvasEl, videoEl, results);
-
       if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
         updateCountdownState(-1);
         return;
       }
-
       const landmarks = results.multiHandLandmarks[0];
       const n = countExtendedFingers(landmarks);
       if (!fingerLocked) updateCountdownState(n);
@@ -1080,12 +749,7 @@
   }
 
   function countExtendedFingers(landmarks) {
-    const fingers = [
-      [8,  6],
-      [12, 10],
-      [16, 14],
-      [20, 18]
-    ];
+    const fingers = [[8,6],[12,10],[16,14],[20,18]];
     let count = fingers.filter(([tip, pip]) => landmarks[tip].y < landmarks[pip].y).length;
     if (landmarks[4].x > landmarks[3].x) count++;
     return count;
@@ -1103,16 +767,13 @@
     ctx.translate(-canvas.width, 0);
 
     const CONNECTIONS = [
-      [0,1],[1,2],[2,3],[3,4],
-      [0,5],[5,6],[6,7],[7,8],
-      [5,9],[9,10],[10,11],[11,12],
-      [9,13],[13,14],[14,15],[15,16],
+      [0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],
+      [5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],
       [13,17],[17,18],[18,19],[19,20],[0,17]
     ];
 
     results.multiHandLandmarks.forEach(lms => {
       const pts = lms.map(lm => ({ x: lm.x * canvas.width, y: lm.y * canvas.height }));
-
       ctx.strokeStyle = 'rgba(255,107,53,0.7)';
       ctx.lineWidth = 2.5;
       CONNECTIONS.forEach(([a,b]) => {
@@ -1121,7 +782,6 @@
         ctx.lineTo(pts[b].x, pts[b].y);
         ctx.stroke();
       });
-
       pts.forEach((p, i) => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, i === 0 ? 6 : 4, 0, 2*Math.PI);
@@ -1132,7 +792,6 @@
         ctx.stroke();
       });
     });
-
     ctx.restore();
   }
 
@@ -1163,7 +822,6 @@
 
     if (lastStableCount >= 0 && stableStartTime !== null && countdownInterval !== 'done') {
       statusEl.classList.remove('hidden');
-
       if (!countdownInterval) {
         countdownInterval = 'ticking';
         (function tick() {
@@ -1174,7 +832,6 @@
           ringFill.style.strokeDashoffset = offset;
           ringText.textContent = Math.ceil(remaining / 1000) || '✓';
           if (statusTxt) statusTxt.textContent = `${lastStableCount}개 유지 중... (${Math.ceil(remaining/1000)}초)`;
-
           if (elapsed >= HOLD_MS) {
             countdownInterval = 'done';
             confirmFingerCount(lastStableCount);
@@ -1377,8 +1034,9 @@
   /* ══════════════════════════════════════════
      INIT
   ══════════════════════════════════════════ */
-  (function init() {
-    initRecognition();
+  (async function init() {
+    await initGeminiKey();
+    await initRecognition();
 
     const obs = new MutationObserver(() => {
       if (document.getElementById('page-dashboard').classList.contains('active')) drawPie();
