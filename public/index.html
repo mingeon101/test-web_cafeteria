@@ -619,8 +619,8 @@
     if (wrap) { wrap.classList.add('shutter-flash'); setTimeout(() => wrap.classList.remove('shutter-flash'), 350); }
 
     btn.disabled = true;
-    btn.textContent = '🔍 Gemini 분석 중...';
-    setOcrStatus('loading', 'Gemini Vision이 이름을 찾는 중...');
+    btn.textContent = '학생 검색 중...';
+    setOcrStatus('loading', '학생 검색 중...');
 
     canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 480;
