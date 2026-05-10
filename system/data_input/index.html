@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>급식 데이터 시뮬레이터</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; background: #f4f4f4; }
+        .panel { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin-bottom: 20px; }
+        h2 { margin-top: 0; color: #333; }
+        button { padding: 10px 15px; cursor: pointer; border: none; border-radius: 5px; background: #FF6B35; color: white; font-weight: bold; }
+        button:hover { background: #e55a2b; }
+        input { padding: 8px; width: 60px; }
+        .group { margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 급식 시스템 관리 도구</h1>
+
+    <div class="panel">
+        <h2>📊 실시간 통계 조절</h2>
+        <div class="group">
+            <span>오늘 배식 완료 인원:</span>
+            <input type="number" id="servedToday" value="0">
+            <button onclick="updateStats()">업데이트</button>
+        </div>
+        <div class="group">
+            <span>현재 대기열 인원:</span>
+            <input type="number" id="queueCount" value="5">
+            <button onclick="updateQueue()">업데이트</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>🤖 로봇 상태 제어 (Robot A)</h2>
+        <div class="group">
+            <span>상태 변경:</span>
+            <select id="robotState">
+                <option value="idle">대기 중 (Idle)</option>
+                <option value="active">배식 중 (Active)</option>
+                <option value="standby">준비 중 (Standby)</option>
+                <option value="error">오류 (Error)</option>
+            </select>
+            <button onclick="updateRobot()">변경 적용</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>😊 가상 배식 발생</h2>
+        <p>버튼을 누르면 '최근 배식 기록'에 학생이 추가됩니다.</p>
+        <button onclick="addServingLog()" style="background: #2E7D32;">배식 완료 시뮬레이션</button>
+    </div>
+
+    <script>
+        // 대시보드와 동일한 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3SvV8-bTyQClyZlGWybhR3z5YvLGXYL0",
+            authDomain: "smart-cafeteria-8a2ce.firebaseapp.com",
+            databaseURL: "https://smart-cafeteria-8a2ce-default-rtdb.firebaseio.com",
+            projectId: "smart-cafeteria-8a2ce",
+            storageBucket: "smart-cafeteria-8a2ce.firebasestorage.app",
+            messagingSenderId: "304671336012",
+            appId: "1:304671336012:web:0fd90cf8e6cc06884176e9"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 1. 통계 업데이트
+        function updateStats() {
+            const val = document.getElementById('servedToday').value;
+            db.ref('stats/servedToday').set(parseInt(val));
+            alert("배식 인원이 업데이트 되었습니다.");
+        }
+
+        function updateQueue() {
+            const val = document.getElementById('queueCount').value;
+            db.ref('stats/queueCount').set(parseInt(val));
+        }
+
+        // 2. 로봇 상태 업데이트
+        function updateRobot() {
+            const state = document.getElementById('robotState').value;
+            db.ref('robots/robot-01').update({
+                state: state,
+                currentTask: state === 'active' ? '배식 진행 중' : '대기 중',
+                lastUpdate: Date.now()
+            });
+            alert("로봇 상태가 " + state + "(으)로 변경되었습니다.");
+        }
+
+        // 3. 배식 로그 기록 추가
+        function addServingLog() {
+            const names = ["김철수", "이영희", "박지민", "최다은", "정우성"];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            
+            const newLog = {
+                name: randomName,
+                grade: Math.floor(Math.random() * 3) + 1,
+                class: Math.floor(Math.random() * 10) + 1,
+                timestamp: Date.now(),
+                counts: { "밥": 1, "국": 1, "반찬": 2 }
+            };
+
+            // push()를 사용하여 고유 ID 생성하며 추가
+            db.ref('recentServed').push(newLog);
+
+            // 동시에 오늘 총 배식 인원도 +1 증가시킴 (트랜잭션 권장하나 간단히 구현)
+            db.ref('stats/servedToday').transaction(current => (current || 0) + 1);
+        }
+    </script>
+</body>
+</html>
