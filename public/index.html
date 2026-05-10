@@ -362,8 +362,8 @@
   /* ══════════════════════════════════════════
      STATE
   ══════════════════════════════════════════ */
-  const FOODS  = ["밥","국","김치","반찬","우유","디저트"];
-  const EMOJIS = ["🍚","🍲","🥬","🥘","🥛","🍮"];
+  const FOODS  = ["밥","국","김치"];
+  const EMOJIS = ["🍚","🍲","🥬"];
   let user        = { grade:1, classNum:2, number:10, name:"홍길동" };
   let counts      = Array(6).fill(0);
   let serveStep   = 0;
@@ -466,6 +466,47 @@
     } catch (err) {
       console.error('Firebase lookup error:', err);
       throw err;
+    }
+  }
+  /* ══════════════════════════════════════════
+   FIREBASE RTDB — SERVE SAVE
+  ══════════════════════════════════════════ */
+  async function saveServeData() {
+
+    if (!user.uid) {
+      console.log("uid 없음");
+      return;
+    }
+
+    try {
+
+      const serveData = {
+        rice: counts[0] || 0,
+        soup: counts[1] || 0,
+        kimchi: counts[2] || 0,
+
+        foods: {
+          밥: counts[0] || 0,
+          국: counts[1] || 0,
+          김치: counts[2] || 0
+        },
+
+        total:
+          (counts[0] || 0) +
+          (counts[1] || 0) +
+          (counts[2] || 0),
+
+        updatedAt: Date.now()
+      };
+
+      await db.ref(`students/${user.uid}/serve`).set(serveData);
+
+      console.log("배식 데이터 저장 완료");
+
+    } catch (err) {
+
+      console.error("배식 데이터 저장 실패:", err);
+
     }
   }
 
@@ -971,13 +1012,21 @@
     });
   }
 
-  function serveNext() {
+  async function serveNext() {
+
     if (serveStep < FOODS.length - 1) {
+
       serveStep++;
       renderServeStep();
+
     } else {
+
+      // Firebase 저장
+      await saveServeData();
+
       stopHandDetector();
       stopCamera('video-serve');
+
       startProgress();
     }
   }
