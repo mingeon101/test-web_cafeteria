@@ -2,113 +2,166 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>급식 데이터 시뮬레이터</title>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <title>스마트 배식 통합 관리자</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.6; background: #f4f4f4; }
-        .panel { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin-bottom: 20px; }
-        h2 { margin-top: 0; color: #333; }
-        button { padding: 10px 15px; cursor: pointer; border: none; border-radius: 5px; background: #FF6B35; color: white; font-weight: bold; }
-        button:hover { background: #e55a2b; }
-        input { padding: 8px; width: 60px; }
-        .group { margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 1000px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h2 { font-size: 1.2em; color: #333; border-left: 4px solid #007bff; padding-left: 10px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 10px; }
+        label { display: block; font-size: 12px; color: #666; margin-bottom: 3px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        .search-result { background: #e9ecef; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 13px; }
     </style>
 </head>
 <body>
 
-    <h1>🚀 급식 시스템 관리 도구</h1>
-
-    <div class="panel">
-        <h2>📊 실시간 통계 조절</h2>
-        <div class="group">
-            <span>오늘 배식 완료 인원:</span>
-            <input type="number" id="servedToday" value="0">
-            <button onclick="updateStats()">업데이트</button>
-        </div>
-        <div class="group">
-            <span>현재 대기열 인원:</span>
-            <input type="number" id="queueCount" value="5">
-            <button onclick="updateQueue()">업데이트</button>
-        </div>
+<div class="grid">
+    <div class="card">
+        <h2>👤 학생 신규 등록</h2>
+        <div class="input-group"><label>UID (고유ID)</label><input type="text" id="reg-uid" placeholder="ex) 2024001"></div>
+        <div class="input-group"><label>이름</label><input type="text" id="reg-name"></div>
+        <div class="input-group"><label>학년</label><input type="number" id="reg-grade"></div>
+        <div class="input-group"><label>반</label><input type="number" id="reg-class"></div>
+        <div class="input-group"><label>번호</label><input type="number" id="reg-number"></div>
+        <button onclick="registerStudent()">학생 등록</button>
     </div>
 
-    <div class="panel">
-        <h2>🤖 로봇 상태 제어 (Robot A)</h2>
-        <div class="group">
-            <span>상태 변경:</span>
-            <select id="robotState">
-                <option value="idle">대기 중 (Idle)</option>
-                <option value="active">배식 중 (Active)</option>
-                <option value="standby">준비 중 (Standby)</option>
-                <option value="error">오류 (Error)</option>
-            </select>
-            <button onclick="updateRobot()">변경 적용</button>
+    <div class="card">
+        <h2>🍱 학생 조회 및 배식</h2>
+        <div class="input-group"><label>조회할 이름</label><input type="text" id="search-name" placeholder="이름 입력 후 조회"></div>
+        <button style="background: #28a745;" onclick="searchStudent()">학생 조회</button>
+        
+        <div id="student-search-info" class="search-result" style="display:none;">
+            <p><strong>UID:</strong> <span id="res-uid">-</span></p>
+            <div class="input-group"><label>밥 수량</label><input type="number" id="food-rice" value="0"></div>
+            <div class="input-group"><label>국 수량</label><input type="number" id="food-soup" value="0"></div>
+            <div class="input-group"><label>김치 수량</label><input type="number" id="food-kimchi" value="0"></div>
+            <button onclick="updateServe()">배식 정보 저장 (Serve)</button>
         </div>
     </div>
 
-    <div class="panel">
-        <h2>😊 가상 배식 발생</h2>
-        <p>버튼을 누르면 '최근 배식 기록'에 학생이 추가됩니다.</p>
-        <button onclick="addServingLog()" style="background: #2E7D32;">배식 완료 시뮬레이션</button>
+    <div class="card">
+        <h2>🤖 로봇 상태 설정</h2>
+        <div class="input-group"><label>로봇 ID</label><input type="text" id="robot-id" placeholder="ex) robot-A"></div>
+        <button style="background: #28a745;" onclick="searchRobot()">로봇 조회</button>
+        
+        <div id="robot-manage-info" class="search-result" style="display:none;">
+            <p><strong>이름:</strong> <span id="res-robot-name">-</span></p>
+            <div class="input-group">
+                <label>상태(State)</label>
+                <select id="robot-state">
+                    <option value="idle">idle</option>
+                    <option value="active">active</option>
+                    <option value="error">error</option>
+                    <option value="standby">standby</option>
+                </select>
+            </div>
+            <div class="input-group"><label>배터리 (%)</label><input type="number" id="robot-battery"></div>
+            <button onclick="updateRobot()">로봇 상태 업데이트</button>
+        </div>
     </div>
 
-    <script>
-        // 대시보드와 동일한 설정
-        const firebaseConfig = {
-            apiKey: "AIzaSyC3SvV8-bTyQClyZlGWybhR3z5YvLGXYL0",
-            authDomain: "smart-cafeteria-8a2ce.firebaseapp.com",
-            databaseURL: "https://smart-cafeteria-8a2ce-default-rtdb.firebaseio.com",
-            projectId: "smart-cafeteria-8a2ce",
-            storageBucket: "smart-cafeteria-8a2ce.firebasestorage.app",
-            messagingSenderId: "304671336012",
-            appId: "1:304671336012:web:0fd90cf8e6cc06884176e9"
+    <div class="card">
+        <h2>📊 시스템 설정</h2>
+        <div class="input-group"><label>실시간 대기 인원 수 (queueCount)</label><input type="number" id="input-queue"></div>
+        <button onclick="updateQueue()">대기 인원 변경</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, set, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC3SvV8-bTyQClyZlGWybhR3z5YvLGXYL0",
+        authDomain: "smart-cafeteria-8a2ce.firebaseapp.com",
+        databaseURL: "https://smart-cafeteria-8a2ce-default-rtdb.firebaseio.com",
+        projectId: "smart-cafeteria-8a2ce",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // --- 1. 학생 등록 ---
+    window.registerStudent = function() {
+        const uid = document.getElementById('reg-uid').value;
+        if(!uid) return alert("UID를 입력하세요.");
+
+        set(ref(db, `students/${uid}`), {
+            name: document.getElementById('reg-name').value,
+            grade: Number(document.getElementById('reg-grade').value),
+            class: Number(document.getElementById('reg-class').value),
+            number: Number(document.getElementById('reg-number').value)
+        }).then(() => alert("학생 등록 완료!"));
+    };
+
+    // --- 2. 학생 조회 및 배식 ---
+    let currentStudentUid = "";
+    window.searchStudent = async function() {
+        const name = document.getElementById('search-name').value;
+        const studentsRef = ref(db, 'students');
+        const nameQuery = query(studentsRef, orderByChild('name'), equalTo(name));
+        
+        const snapshot = await get(nameQuery);
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            currentStudentUid = Object.keys(data)[0];
+            document.getElementById('res-uid').innerText = currentStudentUid;
+            document.getElementById('student-search-info').style.display = "block";
+        } else {
+            alert("해당 이름의 학생이 없습니다.");
+        }
+    };
+
+    window.updateServe = function() {
+        const serveData = {
+            timestamp: Date.now(),
+            foods: {
+                "밥": Number(document.getElementById('food-rice').value),
+                "국": Number(document.getElementById('food-soup').value),
+                "김치": Number(document.getElementById('food-kimchi').value)
+            }
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        update(ref(db, `students/${currentStudentUid}/serve`), serveData)
+            .then(() => alert("배식 정보 업데이트 완료!"));
+    };
 
-        // 1. 통계 업데이트
-        function updateStats() {
-            const val = document.getElementById('servedToday').value;
-            db.ref('stats/servedToday').set(parseInt(val));
-            alert("배식 인원이 업데이트 되었습니다.");
+    // --- 3. 로봇 조회 및 업데이트 ---
+    window.searchRobot = async function() {
+        const rid = document.getElementById('robot-id').value;
+        const snapshot = await get(ref(db, `robots/${rid}`));
+        if (snapshot.exists()) {
+            const r = snapshot.val();
+            document.getElementById('res-robot-name').innerText = r.name;
+            document.getElementById('robot-state').value = r.state;
+            document.getElementById('robot-battery').value = r.battery;
+            document.getElementById('robot-manage-info').style.display = "block";
+        } else {
+            alert("존재하지 않는 로봇 ID입니다.");
         }
+    };
 
-        function updateQueue() {
-            const val = document.getElementById('queueCount').value;
-            db.ref('stats/queueCount').set(parseInt(val));
-        }
+    window.updateRobot = function() {
+        const rid = document.getElementById('robot-id').value;
+        const updates = {
+            state: document.getElementById('robot-state').value,
+            battery: Number(document.getElementById('robot-battery').value),
+            lastUpdate: Date.now() // 자동으로 현재 시간 저장
+        };
+        update(ref(db, `robots/${rid}`), updates)
+            .then(() => alert("로봇 상태 및 시간 업데이트 완료!"));
+    };
 
-        // 2. 로봇 상태 업데이트
-        function updateRobot() {
-            const state = document.getElementById('robotState').value;
-            db.ref('robots/robot-01').update({
-                state: state,
-                currentTask: state === 'active' ? '배식 진행 중' : '대기 중',
-                lastUpdate: Date.now()
-            });
-            alert("로봇 상태가 " + state + "(으)로 변경되었습니다.");
-        }
+    // --- 4. 대기 인원 업데이트 ---
+    window.updateQueue = function() {
+        const count = Number(document.getElementById('input-queue').value);
+        set(ref(db, 'stats/queueCount'), count)
+            .then(() => alert("대기 인원 수정 완료!"));
+    };
+</script>
 
-        // 3. 배식 로그 기록 추가
-        function addServingLog() {
-            const names = ["김철수", "이영희", "박지민", "최다은", "정우성"];
-            const randomName = names[Math.floor(Math.random() * names.length)];
-            
-            const newLog = {
-                name: randomName,
-                grade: Math.floor(Math.random() * 3) + 1,
-                class: Math.floor(Math.random() * 10) + 1,
-                timestamp: Date.now(),
-                counts: { "밥": 1, "국": 1, "반찬": 2 }
-            };
-
-            // push()를 사용하여 고유 ID 생성하며 추가
-            db.ref('recentServed').push(newLog);
-
-            // 동시에 오늘 총 배식 인원도 +1 증가시킴 (트랜잭션 권장하나 간단히 구현)
-            db.ref('stats/servedToday').transaction(current => (current || 0) + 1);
-        }
-    </script>
 </body>
 </html>
