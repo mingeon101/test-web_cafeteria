@@ -1041,7 +1041,7 @@
     goPage('progress');
     document.getElementById('progress-fill').style.width = '0%';
     renderProgressList();
-    progressTimer = setInterval(() => {
+    progressTimer = setInterval(async() => {
       progressStep++;
       document.getElementById('progress-fill').style.width = (progressStep / 6 * 100) + '%';
       renderProgressList();
