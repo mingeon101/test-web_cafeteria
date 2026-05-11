@@ -1047,6 +1047,7 @@
       renderProgressList();
       if (progressStep >= 6) {
         clearInterval(progressTimer);
+        await db.ref('stats/queueCount').transaction(cur => (cur || 0) > 0 ? cur - 1 : 0);
         setTimeout(() => goPage('complete'), 600);
       }
     }, 900);
