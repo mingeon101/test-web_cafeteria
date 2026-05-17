@@ -180,6 +180,21 @@
     .manual-input-wrap label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; display: block; margin-bottom: 8px; }
     .manual-input-wrap input { width: 100%; border: 2px solid #e8e0d8; border-radius: 10px; padding: 10px 14px; font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent); outline: none; transition: border-color 0.2s; background: white; }
     .manual-input-wrap input:focus { border-color: var(--primary); }
+
+    /* ── 확인 페이지 제스처 카메라 ── */
+    .confirm-gesture-wrap { position: relative; width: 100%; aspect-ratio: 4/3; background: var(--accent); border-radius: 16px; overflow: hidden; margin-bottom: 12px; }
+    .confirm-gesture-wrap video,
+    .confirm-gesture-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .confirm-gesture-wrap canvas { pointer-events: none; }
+    .confirm-gesture-badge { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); border-radius: 100px; padding: 6px 20px; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap; color: white; }
+    .confirm-gesture-badge.visible { opacity: 1; }
+    .confirm-gesture-badge.ok  { background: #43a047; }
+    .confirm-gesture-badge.no  { background: var(--danger); }
+    .confirm-gesture-hint { display: flex; gap: 16px; justify-content: center; margin-bottom: 10px; font-size: 13px; color: var(--muted); font-weight: 600; }
+    .confirm-hold-bar { width: 100%; height: 8px; background: #f0ebe5; border-radius: 100px; overflow: hidden; margin-bottom: 14px; }
+    .confirm-hold-fill { height: 100%; border-radius: 100px; width: 0%; transition: width 0.1s linear; }
+    .confirm-hold-fill.ok { background: #43a047; }
+    .confirm-hold-fill.no { background: var(--danger); }
   </style>
 </head>
 <body>
@@ -246,9 +261,24 @@
             <div class="confirm-sub" id="confirm-sub">1학년 2반 10번</div>
           </div>
         </div>
+
+        <!-- ── 제스처 카메라 (추가된 부분) ── -->
+        <div class="confirm-gesture-hint">
+          <span>👌 OK 제스처 → 맞아요</span>
+          <span>✌️ X 제스처 → 아니에요</span>
+        </div>
+        <div class="confirm-gesture-wrap" id="confirm-gesture-wrap">
+          <video id="video-confirm" autoplay muted playsinline style="transform:scaleX(-1)"></video>
+          <canvas id="confirm-hand-canvas"></canvas>
+          <div class="confirm-gesture-badge" id="confirm-gesture-badge"></div>
+        </div>
+        <div class="confirm-hold-bar">
+          <div class="confirm-hold-fill" id="confirm-hold-fill"></div>
+        </div>
+        <!-- ── 기존 버튼 유지 ── -->
         <div class="row">
-          <button class="btn btn-primary" onclick="goPage('dashboard')">맞아요 👍</button>
-          <button class="btn btn-danger" onclick="goPage('recognition'); initRecognition();">아니에요</button>
+          <button class="btn btn-primary" onclick="stopConfirmGesture(); goPage('dashboard');">맞아요 👍</button>
+          <button class="btn btn-danger" onclick="stopConfirmGesture(); goPage('recognition'); initRecognition();">아니에요</button>
         </div>
       </div>
     </div>
@@ -382,9 +412,7 @@
 
   let recogStream = null;
 
-  /* ── Gemini Vision API ──
-     Netlify 함수에서 키를 받아옴. 실패 시 빈 문자열로 폴백.
-  ── */
+  /* ── Gemini Vision API ── */
   let GEMINI_API_KEY = "";
   const GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
   let GEMINI_ENDPOINT = "";
@@ -468,45 +496,25 @@
       throw err;
     }
   }
+
   /* ══════════════════════════════════════════
-   FIREBASE RTDB — SERVE SAVE
+     FIREBASE RTDB — SERVE SAVE
   ══════════════════════════════════════════ */
   async function saveServeData() {
-
-    if (!user.uid) {
-      console.log("uid 없음");
-      return;
-    }
-
+    if (!user.uid) { console.log("uid 없음"); return; }
     try {
-
       const serveData = {
         rice: counts[0] || 0,
         soup: counts[1] || 0,
         kimchi: counts[2] || 0,
-
-        foods: {
-          밥: counts[0] || 0,
-          국: counts[1] || 0,
-          김치: counts[2] || 0
-        },
-
-        total:
-          (counts[0] || 0) +
-          (counts[1] || 0) +
-          (counts[2] || 0),
-
+        foods: { 밥: counts[0] || 0, 국: counts[1] || 0, 김치: counts[2] || 0 },
+        total: (counts[0] || 0) + (counts[1] || 0) + (counts[2] || 0),
         updatedAt: Date.now()
       };
-
       await db.ref(`students/${user.uid}/serve`).set(serveData);
-
       console.log("배식 데이터 저장 완료");
-
     } catch (err) {
-
       console.error("배식 데이터 저장 실패:", err);
-
     }
   }
 
@@ -514,7 +522,6 @@
     const el = document.getElementById('firebase-status');
     el.className = 'firebase-status';
     if (state === 'hidden') { el.style.display = 'none'; return; }
-
     if (state === 'loading') {
       el.classList.add('loading');
       el.innerHTML = `<div class="fb-spinner"></div> ${text}`;
@@ -586,6 +593,7 @@
         : '정보 없음 — 직접 확인하세요';
     updateUserBar(user);
     goPage('confirm');
+    startConfirmGesture();
   }
 
   async function manualSearch() {
@@ -711,6 +719,135 @@
   }
 
   /* ══════════════════════════════════════════
+     CONFIRM PAGE — OK / X 제스처 인식 (신규 추가)
+     OK  : 엄지+검지 붙음(동그라미) + 중지·약지·소지 펴짐
+     X   : 검지+중지만 펴짐 (가위), 약지·소지 접힘
+  ══════════════════════════════════════════ */
+  let confirmHandsDetector  = null;
+  let confirmCameraUtil     = null;
+  let confirmGestureState   = null;  // 'ok' | 'no' | null
+  let confirmGestureStart   = null;
+  let confirmGestureLocked  = false;
+  const CONFIRM_HOLD_MS     = 2000;
+
+  function detectConfirmGesture(lm) {
+    const indexUp  = lm[8].y  < lm[6].y;
+    const middleUp = lm[12].y < lm[10].y;
+    const ringUp   = lm[16].y < lm[14].y;
+    const pinkyUp  = lm[20].y < lm[18].y;
+
+    const dx = lm[4].x - lm[8].x;
+    const dy = lm[4].y - lm[8].y;
+    const thumbIndexDist = Math.sqrt(dx*dx + dy*dy);
+
+    // OK: 엄지-검지 거리 < 0.08 + 중지·약지·소지 펴짐
+    const isOK = thumbIndexDist < 0.08 && middleUp && ringUp && pinkyUp;
+
+    // X(가위): 검지+중지만 펴짐, 약지·소지 접힘, OK 아님
+    const isX = indexUp && middleUp && !ringUp && !pinkyUp && !isOK;
+
+    if (isOK) return 'ok';
+    if (isX)  return 'no';
+    return null;
+  }
+
+  function startConfirmGesture() {
+    if (!window.Hands || !window.Camera) return;
+
+    confirmGestureState  = null;
+    confirmGestureStart  = null;
+    confirmGestureLocked = false;
+
+    const videoEl  = document.getElementById('video-confirm');
+    const canvasEl = document.getElementById('confirm-hand-canvas');
+    const badgeEl  = document.getElementById('confirm-gesture-badge');
+    const fillEl   = document.getElementById('confirm-hold-fill');
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+      .then(stream => {
+        videoEl.srcObject = stream;
+        videoEl.onloadedmetadata = () => {
+
+          confirmHandsDetector = new Hands({
+            locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+          });
+          confirmHandsDetector.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.5
+          });
+
+          confirmHandsDetector.onResults(results => {
+            // 손 스켈레톤 그리기
+            drawHandOverlay(canvasEl, videoEl, results);
+
+            if (confirmGestureLocked) return;
+
+            let gesture = null;
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+              gesture = detectConfirmGesture(results.multiHandLandmarks[0]);
+            }
+
+            // 제스처가 바뀌면 타이머 리셋
+            if (gesture !== confirmGestureState) {
+              confirmGestureState = gesture;
+              confirmGestureStart = gesture ? Date.now() : null;
+              fillEl.style.width  = '0%';
+              fillEl.className    = 'confirm-hold-fill';
+            }
+
+            if (gesture) {
+              badgeEl.textContent = gesture === 'ok' ? '👌 OK — 맞아요' : '✌️ X — 아니에요';
+              badgeEl.className   = `confirm-gesture-badge visible ${gesture}`;
+
+              const elapsed = Date.now() - confirmGestureStart;
+              const pct     = Math.min(elapsed / CONFIRM_HOLD_MS * 100, 100);
+              fillEl.style.width = pct + '%';
+              fillEl.className   = `confirm-hold-fill ${gesture}`;
+
+              if (elapsed >= CONFIRM_HOLD_MS) {
+                confirmGestureLocked = true;
+                const chosen = gesture;
+                stopConfirmGesture();
+                if (chosen === 'ok') {
+                  goPage('dashboard');
+                } else {
+                  goPage('recognition');
+                  initRecognition();
+                }
+              }
+            } else {
+              badgeEl.classList.remove('visible');
+              fillEl.style.width = '0%';
+              fillEl.className   = 'confirm-hold-fill';
+            }
+          });
+
+          confirmCameraUtil = new Camera(videoEl, {
+            onFrame: async () => {
+              if (confirmHandsDetector) await confirmHandsDetector.send({ image: videoEl });
+            },
+            width: 640, height: 480
+          });
+          confirmCameraUtil.start();
+        };
+      }).catch(e => console.warn('confirm gesture camera error:', e));
+  }
+
+  function stopConfirmGesture() {
+    if (confirmCameraUtil)    { confirmCameraUtil.stop();     confirmCameraUtil = null; }
+    if (confirmHandsDetector) { confirmHandsDetector.close(); confirmHandsDetector = null; }
+    stopCamera('video-confirm');
+    confirmGestureState  = null;
+    confirmGestureStart  = null;
+    const badgeEl = document.getElementById('confirm-gesture-badge');
+    const fillEl  = document.getElementById('confirm-hold-fill');
+    if (badgeEl) badgeEl.classList.remove('visible');
+    if (fillEl)  { fillEl.style.width = '0%'; fillEl.className = 'confirm-hold-fill'; }
+  }
+
+  /* ══════════════════════════════════════════
      DASHBOARD PIE CHART
   ══════════════════════════════════════════ */
   function drawPie() {
@@ -751,7 +888,7 @@
   }
 
   /* ══════════════════════════════════════════
-     HAND / FINGER DETECTION
+     HAND / FINGER DETECTION  (배식 페이지)
   ══════════════════════════════════════════ */
   function initHandDetector(videoEl, canvasEl) {
     if (!window.Hands || !window.Camera) return;
@@ -1015,20 +1152,13 @@
   }
 
   async function serveNext() {
-
     if (serveStep < FOODS.length - 1) {
-
       serveStep++;
       renderServeStep();
-
     } else {
-
-      // Firebase 저장
       await saveServeData();
-
       stopHandDetector();
       stopCamera('video-serve');
-
       startProgress();
     }
   }
@@ -1076,6 +1206,7 @@
     stopHandDetector();
     stopCamera('video-serve');
     stopRecogCamera();
+    stopConfirmGesture();
     if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
     counts = Array(6).fill(0);
     serveStep = 0;
