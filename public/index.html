@@ -291,9 +291,6 @@
           <span class="menu-chip">🍚 밥</span>
           <span class="menu-chip">🍲 국</span>
           <span class="menu-chip">🥬 김치</span>
-          <span class="menu-chip">🥘 반찬</span>
-          <span class="menu-chip">🥛 우유</span>
-          <span class="menu-chip">🍮 디저트</span>
         </div>
       </div>
       <div class="card mb16">
@@ -307,7 +304,9 @@
       </div>
       <div class="card mb16">
         <div class="card-title">💬 오늘의 코멘트</div>
-        <div class="comment-box">오늘은 국을 조금 더 먹어보는 건 어때요? 국에는 영양소가 가득해요! 🌿</div>
+        <div class="comment-box" id="ai-comment-box">
+          AI코맨트 생성중
+        </div>
       </div>
       <button class="btn btn-primary btn-full" onclick="startServe()">배식 시작하기 →</button>
     </div>
@@ -886,6 +885,71 @@
     ctx.fillStyle = '#FFFFFF';
     ctx.fill();
   }
+  /* ══════════════════════════════════════════
+   GEMINI AI COMMENT
+══════════════════════════════════════════ */
+async function generateMealComment() {
+  const commentEl = document.getElementById('ai-comment-box');
+  if (!commentEl) return;
+
+  try {
+    commentEl.textContent = 'AI가 오늘의 코멘트를 생성 중입니다...';
+
+    const prompt = `
+학생 급식 데이터를 보고 짧고 친근한 한국어 코멘트를 생성하세요.
+
+조건:
+- 1~2문장
+- 너무 길지 않게
+- 초등/중학생 친화적
+- 이모지 1개 포함
+- 건강 조언 느낌
+- 존댓말 사용
+
+학생 배식 데이터:
+밥: ${counts[0] || 0}회
+국: ${counts[1] || 0}회
+김치: ${counts[2] || 0}회
+`;
+
+    const res = await fetch(GEMINI_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: prompt }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.8,
+          topP: 1
+        }
+      })
+    });
+
+    const data = await res.json();
+
+    const text =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+    if (text) {
+      commentEl.textContent = text;
+    } else {
+      commentEl.textContent =
+        '오늘도 건강한 식사를 해봐요! 😊';
+    }
+
+  } catch (err) {
+    console.error('AI 코멘트 생성 실패:', err);
+    commentEl.textContent =
+      '오늘도 맛있고 건강하게 먹어요! 🍱';
+  }
+}
 
   /* ══════════════════════════════════════════
      HAND / FINGER DETECTION  (배식 페이지)
@@ -1222,8 +1286,11 @@
     await initRecognition();
 
     const obs = new MutationObserver(() => {
-      if (document.getElementById('page-dashboard').classList.contains('active')) drawPie();
-    });
+  if (document.getElementById('page-dashboard').classList.contains('active')) {
+    drawPie();
+    generateMealComment();
+  }
+});
     obs.observe(document.getElementById('page-dashboard'), { attributes: true, attributeFilter: ['class'] });
   })();
 </script>
