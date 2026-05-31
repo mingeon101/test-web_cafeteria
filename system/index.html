@@ -217,24 +217,48 @@ db.ref('robots').on('value', snap => {
 
   container.innerHTML = ROBOT_KEYS.map(id => {
     const r = (robots && robots[id]) || { name: `배식 로봇 ${id.slice(-1)}`, state: 'idle', battery: 0 };
+    const battery = r.battery || 0;
     const isError = r.state === 'error';
+    const needCharge = battery < 30;
+    const needCharge = battery < 30;
+    const criticalBattery = battery < 15;
     
     return `
-      <div class="robot-card ${isError ? 'has-error' : ''}">
+      <div class="robot-card ${isError || needCharge ? 'has-error' : ''}">
         <div class="robot-header">
           <div class="robot-info">
             <div class="robot-name">${r.name}</div>
             <div class="robot-id">${id}</div>
           </div>
-          <div class="error-badge">⚠️ ERROR</div>
+          <div class="error-badge">
+            ${isError ? '⚠️ ERROR' : '🔋 충전 필요'}
+          </div>
         </div>
+
         <div class="robot-stat">
           <span>시스템 상태</span>
-          <span class="val" style="color:${isError ? 'var(--danger)' : 'var(--success)'}">${isError ? '점검 필요' : '정상 작동'}</span>
+          <span class="val" style="color:${
+            isError ? 'var(--danger)' :
+            needCharge ? '#FF9800' :
+            'var(--success)'
+          }">
+            ${
+              isError ? '점검 필요' :
+              needCharge ? '충전 필요' :
+              '정상 작동'
+            }
+          </span>
         </div>
+
         <div class="robot-stat">
           <span>배터리 잔량</span>
-          <span class="val">${r.battery || 0}%</span>
+          <span class="val" style="color:${
+            criticalBattery ? 'var(--danger)' :
+            needCharge ? '#FF9800' :
+            'inherit'
+          }">
+            ${battery}%
+          </span>
         </div>
       </div>
     `;
