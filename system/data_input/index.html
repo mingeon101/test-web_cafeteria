@@ -125,7 +125,7 @@
                 "김치": Number(document.getElementById('food-kimchi').value)
             }
         };
-        update(ref(db, `students/${currentStudentUid}/serve`), serveData)
+        push(ref(db, `students/${currentStudentUid}/serve`), serveData)
             .then(() => alert("배식 정보 업데이트 완료!"));
     };
 
