@@ -220,7 +220,6 @@ db.ref('robots').on('value', snap => {
     const battery = r.battery || 0;
     const isError = r.state === 'error';
     const needCharge = battery < 30;
-    const needCharge = battery < 30;
     const criticalBattery = battery < 15;
     
     return `
