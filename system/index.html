@@ -155,7 +155,7 @@ const db = firebase.database();
 
 const TOTAL_STUDENTS = 320; // 전체 정원
 const FOOD_CAPACITY = 320; // 음식별 최대 인분량 기준
-const FOOD_NAMES = ["밥", "국", "김치", "반찬", "우유", "디저트"];
+const FOOD_NAMES = ["밥", "국", "김치"];
 
 /* ══════════════════════════════════════
    데이터 처리 및 UI 업데이트
@@ -172,7 +172,7 @@ db.ref('students').on('value', snap => {
   const servedCount = studentList.filter(s => s.serve).length;
   
   // 품목별 총 배식량 집계
-  const totalEaten = { "밥": 0, "국": 0, "김치": 0, "반찬": 0, "우유": 0, "디저트": 0 };
+  const totalEaten = { "밥": 0, "국": 0, "김치": 0};
   studentList.forEach(s => {
     if (s.serve && s.serve.foods) {
       Object.entries(s.serve.foods).forEach(([name, amount]) => {
