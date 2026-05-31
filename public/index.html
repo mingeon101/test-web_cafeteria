@@ -905,6 +905,7 @@ async function generateMealComment() {
 - 이모지 1개 포함
 - 건강 조언 느낌
 - 존댓말 사용
+- 오늘의 데이터를 바탕으로 설정하지 마세요
 
 학생 배식 데이터:
 밥: ${counts[0] || 0}회
@@ -1239,7 +1240,7 @@ async function generateMealComment() {
       progressStep++;
       document.getElementById('progress-fill').style.width = (progressStep / 6 * 100) + '%';
       renderProgressList();
-      if (progressStep >= 6) {
+      if (progressStep >= 3) {
         clearInterval(progressTimer);
         await db.ref('stats/queueCount').transaction(cur => (cur || 0) > 0 ? cur - 1 : 0);
         setTimeout(() => goPage('complete'), 600);
