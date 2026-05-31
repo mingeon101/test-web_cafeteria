@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>스마트 배식 관리자</title>
+    <title>배식 관리자</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; padding: 20px; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 1000px; margin: auto; }
@@ -73,7 +73,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, set, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    import { getDatabase, ref, set, update, get, push, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC3SvV8-bTyQClyZlGWybhR3z5YvLGXYL0",
@@ -149,7 +149,7 @@
         const updates = {
             state: document.getElementById('robot-state').value,
             battery: Number(document.getElementById('robot-battery').value),
-            lastUpdate: Date.now() // 자동으로 현재 시간 저장
+            lastUpdate: Date.now()
         };
         update(ref(db, `robots/${rid}`), updates)
             .then(() => alert("로봇 상태 및 시간 업데이트 완료!"));
