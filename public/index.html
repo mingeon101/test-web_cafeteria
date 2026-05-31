@@ -510,7 +510,7 @@
         total: (counts[0] || 0) + (counts[1] || 0) + (counts[2] || 0),
         updatedAt: Date.now()
       };
-      await db.ref(`students/${user.uid}/serve`).set(serveData);
+      await db.ref(`students/${user.uid}/serve`).push(serveData);
       console.log("배식 데이터 저장 완료");
     } catch (err) {
       console.error("배식 데이터 저장 실패:", err);
