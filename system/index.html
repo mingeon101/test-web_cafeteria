@@ -186,18 +186,25 @@ db.ref('students').on('value', snap => {
   studentList.forEach(s => {
     if (!s.serve) return;
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     Object.values(s.serve).forEach(serveData => {
 
       if (!serveData.foods) return;
 
-      Object.entries(serveData.foods).forEach(([foodName, amount]) => {
+      const recordTime = serveData.timestamp || 0;
 
+      if (recordTime < today.getTime()) {
+        return; // 오늘 이전 기록 무시
+      }
+
+      Object.entries(serveData.foods).forEach(([foodName, amount]) => {
         if (totalEaten.hasOwnProperty(foodName)) {
           totalEaten[foodName] += Number(amount) || 0;
         }
 
       });
-
     });
   });
 
