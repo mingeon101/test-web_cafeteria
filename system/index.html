@@ -184,11 +184,21 @@ db.ref('students').on('value', snap => {
   // 품목별 총 배식량 집계
   const totalEaten = { "밥": 0, "국": 0, "김치": 0};
   studentList.forEach(s => {
-    if (s.serve && s.serve.foods) {
-      Object.entries(s.serve.foods).forEach(([name, amount]) => {
-        if (totalEaten.hasOwnProperty(name)) totalEaten[name] += (amount || 0);
+    if (!s.serve) return;
+
+    Object.values(s.serve).forEach(serveData => {
+
+      if (!serveData.foods) return;
+
+      Object.entries(serveData.foods).forEach(([foodName, amount]) => {
+
+        if (totalEaten.hasOwnProperty(foodName)) {
+          totalEaten[foodName] += Number(amount) || 0;
+        }
+
       });
-    }
+
+    });
   });
 
   // KPI 및 잔여 인원 업데이트
