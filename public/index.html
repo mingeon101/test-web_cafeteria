@@ -885,18 +885,50 @@
     ctx.fillStyle = '#FFFFFF';
     ctx.fill();
   }
+
   /* ══════════════════════════════════════════
-   GEMINI AI COMMENT
-══════════════════════════════════════════ */
-async function generateMealComment() {
-  const commentEl = document.getElementById('ai-comment-box');
-  if (!commentEl) return;
+     GEMINI AI COMMENT
+     — Firebase의 과거 serve 기록(오늘 제외)을 읽어 프롬프트에 포함
+  ══════════════════════════════════════════ */
+  async function generateMealComment() {
+    const commentEl = document.getElementById('ai-comment-box');
+    if (!commentEl) return;
 
-  try {
-    commentEl.textContent = 'AI가 오늘의 코멘트를 생성 중입니다...';
+    try {
+      commentEl.textContent = 'AI가 오늘의 코멘트를 생성 중입니다...';
 
-    const prompt = `
-학생 급식 데이터를 보고 짧고 친근한 한국어 코멘트를 생성하세요.
+      // ── 과거 배식 기록 로드 (오늘 날짜 제외) ──
+      let historyText = '과거 배식 기록 없음';
+      if (user.uid) {
+        try {
+          const snapshot = await db.ref(`students/${user.uid}/serve`).once('value');
+          if (snapshot.exists()) {
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            const todayTs = todayStart.getTime();
+
+            const records = [];
+            snapshot.forEach(child => {
+              const d = child.val();
+              // updatedAt 이 오늘 자정 이전인 것만 포함
+              if (d.updatedAt && d.updatedAt < todayTs) {
+                const date = new Date(d.updatedAt).toLocaleDateString('ko-KR');
+                records.push(`${date} — 밥 ${d.rice ?? d.foods?.['밥'] ?? 0}회, 국 ${d.soup ?? d.foods?.['국'] ?? 0}회, 김치 ${d.kimchi ?? d.foods?.['김치'] ?? 0}회`);
+              }
+            });
+
+            if (records.length > 0) {
+              // 최근 7건만 사용
+              historyText = records.slice(-7).join('\n');
+            }
+          }
+        } catch (e) {
+          console.warn('과거 배식 기록 로드 실패:', e);
+        }
+      }
+
+      const prompt = `
+학생의 과거 급식 배식 기록을 바탕으로 짧고 친근한 한국어 코멘트를 생성하세요.
 
 조건:
 - 1~2문장
@@ -905,52 +937,35 @@ async function generateMealComment() {
 - 이모지 1개 포함
 - 건강 조언 느낌
 - 존댓말 사용
-- 오늘의 데이터를 바탕으로 설정하지 마세요
+- 오늘 데이터는 포함하지 말고, 아래 과거 기록만 참고하세요
 
-학생 배식 데이터:
-밥: ${counts[0] || 0}회
-국: ${counts[1] || 0}회
-김치: ${counts[2] || 0}회
+학생 과거 배식 기록 (오늘 제외):
+${historyText}
 `;
 
-    const res = await fetch(GEMINI_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: prompt }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.8,
-          topP: 1
-        }
-      })
-    });
+      const res = await fetch(GEMINI_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.8, topP: 1 }
+        })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
-    const text =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (text) {
+        commentEl.textContent = text;
+      } else {
+        commentEl.textContent = '오늘도 건강한 식사를 해봐요! 😊';
+      }
 
-    if (text) {
-      commentEl.textContent = text;
-    } else {
-      commentEl.textContent =
-        '오늘도 건강한 식사를 해봐요! 😊';
+    } catch (err) {
+      console.error('AI 코멘트 생성 실패:', err);
+      commentEl.textContent = '오늘도 맛있고 건강하게 먹어요! 🍱';
     }
-
-  } catch (err) {
-    console.error('AI 코멘트 생성 실패:', err);
-    commentEl.textContent =
-      '오늘도 맛있고 건강하게 먹어요! 🍱';
   }
-}
 
   /* ══════════════════════════════════════════
      HAND / FINGER DETECTION  (배식 페이지)
@@ -1287,11 +1302,11 @@ async function generateMealComment() {
     await initRecognition();
 
     const obs = new MutationObserver(() => {
-  if (document.getElementById('page-dashboard').classList.contains('active')) {
-    drawPie();
-    generateMealComment();
-  }
-});
+      if (document.getElementById('page-dashboard').classList.contains('active')) {
+        drawPie();
+        generateMealComment();
+      }
+    });
     obs.observe(document.getElementById('page-dashboard'), { attributes: true, attributeFilter: ['class'] });
   })();
 </script>
