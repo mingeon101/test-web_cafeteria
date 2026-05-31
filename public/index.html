@@ -1238,7 +1238,7 @@ async function generateMealComment() {
     renderProgressList();
     progressTimer = setInterval(async() => {
       progressStep++;
-      document.getElementById('progress-fill').style.width = (progressStep / 6 * 100) + '%';
+      document.getElementById('progress-fill').style.width = (progressStep / 3 * 100) + '%';
       renderProgressList();
       if (progressStep >= 3) {
         clearInterval(progressTimer);
