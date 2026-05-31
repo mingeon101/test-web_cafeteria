@@ -212,6 +212,7 @@ db.ref('students').on('value', snap => {
   circle.style.strokeDashoffset = offset;
 
   // 잔반량 UI 업데이트
+  const foodContainer = document.getElementById('food-container');
   foodContainer.innerHTML = FOOD_NAMES.map(name => {
   const eaten = totalEaten[name] || 0;
   const remain = Math.max(0, FOOD_CAPACITY - eaten);
