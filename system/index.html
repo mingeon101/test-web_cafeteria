@@ -212,27 +212,37 @@ db.ref('students').on('value', snap => {
   circle.style.strokeDashoffset = offset;
 
   // 잔반량 UI 업데이트
-  const foodContainer = document.getElementById('food-container');
   foodContainer.innerHTML = FOOD_NAMES.map(name => {
-    const eaten = totalEaten[name] || 0;
-    const remain = Math.max(0, FOOD_CAPACITY - eaten);
-    const pct = Math.round((remain / FOOD_CAPACITY) * 100);
-    const color = pct < 20 ? 'var(--danger)' : pct < 50 ? '#FF9800' : 'var(--success)';
-    
-    return `
-      <div class="food-item" style="${dangerStyle}">
-        <div class="food-name">${name}</div>
-        <div class="progress-bg">
-          <div class="progress-fill" style="width:${pct}%; background:${color};"></div>
-        </div>
-        <div class="food-val" style="color:${color};font-weight:900;">
-          ${pct}%
-          ${pct <= 15 ? '⚠️' : ''}
+  const eaten = totalEaten[name] || 0;
+  const remain = Math.max(0, FOOD_CAPACITY - eaten);
+  const pct = Math.round((remain / FOOD_CAPACITY) * 100);
+
+  const color =
+    pct <= 15 ? 'var(--danger)' :
+    pct < 50 ? '#FF9800' :
+    'var(--success)';
+
+  const dangerStyle = pct <= 15
+    ? 'background:#FFEBEE;padding:10px;border-radius:12px;'
+    : '';
+
+  return `
+    <div class="food-item" style="${dangerStyle}">
+      <div class="food-name">${name}</div>
+
+      <div class="progress-bg">
+        <div class="progress-fill"
+             style="width:${pct}%; background:${color};">
         </div>
       </div>
-    `;
-  }).join('');
-});
+
+      <div class="food-val"
+           style="color:${color};font-weight:900;">
+        ${pct}% ${pct <= 15 ? '⚠️' : ''}
+      </div>
+    </div>
+  `;
+}).join('');
 
 // 2. 로봇 데이터 감시 (A, B, C)
 db.ref('robots').on('value', snap => {
