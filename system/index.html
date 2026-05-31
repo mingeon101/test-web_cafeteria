@@ -220,10 +220,15 @@ db.ref('students').on('value', snap => {
     const color = pct < 20 ? 'var(--danger)' : pct < 50 ? '#FF9800' : 'var(--success)';
     
     return `
-      <div class="food-item">
+      <div class="food-item" style="${dangerStyle}">
         <div class="food-name">${name}</div>
-        <div class="progress-bg"><div class="progress-fill" style="width:${pct}%; background:${color};"></div></div>
-        <div class="food-val" style="color:${color}">${pct}%</div>
+        <div class="progress-bg">
+          <div class="progress-fill" style="width:${pct}%; background:${color};"></div>
+        </div>
+        <div class="food-val" style="color:${color};font-weight:900;">
+          ${pct}%
+          ${pct <= 15 ? '⚠️' : ''}
+        </div>
       </div>
     `;
   }).join('');
