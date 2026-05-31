@@ -153,8 +153,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const TOTAL_STUDENTS = 320; // 전체 정원
-const FOOD_CAPACITY = 320; // 음식별 최대 인분량 기준
+const TOTAL_STUDENTS = 5; // 전체 정원
+const FOOD_CAPACITY = 15; // 음식별 최대 인분량 기준
 const FOOD_NAMES = ["밥", "국", "김치"];
 
 /* ══════════════════════════════════════
@@ -226,9 +226,26 @@ db.ref('robots').on('value', snap => {
       <div class="robot-card ${isError || needCharge ? 'has-error' : ''}">
         <div class="robot-header">
           <div class="robot-info">
-            <div class="robot-name">${r.name}</div>
-            <div class="robot-id">${id}</div>
-          </div>
+  <div class="robot-name">
+    ${r.name}
+    <span style="
+      font-size:12px;
+      background:var(--primary);
+      color:white;
+      padding:3px 8px;
+      border-radius:10px;
+      margin-left:8px;
+      vertical-align:middle;
+    ">
+      ${
+        id === 'robot-A' ? '🍚 밥' :
+        id === 'robot-B' ? '🍲 국' :
+        '🥬 김치'
+      }
+    </span>
+  </div>
+  <div class="robot-id">${id}</div>
+</div>
           <div class="error-badge">
             ${isError ? '⚠️ ERROR' : '🔋 충전 필요'}
           </div>
