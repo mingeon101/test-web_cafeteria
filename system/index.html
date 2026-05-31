@@ -168,8 +168,18 @@ db.ref('students').on('value', snap => {
 
   const studentList = Object.values(students);
   
-  // 배식 완료 인원 (serve 노드가 존재하는 경우)
+  // 배식 완료 인원
   const servedCount = studentList.filter(s => s.serve).length;
+
+  // 대기 인원 = 전체 학생 - 배식 완료 인원
+  const queueCount = Math.max(0, TOTAL_STUDENTS - servedCount);
+
+  // KPI 업데이트
+  document.getElementById('stat-served').innerHTML =
+    `${servedCount}<span class="kpi-unit">명</span>`;
+
+  document.getElementById('stat-queue').innerHTML =
+    `${queueCount}<span class="kpi-unit">명</span>`;
   
   // 품목별 총 배식량 집계
   const totalEaten = { "밥": 0, "국": 0, "김치": 0};
@@ -282,9 +292,7 @@ db.ref('robots').on('value', snap => {
 });
 
 // 3. 실시간 대기열 정보
-db.ref('stats/queueCount').on('value', snap => {
-  document.getElementById('stat-queue').innerHTML = `${snap.val() || 0}<span class="kpi-unit">명</span>`;
-});
+
 
 // 시계 업데이트
 setInterval(() => {
