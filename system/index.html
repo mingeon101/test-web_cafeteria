@@ -193,7 +193,7 @@ db.ref('students').on('value', snap => {
 
   // KPI 및 잔여 인원 업데이트
   document.getElementById('stat-served').innerHTML = `${servedCount}<span class="kpi-unit">명</span>`;
-  const remainPeople = Math.max(0, TOTAL_STUDENTS - servedCount);
+  const remainPeople = queueCount;
   document.getElementById('cap-remain').textContent = remainPeople;
 
   // 원형 게이지 (SVG Circumference = 2 * PI * 80 ≈ 502.6)
