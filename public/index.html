@@ -849,43 +849,69 @@
   /* ══════════════════════════════════════════
      DASHBOARD PIE CHART
   ══════════════════════════════════════════ */
-  function drawPie() {
+  async function drawPie() {
     const canvas = document.getElementById('pie-canvas');
     const ctx = canvas.getContext('2d');
-    const data   = [4, 2, 3];
+    let rice = 0;
+    let soup = 0;
+    let kimchi = 0;
+    try {
+      if (user.uid) {
+        const snapshot = await db.ref(`students/${user.uid}/serve`).once('value');
+        if (snapshot.exists()) {
+          snapshot.forEach(child => {
+            const d = child.val();
+            rice += Number(d.rice ?? d.foods?.['밥'] ?? 0);
+            soup += Number(d.soup ?? d.foods?.['국'] ?? 0);
+            kimchi += Number(d.kimchi ?? d.foods?.['김치'] ?? 0);
+          });
+        }
+      }
+    } catch (e) {
+      console.error('원차트 데이터 로드 실패', e);
+    }
+    const data = [rice, soup, kimchi];
+    // 데이터가 하나도 없으면 기본값
+    if (data.reduce((a,b)=>a+b,0) === 0) {
+      data[0] = 1;
+      data[1] = 1;
+      data[2] = 1;
+    }
     const colors = ['#FF6B35', '#F7C59F', '#1A1A2E'];
-    const total  = data.reduce((a,b) => a+b, 0);
-    const cx = 110, cy = 110, r = 88, ir = 44;
-
-    ctx.clearRect(0, 0, 220, 220);
-    let start = -Math.PI / 2;
-    data.forEach((val, i) => {
-      const slice = (val / total) * 2 * Math.PI;
+    const total = data.reduce((a,b)=>a+b,0);
+    const cx = 110;
+    const cy = 110;
+    const r = 88;
+    const ir = 44;
+    ctx.clearRect(0,0,220,220);
+    let start = -Math.PI/2;
+    data.forEach((val,i)=>{
+      const slice = (val/total) * Math.PI * 2;
       ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r, start, start + slice);
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,start,start+slice);
       ctx.closePath();
       ctx.fillStyle = colors[i];
       ctx.fill();
-
-      const mid = start + slice / 2;
-      const lr  = ir + (r - ir) * 0.6;
-      const lx  = cx + lr * Math.cos(mid);
-      const ly  = cy + lr * Math.sin(mid);
-      ctx.fillStyle = i === 1 ? '#1A1A2E' : '#fff';
-      ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+      const mid = start + slice/2;
+      const lx = cx + Math.cos(mid) * 65;
+      const ly = cy + Math.sin(mid) * 65;
+      ctx.fillStyle = i === 1 ? '#1A1A2E' : '#FFFFFF';
+      ctx.font = 'bold 13px Space Grotesk';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(Math.round((val/total)*100) + '%', lx, ly);
+      ctx.fillText(
+        Math.round((val/total)*100) + '%',
+        lx,
+        ly
+      );
       start += slice;
     });
-
     ctx.beginPath();
-    ctx.arc(cx, cy, ir, 0, 2 * Math.PI);
+    ctx.arc(cx,cy,ir,0,Math.PI*2);
     ctx.fillStyle = '#FFFFFF';
     ctx.fill();
   }
-
   /* ══════════════════════════════════════════
      GEMINI AI COMMENT
      — Firebase의 과거 serve 기록(오늘 제외)을 읽어 프롬프트에 포함
@@ -1301,10 +1327,10 @@ ${historyText}
     await initGeminiKey();
     await initRecognition();
 
-    const obs = new MutationObserver(() => {
+    const obs = new MutationObserver(async () => {
       if (document.getElementById('page-dashboard').classList.contains('active')) {
-        drawPie();
-        generateMealComment();
+        await drawPie();
+        await generateMealComment();
       }
     });
     obs.observe(document.getElementById('page-dashboard'), { attributes: true, attributeFilter: ['class'] });
