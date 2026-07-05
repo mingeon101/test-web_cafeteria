@@ -287,7 +287,7 @@
     <div class="page fade-up" id="page-dashboard">
       <div class="card mb16">
         <div class="card-title">🍽️ 오늘의 메뉴</div>
-        <div class="menu-chips">
+        <div class="menu-chips" id="menu-chips">
           <span class="menu-chip">🍚 밥</span>
           <span class="menu-chip">🍲 국</span>
           <span class="menu-chip">🥬 김치</span>
@@ -393,6 +393,8 @@
   ══════════════════════════════════════════ */
   const FOODS  = ["밥","국","김치"];
   const EMOJIS = ["🍚","🍲","🥬"];
+  // 관리자 대시보드에서 설정한 "오늘의 메뉴" 표시명 (기본값 = 카테고리명 그대로)
+  let menuLabels  = { "밥": "밥", "국": "국", "김치": "김치" };
   let user        = { grade:1, classNum:2, number:10, name:"홍길동" };
   let counts      = Array(6).fill(0);
   let serveStep   = 0;
@@ -429,6 +431,40 @@
     }
     GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
   }
+
+  /* ══════════════════════════════════════════
+     MENU SYNC — 관리자 대시보드에서 설정한 "오늘의 메뉴" 반영
+     (관리자 대시보드가 db.ref('menu')에 {밥, 국, 김치} 형태로 저장함)
+  ══════════════════════════════════════════ */
+  function renderMenuChips() {
+    const el = document.getElementById('menu-chips');
+    if (!el) return;
+    el.innerHTML = FOODS.map((food, i) =>
+      `<span class="menu-chip">${EMOJIS[i]} ${menuLabels[food] || food}</span>`
+    ).join('');
+  }
+
+  db.ref('menu').on('value', snap => {
+    const m = snap.val() || {};
+    menuLabels['밥']   = m['밥']   || '밥';
+    menuLabels['국']   = m['국']   || '국';
+    menuLabels['김치'] = m['김치'] || '김치';
+
+    renderMenuChips();
+
+    // 배식 페이지가 열려 있으면 현재 단계의 음식 이름도 즉시 갱신
+    const servePage = document.getElementById('page-serve');
+    if (servePage && servePage.classList.contains('active')) {
+      const nameEl = document.getElementById('serve-food-name');
+      if (nameEl) nameEl.textContent = EMOJIS[serveStep] + ' ' + (menuLabels[FOODS[serveStep]] || FOODS[serveStep]);
+    }
+
+    // 진행(배식중) 페이지가 열려 있으면 목록의 음식 이름도 즉시 갱신
+    const progressPage = document.getElementById('page-progress');
+    if (progressPage && progressPage.classList.contains('active')) {
+      renderProgressList();
+    }
+  });
 
   /* ══════════════════════════════════════════
      PAGE ROUTING
@@ -1207,7 +1243,7 @@ ${historyText}
       return `<div class="food-step ${cls}">${content}</div>`;
     }).join('');
 
-    document.getElementById('serve-food-name').textContent = EMOJIS[serveStep] + ' ' + FOODS[serveStep];
+    document.getElementById('serve-food-name').textContent = EMOJIS[serveStep] + ' ' + (menuLabels[FOODS[serveStep]] || FOODS[serveStep]);
 
     customMode = false;
     document.getElementById('serve-normal').style.display = '';
@@ -1300,7 +1336,7 @@ ${historyText}
       return `
         <div class="summary-item" style="opacity:${opacity}">
           <div class="summary-emoji">${EMOJIS[i]}</div>
-          <div class="summary-name">${food}</div>
+          <div class="summary-name">${menuLabels[food] || food}</div>
           ${right}
         </div>`;
     }).join('');
