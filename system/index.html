@@ -34,7 +34,31 @@
     .header-time { font-family: 'Space Grotesk', sans-serif; opacity: 0.6; font-size: 14px; }
 
     .content { padding: 25px; display: flex; flex-direction: column; gap: 30px; }
-    .section-title { font-size: 12px; font-weight: 900; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+    .section-title { font-size: 12px; font-weight: 900; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+    .section-title-left { display: flex; align-items: center; gap: 8px; }
+
+    /* MENU SET BUTTON */
+    .menu-edit-btn {
+      background: var(--primary); color: white; border: none; padding: 8px 16px;
+      border-radius: 12px; font-size: 12px; font-weight: 900; letter-spacing: 0.5px;
+      cursor: pointer; font-family: 'Noto Sans KR', sans-serif; text-transform: none;
+      display: flex; align-items: center; gap: 6px; transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    }
+    .menu-edit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,107,53,0.4); }
+    .menu-edit-btn:active { transform: translateY(0); }
+
+    /* TODAY'S MENU CARD */
+    .menu-today-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 850px) { .menu-today-grid { grid-template-columns: 1fr; } }
+    .menu-today-item {
+      display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 16px;
+      background: #FAF8F5; border: 1px solid #EEE7DE;
+    }
+    .menu-today-icon { font-size: 26px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex-shrink: 0; }
+    .menu-today-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .menu-today-robot { font-size: 11px; color: var(--muted); font-weight: 700; font-family: 'Space Grotesk'; }
+    .menu-today-name { font-size: 16px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* KPI CARDS */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
@@ -56,6 +80,12 @@
     .robot-name { font-size: 18px; font-weight: 700; }
     .robot-id { font-size: 11px; color: var(--muted); font-family: 'Space Grotesk'; }
 
+    .menu-badge {
+      font-size: 12px; background: var(--primary); color: white; padding: 3px 8px;
+      border-radius: 10px; margin-left: 8px; vertical-align: middle; display: inline-block;
+      max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
     .error-badge { 
       background: var(--danger); color: white; padding: 5px 12px; border-radius: 12px;
       font-size: 12px; font-weight: 900; display: none; align-items: center; gap: 5px;
@@ -75,7 +105,7 @@
     .card { background: var(--card); padding: 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
     
     .food-item { display: flex; align-items: center; gap: 20px; margin-bottom: 18px; }
-    .food-name { width: 60px; font-size: 14px; font-weight: 700; }
+    .food-name { width: 84px; flex-shrink: 0; font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .progress-bg { flex: 1; height: 12px; background: #E9E4DE; border-radius: 10px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
     .food-val { width: 50px; text-align: right; font-size: 14px; font-weight: 700; font-family: 'Space Grotesk'; }
@@ -85,6 +115,46 @@
     .cap-text { position: absolute; text-align: center; }
     .cap-num { font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 700; color: var(--primary); line-height: 1; }
     .cap-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 5px; }
+
+    /* MENU SET MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(26,26,46,0.55);
+      z-index: 300; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: var(--card); border-radius: 24px; padding: 30px; width: 100%; max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal-title { font-size: 18px; font-weight: 900; margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label {
+      display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700;
+      color: var(--accent); margin-bottom: 8px;
+    }
+    .modal-field input {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 2px solid #EEE7DE;
+      font-family: 'Noto Sans KR', sans-serif; font-size: 14px; outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .modal-field input:focus { border-color: var(--primary); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .modal-actions button {
+      flex: 1; padding: 13px; border-radius: 12px; border: none; font-weight: 900;
+      font-size: 14px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+    }
+    .btn-secondary { background: #F0EDE8; color: var(--accent); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #E85A24; }
+    .modal-saved-toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--accent); color: white; padding: 12px 22px; border-radius: 14px;
+      font-size: 13px; font-weight: 700; z-index: 400; opacity: 0; pointer-events: none;
+      transition: all 0.25s ease;
+    }
+    .modal-saved-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
@@ -96,6 +166,16 @@
   </div>
 
   <div class="content">
+    <section>
+      <div class="section-title">
+        <div class="section-title-left"><span>📋</span> 오늘의 메뉴</div>
+        <button class="menu-edit-btn" id="btn-open-menu-modal">✏️ 메뉴 설정</button>
+      </div>
+      <div class="card">
+        <div class="menu-today-grid" id="menu-today-container"></div>
+      </div>
+    </section>
+
     <section>
       <div class="section-title"><span>📊</span> 오늘의 배식 현황</div>
       <div class="kpi-grid">
@@ -140,6 +220,33 @@
   </div>
 </div>
 
+<!-- 메뉴 설정 모달 -->
+<div class="modal-overlay" id="menu-modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title">오늘의 메뉴 설정</div>
+    <div class="modal-sub">로봇 A・B・C가 배식할 품목을 입력하세요.</div>
+
+    <div class="modal-field">
+      <label>🍚 로봇 A — 밥</label>
+      <input type="text" id="menu-input-밥" placeholder="예: 잡곡밥" maxlength="20" />
+    </div>
+    <div class="modal-field">
+      <label>🍲 로봇 B — 국</label>
+      <input type="text" id="menu-input-국" placeholder="예: 된장국" maxlength="20" />
+    </div>
+    <div class="modal-field">
+      <label>🥬 로봇 C — 김치</label>
+      <input type="text" id="menu-input-김치" placeholder="예: 배추김치" maxlength="20" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="menu-modal-cancel">취소</button>
+      <button class="btn-primary" id="menu-modal-save">저장</button>
+    </div>
+  </div>
+</div>
+<div class="modal-saved-toast" id="menu-saved-toast">✅ 메뉴가 저장되었습니다</div>
+
 <script>
 /* ══════════════════════════════════════
    FIREBASE 설정 및 초기화
@@ -155,11 +262,145 @@ const db = firebase.database();
 
 const TOTAL_STUDENTS = 5; // 전체 정원
 const FOOD_CAPACITY = 5; // 음식별 최대 인분량 기준
-const FOOD_NAMES = ["밥", "국", "김치"];
+const FOOD_NAMES = ["밥", "국", "김치"]; // 내부 데이터 키 (고정)
+const ROBOT_TO_CATEGORY = { "robot-A": "밥", "robot-B": "국", "robot-C": "김치" };
+const CATEGORY_ICON = { "밥": "🍚", "국": "🍲", "김치": "🥬" };
+
+// 오늘의 메뉴 표시 이름 (기본값 = 카테고리명 그대로)
+let menuLabels = { "밥": "밥", "국": "국", "김치": "김치" };
+
+// 최신 데이터 캐시 (메뉴가 바뀌어도 즉시 다시 그릴 수 있도록 보관)
+let lastTotalEaten = { "밥": 0, "국": 0, "김치": 0 };
+let lastRobots = null;
+
+/* ══════════════════════════════════════
+   렌더링 함수
+══════════════════════════════════════ */
+
+function renderMenuToday() {
+  const container = document.getElementById('menu-today-container');
+  container.innerHTML = FOOD_NAMES.map(cat => `
+    <div class="menu-today-item">
+      <div class="menu-today-icon">${CATEGORY_ICON[cat]}</div>
+      <div class="menu-today-info">
+        <div class="menu-today-robot">${cat === '밥' ? '로봇 A' : cat === '국' ? '로봇 B' : '로봇 C'}</div>
+        <div class="menu-today-name">${menuLabels[cat]}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderFood() {
+  const foodContainer = document.getElementById('food-container');
+  foodContainer.innerHTML = FOOD_NAMES.map(name => {
+    const eaten = lastTotalEaten[name] || 0;
+    const remain = Math.max(0, FOOD_CAPACITY - eaten);
+    const pct = Math.round((remain / FOOD_CAPACITY) * 100);
+
+    const color =
+      pct <= 15 ? 'var(--danger)' :
+      pct < 50 ? '#FF9800' :
+      'var(--success)';
+
+    const dangerStyle = pct <= 15
+      ? 'background:#FFEBEE;padding:10px;border-radius:12px;'
+      : '';
+
+    return `
+      <div class="food-item" style="${dangerStyle}">
+        <div class="food-name" title="${menuLabels[name]}">${menuLabels[name]}</div>
+
+        <div class="progress-bg">
+          <div class="progress-fill"
+               style="width:${pct}%; background:${color};">
+          </div>
+        </div>
+
+        <div class="food-val"
+             style="color:${color};font-weight:900;">
+          ${pct}% ${pct <= 15 ? '⚠️' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderRobots() {
+  const robots = lastRobots;
+  const container = document.getElementById('robot-container');
+  const ROBOT_KEYS = ["robot-A", "robot-B", "robot-C"];
+
+  container.innerHTML = ROBOT_KEYS.map(id => {
+    const r = (robots && robots[id]) || { name: `배식 로봇 ${id.slice(-1)}`, state: 'idle', battery: 0 };
+    const battery = r.battery || 0;
+    const isError = r.state === 'error';
+    const needCharge = battery < 30;
+    const criticalBattery = battery < 15;
+    const category = ROBOT_TO_CATEGORY[id];
+    const dishName = menuLabels[category];
+
+    return `
+      <div class="robot-card ${isError || needCharge ? 'has-error' : ''}">
+        <div class="robot-header">
+          <div class="robot-info">
+  <div class="robot-name">
+    ${r.name}
+    <span class="menu-badge" title="${dishName}">
+      ${CATEGORY_ICON[category]} ${dishName}
+    </span>
+  </div>
+  <div class="robot-id">${id}</div>
+</div>
+          <div class="error-badge">
+            ${isError ? '⚠️ ERROR' : '🔋 충전 필요'}
+          </div>
+        </div>
+
+        <div class="robot-stat">
+          <span>시스템 상태</span>
+          <span class="val" style="color:${
+            isError ? 'var(--danger)' :
+            needCharge ? '#FF9800' :
+            'var(--success)'
+          }">
+            ${
+              isError ? '점검 필요' :
+              needCharge ? '충전 필요' :
+              '정상 작동'
+            }
+          </span>
+        </div>
+
+        <div class="robot-stat">
+          <span>배터리 잔량</span>
+          <span class="val" style="color:${
+            criticalBattery ? 'var(--danger)' :
+            needCharge ? '#FF9800' :
+            'inherit'
+          }">
+            ${battery}%
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
 /* ══════════════════════════════════════
    데이터 처리 및 UI 업데이트
 ══════════════════════════════════════ */
+
+// 0. 오늘의 메뉴 감시 (관리자가 저장한 메뉴명)
+db.ref('menu').on('value', snap => {
+  const m = snap.val() || {};
+  menuLabels['밥'] = m['밥'] || '밥';
+  menuLabels['국'] = m['국'] || '국';
+  menuLabels['김치'] = m['김치'] || '김치';
+
+  renderMenuToday();
+  renderFood();
+  renderRobots();
+});
 
 // 1. 학생 데이터 감시 (배식 인원 및 잔반량 계산)
 db.ref('students').on('value', snap => {
@@ -208,6 +449,8 @@ db.ref('students').on('value', snap => {
     });
   });
 
+  lastTotalEaten = totalEaten;
+
   // KPI 및 잔여 인원 업데이트
   document.getElementById('stat-served').innerHTML = `${servedCount}<span class="kpi-unit">명</span>`;
   const remainPeople = queueCount;
@@ -219,114 +462,67 @@ db.ref('students').on('value', snap => {
   circle.style.strokeDashoffset = offset;
 
   // 잔반량 UI 업데이트
-  const foodContainer = document.getElementById('food-container');
-  foodContainer.innerHTML = FOOD_NAMES.map(name => {
-  const eaten = totalEaten[name] || 0;
-  const remain = Math.max(0, FOOD_CAPACITY - eaten);
-  const pct = Math.round((remain / FOOD_CAPACITY) * 100);
-
-  const color =
-    pct <= 15 ? 'var(--danger)' :
-    pct < 50 ? '#FF9800' :
-    'var(--success)';
-
-  const dangerStyle = pct <= 15
-    ? 'background:#FFEBEE;padding:10px;border-radius:12px;'
-    : '';
-
-  return `
-    <div class="food-item" style="${dangerStyle}">
-      <div class="food-name">${name}</div>
-
-      <div class="progress-bg">
-        <div class="progress-fill"
-             style="width:${pct}%; background:${color};">
-        </div>
-      </div>
-
-      <div class="food-val"
-           style="color:${color};font-weight:900;">
-        ${pct}% ${pct <= 15 ? '⚠️' : ''}
-      </div>
-    </div>
-  `;
-}).join('');
+  renderFood();
 });
 
 // 2. 로봇 데이터 감시 (A, B, C)
 db.ref('robots').on('value', snap => {
-  const robots = snap.val();
-  const container = document.getElementById('robot-container');
-  const ROBOT_KEYS = ["robot-A", "robot-B", "robot-C"];
-
-  container.innerHTML = ROBOT_KEYS.map(id => {
-    const r = (robots && robots[id]) || { name: `배식 로봇 ${id.slice(-1)}`, state: 'idle', battery: 0 };
-    const battery = r.battery || 0;
-    const isError = r.state === 'error';
-    const needCharge = battery < 30;
-    const criticalBattery = battery < 15;
-    
-    return `
-      <div class="robot-card ${isError || needCharge ? 'has-error' : ''}">
-        <div class="robot-header">
-          <div class="robot-info">
-  <div class="robot-name">
-    ${r.name}
-    <span style="
-      font-size:12px;
-      background:var(--primary);
-      color:white;
-      padding:3px 8px;
-      border-radius:10px;
-      margin-left:8px;
-      vertical-align:middle;
-    ">
-      ${
-        id === 'robot-A' ? '🍚 밥' :
-        id === 'robot-B' ? '🍲 국' :
-        '🥬 김치'
-      }
-    </span>
-  </div>
-  <div class="robot-id">${id}</div>
-</div>
-          <div class="error-badge">
-            ${isError ? '⚠️ ERROR' : '🔋 충전 필요'}
-          </div>
-        </div>
-
-        <div class="robot-stat">
-          <span>시스템 상태</span>
-          <span class="val" style="color:${
-            isError ? 'var(--danger)' :
-            needCharge ? '#FF9800' :
-            'var(--success)'
-          }">
-            ${
-              isError ? '점검 필요' :
-              needCharge ? '충전 필요' :
-              '정상 작동'
-            }
-          </span>
-        </div>
-
-        <div class="robot-stat">
-          <span>배터리 잔량</span>
-          <span class="val" style="color:${
-            criticalBattery ? 'var(--danger)' :
-            needCharge ? '#FF9800' :
-            'inherit'
-          }">
-            ${battery}%
-          </span>
-        </div>
-      </div>
-    `;
-  }).join('');
+  lastRobots = snap.val();
+  renderRobots();
 });
 
-// 3. 실시간 대기열 정보
+/* ══════════════════════════════════════
+   메뉴 설정 모달 로직
+══════════════════════════════════════ */
+const menuModal = document.getElementById('menu-modal-overlay');
+const toast = document.getElementById('menu-saved-toast');
 
+function openMenuModal() {
+  document.getElementById('menu-input-밥').value = menuLabels['밥'] === '밥' ? '' : menuLabels['밥'];
+  document.getElementById('menu-input-국').value = menuLabels['국'] === '국' ? '' : menuLabels['국'];
+  document.getElementById('menu-input-김치').value = menuLabels['김치'] === '김치' ? '' : menuLabels['김치'];
+  menuModal.classList.add('open');
+}
+
+function closeMenuModal() {
+  menuModal.classList.remove('open');
+}
+
+function showSavedToast() {
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+document.getElementById('btn-open-menu-modal').addEventListener('click', openMenuModal);
+document.getElementById('menu-modal-cancel').addEventListener('click', closeMenuModal);
+
+// 오버레이 바깥 클릭 시 닫기
+menuModal.addEventListener('click', (e) => {
+  if (e.target === menuModal) closeMenuModal();
+});
+
+document.getElementById('menu-modal-save').addEventListener('click', () => {
+  const rice = document.getElementById('menu-input-밥').value.trim() || '밥';
+  const soup = document.getElementById('menu-input-국').value.trim() || '국';
+  const kimchi = document.getElementById('menu-input-김치').value.trim() || '김치';
+
+  db.ref('menu').set({
+    "밥": rice,
+    "국": soup,
+    "김치": kimchi,
+    updatedAt: Date.now()
+  }).then(() => {
+    closeMenuModal();
+    showSavedToast();
+  }).catch(err => {
+    alert('메뉴 저장에 실패했습니다: ' + err.message);
+  });
+});
+
+// 초기 렌더 (Firebase 응답 전 기본 표시)
+renderMenuToday();
+renderFood();
+renderRobots();
 
 // 시계 업데이트
 setInterval(() => {
