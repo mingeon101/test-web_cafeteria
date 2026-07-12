@@ -195,6 +195,34 @@
     .confirm-hold-fill { height: 100%; border-radius: 100px; width: 0%; transition: width 0.1s linear; }
     .confirm-hold-fill.ok { background: #43a047; }
     .confirm-hold-fill.no { background: var(--danger); }
+
+    /* ── 시스템 작동 중단 전체화면 오버레이 ── */
+    .system-stopped-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(26,26,46,0.97);
+      align-items: center; justify-content: center; flex-direction: column;
+      padding: 40px 28px; text-align: center;
+    }
+    .system-stopped-overlay.visible { display: flex; }
+    .stopped-x-circle {
+      width: 110px; height: 110px; border-radius: 50%; background: rgba(229,57,53,0.15);
+      border: 3px solid var(--danger); display: flex; align-items: center; justify-content: center;
+      margin-bottom: 26px; animation: stoppedPulse 1.6s infinite;
+    }
+    .stopped-x-circle span { font-size: 52px; color: var(--danger); font-weight: 900; line-height: 1; }
+    @keyframes stoppedPulse {
+      0% { box-shadow: 0 0 0 0 rgba(229,57,53,0.35); }
+      70% { box-shadow: 0 0 0 18px rgba(229,57,53,0); }
+      100% { box-shadow: 0 0 0 0 rgba(229,57,53,0); }
+    }
+    .stopped-title { font-size: 26px; font-weight: 900; color: white; letter-spacing: -0.5px; margin-bottom: 10px; }
+    .stopped-sub { font-size: 14px; color: #C9C9DA; line-height: 1.7; max-width: 320px; }
+    .stopped-badge {
+      margin-top: 24px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 100px; padding: 8px 18px; font-size: 12px; color: #C9C9DA; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .stopped-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -371,6 +399,14 @@
   </div>
 </div>
 
+<!-- 시스템 작동 중단 전체화면 오버레이 -->
+<div class="system-stopped-overlay" id="system-stopped-overlay">
+  <div class="stopped-x-circle"><span>✕</span></div>
+  <div class="stopped-title">작동 중단</div>
+  <div class="stopped-sub">관리자가 급식 시스템을 일시 중지했습니다.<br>잠시만 기다려 주세요. 재개되면 화면이 자동으로 돌아옵니다.</div>
+  <div class="stopped-badge"><span class="stopped-dot"></span> 관리자 재개를 기다리는 중...</div>
+</div>
+
 <script>
   /* ══════════════════════════════════════════
      FIREBASE INIT
@@ -395,6 +431,8 @@
   const EMOJIS = ["🍚","🍲","🥬"];
   // 관리자 대시보드에서 설정한 "오늘의 메뉴" 표시명 (기본값 = 카테고리명 그대로)
   let menuLabels  = { "밥": "밥", "국": "국", "김치": "김치" };
+  // 관리자 대시보드의 "작동 중지" 상태 (기본값 = 정상 작동)
+  let systemOperating = true;
   let user        = { grade:1, classNum:2, number:10, name:"홍길동" };
   let counts      = Array(6).fill(0);
   let serveStep   = 0;
@@ -463,6 +501,42 @@
     const progressPage = document.getElementById('page-progress');
     if (progressPage && progressPage.classList.contains('active')) {
       renderProgressList();
+    }
+  });
+
+  /* ══════════════════════════════════════════
+     SYSTEM STOP SYNC — 관리자 대시보드의 "작동 중지" 반영
+     (관리자 대시보드가 db.ref('system')에 {operating: true/false} 형태로 저장함)
+     중지되면 X 표시와 함께 전체화면 안내를 띄우고 모든 카메라를 정지한다.
+  ══════════════════════════════════════════ */
+  function showStoppedOverlay() {
+    document.getElementById('system-stopped-overlay').classList.add('visible');
+    // 리소스 절약 및 오작동 방지를 위해 열려 있는 카메라를 모두 정지
+    stopHandDetector();
+    stopCamera('video-serve');
+    stopRecogCamera();
+    stopConfirmGesture();
+    if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
+  }
+
+  function hideStoppedOverlay() {
+    document.getElementById('system-stopped-overlay').classList.remove('visible');
+    // 재개되면 처음(학생증 인식) 화면부터 깨끗하게 다시 시작
+    counts = Array(6).fill(0);
+    serveStep = 0;
+    goPage('recognition');
+    initRecognition();
+  }
+
+  db.ref('system').on('value', snap => {
+    const s = snap.val();
+    const wasOperating = systemOperating;
+    systemOperating = s ? (s.operating !== false) : true;
+
+    if (wasOperating && !systemOperating) {
+      showStoppedOverlay();
+    } else if (!wasOperating && systemOperating) {
+      hideStoppedOverlay();
     }
   });
 
@@ -649,6 +723,8 @@
   }
 
   async function initRecognition() {
+    if (!systemOperating) return; // 시스템이 정지된 상태면 카메라를 켜지 않는다
+
     updateUserBar(null);
     resetOcrUI();
 
@@ -788,6 +864,7 @@
   }
 
   function startConfirmGesture() {
+    if (!systemOperating) return; // 시스템이 정지된 상태면 카메라를 켜지 않는다
     if (!window.Hands || !window.Camera) return;
 
     confirmGestureState  = null;
@@ -1362,7 +1439,9 @@ ${historyText}
   ══════════════════════════════════════════ */
   (async function init() {
     await initGeminiKey();
-    await initRecognition();
+    if (systemOperating) {
+      await initRecognition();
+    }
 
     const obs = new MutationObserver(async () => {
       if (document.getElementById('page-dashboard').classList.contains('active')) {
