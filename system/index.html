@@ -37,6 +37,38 @@
     .section-title { font-size: 12px; font-weight: 900; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
     .section-title-left { display: flex; align-items: center; gap: 8px; }
 
+    /* SYSTEM STATUS / STOP CONTROL */
+    .system-status-card {
+      background: var(--card); border-radius: 24px; padding: 22px 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04); display: flex; align-items: center;
+      justify-content: space-between; gap: 16px; border: 2px solid transparent;
+      transition: all 0.3s ease; flex-wrap: wrap;
+    }
+    .system-status-card.stopped { background: var(--danger-bg); border-color: var(--danger); }
+    .system-status-left { display: flex; align-items: center; gap: 16px; }
+    .status-dot {
+      width: 14px; height: 14px; border-radius: 50%; background: var(--success);
+      flex-shrink: 0; box-shadow: 0 0 0 5px rgba(46,125,50,0.15); transition: all 0.3s ease;
+    }
+    .system-status-card.stopped .status-dot {
+      background: var(--danger); box-shadow: 0 0 0 5px rgba(198,40,40,0.15);
+      animation: statusPulse 1.5s infinite;
+    }
+    @keyframes statusPulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    .system-status-title { font-size: 17px; font-weight: 900; }
+    .system-status-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    .system-toggle-btn {
+      border: none; padding: 13px 24px; border-radius: 14px; font-weight: 900;
+      font-size: 13px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+      display: flex; align-items: center; gap: 6px; transition: transform 0.15s ease, box-shadow 0.15s ease;
+      background: var(--danger); color: white; box-shadow: 0 4px 14px rgba(198,40,40,0.3);
+      white-space: nowrap;
+    }
+    .system-toggle-btn.resume { background: var(--success); box-shadow: 0 4px 14px rgba(46,125,50,0.3); }
+    .system-toggle-btn:hover { transform: translateY(-2px); }
+    .system-toggle-btn:active { transform: translateY(0); }
+
     /* MENU SET BUTTON */
     .menu-edit-btn {
       background: var(--primary); color: white; border: none; padding: 8px 16px;
@@ -47,6 +79,7 @@
     }
     .menu-edit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,107,53,0.4); }
     .menu-edit-btn:active { transform: translateY(0); }
+    .menu-edit-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
 
     /* TODAY'S MENU CARD */
     .menu-today-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -73,6 +106,11 @@
     
     .robot-card { background: var(--card); padding: 24px; border-radius: 24px; position: relative; border: 2px solid transparent; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
     .robot-card.has-error { border-color: var(--danger); background: var(--danger-bg); animation: shake 0.5s ease-in-out; }
+    .robot-card.system-stopped {
+      filter: grayscale(0.65); opacity: 0.88;
+      border-color: var(--muted) !important; background: #F1EEEA !important;
+      animation: none !important;
+    }
     
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
@@ -92,6 +130,7 @@
       animation: pulse 1.5s infinite;
     }
     .robot-card.has-error .error-badge { display: flex; }
+    .robot-card.system-stopped .error-badge { display: flex; background: var(--muted); animation: none; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
     .robot-stat { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; }
@@ -116,7 +155,7 @@
     .cap-num { font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 700; color: var(--primary); line-height: 1; }
     .cap-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 5px; }
 
-    /* MENU SET MODAL */
+    /* MODAL (메뉴 설정 / 작동 중지 공용) */
     .modal-overlay {
       display: none; position: fixed; inset: 0; background: rgba(26,26,46,0.55);
       z-index: 300; align-items: center; justify-content: center; padding: 20px;
@@ -128,7 +167,7 @@
     }
     @keyframes modalIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .modal-title { font-size: 18px; font-weight: 900; margin-bottom: 6px; }
-    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
     .modal-field { margin-bottom: 16px; }
     .modal-field label {
       display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700;
@@ -148,6 +187,8 @@
     .btn-secondary { background: #F0EDE8; color: var(--accent); }
     .btn-primary { background: var(--primary); color: white; }
     .btn-primary:hover { background: #E85A24; }
+    .btn-danger-solid { background: var(--danger); color: white; }
+    .btn-danger-solid:hover { background: #A81F1F; }
     .modal-saved-toast {
       position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: var(--accent); color: white; padding: 12px 22px; border-radius: 14px;
@@ -166,6 +207,19 @@
   </div>
 
   <div class="content">
+    <section>
+      <div class="system-status-card" id="system-status-card">
+        <div class="system-status-left">
+          <div class="status-dot" id="status-dot"></div>
+          <div>
+            <div class="system-status-title" id="system-status-title">시스템 정상 작동 중</div>
+            <div class="system-status-sub" id="system-status-sub">모든 로봇이 정상적으로 배식을 진행하고 있습니다</div>
+          </div>
+        </div>
+        <button class="system-toggle-btn" id="btn-system-toggle">🛑 작동 중지</button>
+      </div>
+    </section>
+
     <section>
       <div class="section-title">
         <div class="section-title-left"><span>📋</span> 오늘의 메뉴</div>
@@ -245,7 +299,21 @@
     </div>
   </div>
 </div>
+
+<!-- 작동 중지 확인 모달 -->
+<div class="modal-overlay" id="stop-modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title">⚠️ 시스템 작동을 중지할까요?</div>
+    <div class="modal-sub">로봇 A・B・C의 배식이 즉시 중단되고, 학생들은 배식을 받을 수 없게 됩니다. 재개 전까지 메뉴 설정도 변경할 수 없습니다.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="stop-modal-cancel">취소</button>
+      <button class="btn-danger-solid" id="stop-modal-confirm">중지하기</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-saved-toast" id="menu-saved-toast">✅ 메뉴가 저장되었습니다</div>
+<div class="modal-saved-toast" id="system-saved-toast">🛑 시스템이 중지되었습니다</div>
 
 <script>
 /* ══════════════════════════════════════
@@ -269,9 +337,12 @@ const CATEGORY_ICON = { "밥": "🍚", "국": "🍲", "김치": "🥬" };
 // 오늘의 메뉴 표시 이름 (기본값 = 카테고리명 그대로)
 let menuLabels = { "밥": "밥", "국": "국", "김치": "김치" };
 
-// 최신 데이터 캐시 (메뉴가 바뀌어도 즉시 다시 그릴 수 있도록 보관)
+// 최신 데이터 캐시 (메뉴/시스템 상태가 바뀌어도 즉시 다시 그릴 수 있도록 보관)
 let lastTotalEaten = { "밥": 0, "국": 0, "김치": 0 };
 let lastRobots = null;
+
+// 시스템 작동 상태 (기본값 = 정상 작동, DB에 값이 없을 때도 안전하게 동작)
+let systemOperating = true;
 
 /* ══════════════════════════════════════
    렌더링 함수
@@ -339,8 +410,25 @@ function renderRobots() {
     const category = ROBOT_TO_CATEGORY[id];
     const dishName = menuLabels[category];
 
+    const cardClasses = [
+      'robot-card',
+      (isError || needCharge) ? 'has-error' : '',
+      !systemOperating ? 'system-stopped' : ''
+    ].filter(Boolean).join(' ');
+
+    let badgeText;
+    if (!systemOperating) badgeText = '⏸ 정지됨';
+    else if (isError) badgeText = '⚠️ ERROR';
+    else badgeText = '🔋 충전 필요';
+
+    let statusText, statusColor;
+    if (!systemOperating) { statusText = '정지됨'; statusColor = 'var(--muted)'; }
+    else if (isError) { statusText = '점검 필요'; statusColor = 'var(--danger)'; }
+    else if (needCharge) { statusText = '충전 필요'; statusColor = '#FF9800'; }
+    else { statusText = '정상 작동'; statusColor = 'var(--success)'; }
+
     return `
-      <div class="robot-card ${isError || needCharge ? 'has-error' : ''}">
+      <div class="${cardClasses}">
         <div class="robot-header">
           <div class="robot-info">
   <div class="robot-name">
@@ -352,22 +440,14 @@ function renderRobots() {
   <div class="robot-id">${id}</div>
 </div>
           <div class="error-badge">
-            ${isError ? '⚠️ ERROR' : '🔋 충전 필요'}
+            ${badgeText}
           </div>
         </div>
 
         <div class="robot-stat">
           <span>시스템 상태</span>
-          <span class="val" style="color:${
-            isError ? 'var(--danger)' :
-            needCharge ? '#FF9800' :
-            'var(--success)'
-          }">
-            ${
-              isError ? '점검 필요' :
-              needCharge ? '충전 필요' :
-              '정상 작동'
-            }
+          <span class="val" style="color:${statusColor}">
+            ${statusText}
           </span>
         </div>
 
@@ -386,6 +466,30 @@ function renderRobots() {
   }).join('');
 }
 
+function renderSystemStatus() {
+  const card  = document.getElementById('system-status-card');
+  const title = document.getElementById('system-status-title');
+  const sub   = document.getElementById('system-status-sub');
+  const btn   = document.getElementById('btn-system-toggle');
+  const menuBtn = document.getElementById('btn-open-menu-modal');
+
+  if (systemOperating) {
+    card.classList.remove('stopped');
+    title.textContent = '시스템 정상 작동 중';
+    sub.textContent = '모든 로봇이 정상적으로 배식을 진행하고 있습니다';
+    btn.textContent = '🛑 작동 중지';
+    btn.classList.remove('resume');
+    menuBtn.disabled = false;
+  } else {
+    card.classList.add('stopped');
+    title.textContent = '시스템 작동 중지됨';
+    sub.textContent = '모든 로봇이 배식을 중단했습니다. 재개하려면 버튼을 눌러주세요.';
+    btn.textContent = '▶️ 작동 재개';
+    btn.classList.add('resume');
+    menuBtn.disabled = true;
+  }
+}
+
 /* ══════════════════════════════════════
    데이터 처리 및 UI 업데이트
 ══════════════════════════════════════ */
@@ -393,12 +497,21 @@ function renderRobots() {
 // 0. 오늘의 메뉴 감시 (관리자가 저장한 메뉴명)
 db.ref('menu').on('value', snap => {
   const m = snap.val() || {};
-  menuLabels['밥'] = m['밥'] || '밥';
-  menuLabels['국'] = m['국'] || '국';
+  menuLabels['밥']   = m['밥']   || '밥';
+  menuLabels['국']   = m['국']   || '국';
   menuLabels['김치'] = m['김치'] || '김치';
 
   renderMenuToday();
   renderFood();
+  renderRobots();
+});
+
+// 0-1. 시스템 작동 상태 감시 (작동중지 기능)
+db.ref('system').on('value', snap => {
+  const s = snap.val();
+  systemOperating = s ? (s.operating !== false) : true;
+
+  renderSystemStatus();
   renderRobots();
 });
 
@@ -475,9 +588,10 @@ db.ref('robots').on('value', snap => {
    메뉴 설정 모달 로직
 ══════════════════════════════════════ */
 const menuModal = document.getElementById('menu-modal-overlay');
-const toast = document.getElementById('menu-saved-toast');
+const menuToast = document.getElementById('menu-saved-toast');
 
 function openMenuModal() {
+  if (document.getElementById('btn-open-menu-modal').disabled) return;
   document.getElementById('menu-input-밥').value = menuLabels['밥'] === '밥' ? '' : menuLabels['밥'];
   document.getElementById('menu-input-국').value = menuLabels['국'] === '국' ? '' : menuLabels['국'];
   document.getElementById('menu-input-김치').value = menuLabels['김치'] === '김치' ? '' : menuLabels['김치'];
@@ -488,9 +602,9 @@ function closeMenuModal() {
   menuModal.classList.remove('open');
 }
 
-function showSavedToast() {
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2200);
+function showToast(el) {
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
 }
 
 document.getElementById('btn-open-menu-modal').addEventListener('click', openMenuModal);
@@ -513,9 +627,44 @@ document.getElementById('menu-modal-save').addEventListener('click', () => {
     updatedAt: Date.now()
   }).then(() => {
     closeMenuModal();
-    showSavedToast();
+    showToast(menuToast);
   }).catch(err => {
     alert('메뉴 저장에 실패했습니다: ' + err.message);
+  });
+});
+
+/* ══════════════════════════════════════
+   작동 중지 / 재개 로직
+══════════════════════════════════════ */
+const stopModal = document.getElementById('stop-modal-overlay');
+const systemToast = document.getElementById('system-saved-toast');
+
+document.getElementById('btn-system-toggle').addEventListener('click', () => {
+  if (systemOperating) {
+    // 중지는 되돌리기 어려운 동작이므로 확인 모달을 거친다
+    stopModal.classList.add('open');
+  } else {
+    // 재개는 즉시 적용
+    db.ref('system').set({ operating: true, updatedAt: Date.now() }).catch(err => {
+      alert('작동 재개에 실패했습니다: ' + err.message);
+    });
+  }
+});
+
+document.getElementById('stop-modal-cancel').addEventListener('click', () => {
+  stopModal.classList.remove('open');
+});
+
+stopModal.addEventListener('click', (e) => {
+  if (e.target === stopModal) stopModal.classList.remove('open');
+});
+
+document.getElementById('stop-modal-confirm').addEventListener('click', () => {
+  db.ref('system').set({ operating: false, updatedAt: Date.now() }).then(() => {
+    stopModal.classList.remove('open');
+    showToast(systemToast);
+  }).catch(err => {
+    alert('작동 중지에 실패했습니다: ' + err.message);
   });
 });
 
@@ -523,6 +672,7 @@ document.getElementById('menu-modal-save').addEventListener('click', () => {
 renderMenuToday();
 renderFood();
 renderRobots();
+renderSystemStatus();
 
 // 시계 업데이트
 setInterval(() => {
