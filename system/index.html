@@ -32,6 +32,20 @@
     }
     .header-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; }
     .header-time { font-family: 'Space Grotesk', sans-serif; opacity: 0.6; font-size: 14px; }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .connection-badge {
+      display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.75); font-family: 'Space Grotesk', sans-serif;
+    }
+    .connection-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(46,125,50,0.2); transition: all 0.3s ease;
+    }
+    .connection-badge.offline .connection-dot {
+      background: var(--danger); box-shadow: 0 0 0 3px rgba(198,40,40,0.25);
+      animation: statusPulse 1.5s infinite;
+    }
+    .connection-badge.offline { color: #FF8A80; }
 
     .content { padding: 25px; display: flex; flex-direction: column; gap: 30px; }
     .section-title { font-size: 12px; font-weight: 900; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
@@ -68,6 +82,7 @@
     .system-toggle-btn.resume { background: var(--success); box-shadow: 0 4px 14px rgba(46,125,50,0.3); }
     .system-toggle-btn:hover { transform: translateY(-2px); }
     .system-toggle-btn:active { transform: translateY(0); }
+    .system-toggle-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     /* MENU SET BUTTON */
     .menu-edit-btn {
@@ -179,11 +194,21 @@
       transition: border-color 0.15s ease;
     }
     .modal-field input:focus { border-color: var(--primary); }
+    .modal-field select {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 2px solid #EEE7DE;
+      font-family: 'Noto Sans KR', sans-serif; font-size: 14px; outline: none;
+      background: white; color: var(--accent); cursor: pointer;
+      transition: border-color 0.15s ease; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%238B7355'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.148l3.71-3.918a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; background-size: 16px;
+    }
+    .modal-field select:focus { border-color: var(--primary); }
     .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
     .modal-actions button {
       flex: 1; padding: 13px; border-radius: 12px; border: none; font-weight: 900;
       font-size: 14px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
     }
+    .modal-actions button:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-secondary { background: #F0EDE8; color: var(--accent); }
     .btn-primary { background: var(--primary); color: white; }
     .btn-primary:hover { background: #E85A24; }
@@ -203,7 +228,13 @@
 <div id="app">
   <div class="header">
     <div class="header-title">SMART CAFETERIA ADMIN</div>
-    <div class="header-time" id="clock">00:00:00</div>
+    <div class="header-right">
+      <div class="connection-badge" id="connection-badge">
+        <span class="connection-dot"></span>
+        <span id="connection-text">연결됨</span>
+      </div>
+      <div class="header-time" id="clock">00:00:00</div>
+    </div>
   </div>
 
   <div class="content">
@@ -305,6 +336,22 @@
   <div class="modal-card">
     <div class="modal-title">⚠️ 시스템 작동을 중지할까요?</div>
     <div class="modal-sub">로봇 A・B・C의 배식이 즉시 중단되고, 학생들은 배식을 받을 수 없게 됩니다. 재개 전까지 메뉴 설정도 변경할 수 없습니다.</div>
+
+    <div class="modal-field">
+      <label>🛑 중지 사유</label>
+      <select id="stop-reason-select">
+        <option value="로봇 점검/정비 중">🔧 로봇 점검/정비 중</option>
+        <option value="재료 소진">🍚 재료 소진</option>
+        <option value="정전 · 네트워크 문제">⚡ 정전 · 네트워크 문제</option>
+        <option value="청소 · 소독 중">🧹 청소 · 소독 중</option>
+        <option value="__other__">✏️ 기타 (직접 입력)</option>
+      </select>
+    </div>
+    <div class="modal-field" id="stop-reason-other-wrap" style="display:none;">
+      <label>사유 직접 입력</label>
+      <input type="text" id="stop-reason-other" placeholder="예: 배식 인원 조정 중" maxlength="40" />
+    </div>
+
     <div class="modal-actions">
       <button class="btn-secondary" id="stop-modal-cancel">취소</button>
       <button class="btn-danger-solid" id="stop-modal-confirm">중지하기</button>
@@ -343,6 +390,17 @@ let lastRobots = null;
 
 // 시스템 작동 상태 (기본값 = 정상 작동, DB에 값이 없을 때도 안전하게 동작)
 let systemOperating = true;
+let lastSystemUpdatedAt = null; // 마지막으로 상태가 바뀐 시각 (중지/재개 시각 표시용)
+let lastSystemReason = null;    // 중지 사유 (관리자가 선택/입력한 값)
+
+/* ══════════════════════════════════════
+   유틸 — innerHTML에 꽂히는 값은 항상 이스케이프해서 XSS를 방지
+══════════════════════════════════════ */
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
 
 /* ══════════════════════════════════════
    렌더링 함수
@@ -355,7 +413,7 @@ function renderMenuToday() {
       <div class="menu-today-icon">${CATEGORY_ICON[cat]}</div>
       <div class="menu-today-info">
         <div class="menu-today-robot">${cat === '밥' ? '로봇 A' : cat === '국' ? '로봇 B' : '로봇 C'}</div>
-        <div class="menu-today-name">${menuLabels[cat]}</div>
+        <div class="menu-today-name">${esc(menuLabels[cat])}</div>
       </div>
     </div>
   `).join('');
@@ -379,7 +437,7 @@ function renderFood() {
 
     return `
       <div class="food-item" style="${dangerStyle}">
-        <div class="food-name" title="${menuLabels[name]}">${menuLabels[name]}</div>
+        <div class="food-name" title="${esc(menuLabels[name])}">${esc(menuLabels[name])}</div>
 
         <div class="progress-bg">
           <div class="progress-fill"
@@ -432,12 +490,12 @@ function renderRobots() {
         <div class="robot-header">
           <div class="robot-info">
   <div class="robot-name">
-    ${r.name}
-    <span class="menu-badge" title="${dishName}">
-      ${CATEGORY_ICON[category]} ${dishName}
+    ${esc(r.name)}
+    <span class="menu-badge" title="${esc(dishName)}">
+      ${CATEGORY_ICON[category]} ${esc(dishName)}
     </span>
   </div>
-  <div class="robot-id">${id}</div>
+  <div class="robot-id">${esc(id)}</div>
 </div>
           <div class="error-badge">
             ${badgeText}
@@ -473,6 +531,9 @@ function renderSystemStatus() {
   const btn   = document.getElementById('btn-system-toggle');
   const menuBtn = document.getElementById('btn-open-menu-modal');
 
+  // 버튼 연타로 중복 요청이 쌓이지 않도록, 서버 상태가 반영될 때마다 버튼을 다시 활성화한다
+  btn.disabled = false;
+
   if (systemOperating) {
     card.classList.remove('stopped');
     title.textContent = '시스템 정상 작동 중';
@@ -483,7 +544,13 @@ function renderSystemStatus() {
   } else {
     card.classList.add('stopped');
     title.textContent = '시스템 작동 중지됨';
-    sub.textContent = '모든 로봇이 배식을 중단했습니다. 재개하려면 버튼을 눌러주세요.';
+    const timeStr = lastSystemUpdatedAt
+      ? new Date(lastSystemUpdatedAt).toLocaleTimeString('ko-KR', { hour12: false })
+      : null;
+    const parts = ['모든 로봇이 배식을 중단했습니다'];
+    if (lastSystemReason) parts.push(`사유: ${lastSystemReason}`);
+    if (timeStr) parts.push(`${timeStr}에 중지됨`);
+    sub.textContent = parts.join(' · ');
     btn.textContent = '▶️ 작동 재개';
     btn.classList.add('resume');
     menuBtn.disabled = true;
@@ -510,9 +577,28 @@ db.ref('menu').on('value', snap => {
 db.ref('system').on('value', snap => {
   const s = snap.val();
   systemOperating = s ? (s.operating !== false) : true;
+  lastSystemUpdatedAt = s ? (s.updatedAt || null) : null;
+  lastSystemReason = s ? (s.reason || null) : null;
 
   renderSystemStatus();
   renderRobots();
+});
+
+// 0-2. Firebase 연결 상태 감시 — 끊기면 화면이 "정상"처럼 멈춰있는 걸 방지
+db.ref('.info/connected').on('value', snap => {
+  const connected = snap.val() === true;
+  const badge = document.getElementById('connection-badge');
+  const text  = document.getElementById('connection-text');
+  if (!badge || !text) return;
+
+  if (connected) {
+    badge.classList.remove('offline');
+    text.textContent = '연결됨';
+  } else {
+    badge.classList.add('offline');
+    const now = new Date().toLocaleTimeString('ko-KR', { hour12: false });
+    text.textContent = `연결 끊김 · ${now} 이후 갱신 안 됨`;
+  }
 });
 
 // 1. 학생 데이터 감시 (배식 인원 및 잔반량 계산)
@@ -638,15 +724,31 @@ document.getElementById('menu-modal-save').addEventListener('click', () => {
 ══════════════════════════════════════ */
 const stopModal = document.getElementById('stop-modal-overlay');
 const systemToast = document.getElementById('system-saved-toast');
+const stopReasonSelect = document.getElementById('stop-reason-select');
+const stopReasonOtherWrap = document.getElementById('stop-reason-other-wrap');
+const stopReasonOtherInput = document.getElementById('stop-reason-other');
 
-document.getElementById('btn-system-toggle').addEventListener('click', () => {
+function resetStopModalFields() {
+  stopReasonSelect.value = stopReasonSelect.options[0].value;
+  stopReasonOtherInput.value = '';
+  stopReasonOtherWrap.style.display = 'none';
+}
+
+stopReasonSelect.addEventListener('change', () => {
+  stopReasonOtherWrap.style.display = stopReasonSelect.value === '__other__' ? 'block' : 'none';
+});
+
+document.getElementById('btn-system-toggle').addEventListener('click', (e) => {
   if (systemOperating) {
-    // 중지는 되돌리기 어려운 동작이므로 확인 모달을 거친다
+    // 중지는 되돌리기 어려운 동작이므로 확인 모달을 거친다 (버튼은 모달의 확인 버튼에서 잠근다)
+    resetStopModalFields();
     stopModal.classList.add('open');
   } else {
-    // 재개는 즉시 적용
-    db.ref('system').set({ operating: true, updatedAt: Date.now() }).catch(err => {
+    // 재개는 즉시 적용 — 연타로 중복 요청이 쌓이지 않도록 응답 전까지 버튼을 잠근다, 중지 사유도 초기화
+    e.currentTarget.disabled = true;
+    db.ref('system').set({ operating: true, updatedAt: Date.now(), reason: null }).catch(err => {
       alert('작동 재개에 실패했습니다: ' + err.message);
+      e.currentTarget.disabled = false;
     });
   }
 });
@@ -659,12 +761,27 @@ stopModal.addEventListener('click', (e) => {
   if (e.target === stopModal) stopModal.classList.remove('open');
 });
 
-document.getElementById('stop-modal-confirm').addEventListener('click', () => {
-  db.ref('system').set({ operating: false, updatedAt: Date.now() }).then(() => {
+document.getElementById('stop-modal-confirm').addEventListener('click', (e) => {
+  let reason = stopReasonSelect.value;
+  if (reason === '__other__') {
+    reason = stopReasonOtherInput.value.trim();
+    if (!reason) {
+      alert('중지 사유를 입력해주세요.');
+      stopReasonOtherInput.focus();
+      return;
+    }
+  }
+
+  const confirmBtn = e.currentTarget;
+  confirmBtn.disabled = true; // 연타 방지 — 응답이 올 때까지 잠깐 잠근다
+
+  db.ref('system').set({ operating: false, reason: reason, updatedAt: Date.now() }).then(() => {
     stopModal.classList.remove('open');
     showToast(systemToast);
   }).catch(err => {
     alert('작동 중지에 실패했습니다: ' + err.message);
+  }).finally(() => {
+    confirmBtn.disabled = false;
   });
 });
 
