@@ -217,6 +217,12 @@
     }
     .stopped-title { font-size: 26px; font-weight: 900; color: white; letter-spacing: -0.5px; margin-bottom: 10px; }
     .stopped-sub { font-size: 14px; color: #C9C9DA; line-height: 1.7; max-width: 320px; }
+    .stopped-reason {
+      display: none; margin-top: 16px; background: rgba(255,107,53,0.14);
+      border: 1px solid rgba(255,107,53,0.4); color: var(--primary);
+      font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 14px;
+      max-width: 320px;
+    }
     .stopped-badge {
       margin-top: 24px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
       border-radius: 100px; padding: 8px 18px; font-size: 12px; color: #C9C9DA; font-weight: 600;
@@ -404,6 +410,7 @@
   <div class="stopped-x-circle"><span>✕</span></div>
   <div class="stopped-title">작동 중단</div>
   <div class="stopped-sub">관리자가 급식 시스템을 일시 중지했습니다.<br>잠시만 기다려 주세요. 재개되면 화면이 자동으로 돌아옵니다.</div>
+  <div class="stopped-reason" id="stopped-reason"></div>
   <div class="stopped-badge"><span class="stopped-dot"></span> 관리자 재개를 기다리는 중...</div>
 </div>
 
@@ -433,6 +440,7 @@
   let menuLabels  = { "밥": "밥", "국": "국", "김치": "김치" };
   // 관리자 대시보드의 "작동 중지" 상태 (기본값 = 정상 작동)
   let systemOperating = true;
+  let lastStopReason = null; // 관리자가 선택/입력한 중지 사유
   let user        = { grade:1, classNum:2, number:10, name:"홍길동" };
   let counts      = Array(6).fill(0);
   let serveStep   = 0;
@@ -509,8 +517,20 @@
      (관리자 대시보드가 db.ref('system')에 {operating: true/false} 형태로 저장함)
      중지되면 X 표시와 함께 전체화면 안내를 띄우고 모든 카메라를 정지한다.
   ══════════════════════════════════════════ */
+  function renderStoppedReason() {
+    const el = document.getElementById('stopped-reason');
+    if (!el) return;
+    if (lastStopReason) {
+      el.textContent = `사유: ${lastStopReason}`;
+      el.style.display = 'inline-block';
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
   function showStoppedOverlay() {
     document.getElementById('system-stopped-overlay').classList.add('visible');
+    renderStoppedReason();
     // 리소스 절약 및 오작동 방지를 위해 열려 있는 카메라를 모두 정지
     stopHandDetector();
     stopCamera('video-serve');
@@ -532,11 +552,15 @@
     const s = snap.val();
     const wasOperating = systemOperating;
     systemOperating = s ? (s.operating !== false) : true;
+    lastStopReason = s ? (s.reason || null) : null;
 
     if (wasOperating && !systemOperating) {
       showStoppedOverlay();
     } else if (!wasOperating && systemOperating) {
       hideStoppedOverlay();
+    } else if (!systemOperating) {
+      // 이미 중지된 화면을 보고 있는 도중에 관리자가 사유만 바꾼 경우에도 반영
+      renderStoppedReason();
     }
   });
 
