@@ -455,6 +455,7 @@
   let stableStartTime  = null;
   let countdownInterval = null;
   let fingerLocked     = false;
+  let isAdvancingServe = false;
   const HOLD_MS        = 3000;
   const CIRCUMFERENCE  = 75.4;
 
@@ -1314,6 +1315,7 @@ ${historyText}
     serveStep = 0;
     counts = Array(6).fill(0);
     fingerLocked = false;
+    isAdvancingServe = false;
     resetCountdownState();
     goPage('serve');
 
@@ -1383,7 +1385,9 @@ ${historyText}
       counts[serveStep] = parseInt(e.target.value) || 0;
     };
 
-    document.getElementById('serve-next-btn').textContent =
+    const nextBtn = document.getElementById('serve-next-btn');
+    nextBtn.disabled = false;
+    nextBtn.textContent =
       serveStep === FOODS.length - 1 ? '배식 완료 ✓' : '다음 →';
   }
 
@@ -1396,14 +1400,27 @@ ${historyText}
   }
 
   async function serveNext() {
-    if (serveStep < FOODS.length - 1) {
-      serveStep++;
-      renderServeStep();
-    } else {
-      await saveServeData();
-      stopHandDetector();
-      stopCamera('video-serve');
-      startProgress();
+    // 버튼 클릭과 손가락 제스처 확정이 동시에 들어와서 startProgress()가
+    // 중복 호출되는 것을 막는 잠금 (완료 화면이 반복 노출되는 버그 방지)
+    if (isAdvancingServe) return;
+    isAdvancingServe = true;
+
+    const nextBtn = document.getElementById('serve-next-btn');
+    if (nextBtn) nextBtn.disabled = true;
+
+    try {
+      if (serveStep < FOODS.length - 1) {
+        serveStep++;
+        renderServeStep();
+      } else {
+        // 손가락 인식 카메라를 먼저 완전히 정지시켜 추가 confirmFingerCount 호출을 원천 차단
+        stopHandDetector();
+        stopCamera('video-serve');
+        await saveServeData();
+        startProgress();
+      }
+    } finally {
+      isAdvancingServe = false;
     }
   }
 
@@ -1411,20 +1428,29 @@ ${historyText}
      PROGRESS PAGE
   ══════════════════════════════════════════ */
   async function startProgress() {
+    // 이전에 남아있는 진행 타이머가 있으면 먼저 정리 (타이머 중복/좀비화 방지)
+    if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
+
     progressStep = 0;
     goPage('progress');
     document.getElementById('progress-fill').style.width = '0%';
     renderProgressList();
-    progressTimer = setInterval(async() => {
+
+    // 자기 자신의 interval id를 지역변수로 캡처해서, 전역변수가 다른 값으로
+    // 덮어써지더라도 정확히 "자기 자신"만 종료시키도록 한다.
+    const timerId = setInterval(async () => {
       progressStep++;
       document.getElementById('progress-fill').style.width = (progressStep / 3 * 100) + '%';
       renderProgressList();
       if (progressStep >= 3) {
-        clearInterval(progressTimer);
+        clearInterval(timerId);
+        if (progressTimer === timerId) progressTimer = null;
         await db.ref('stats/queueCount').transaction(cur => (cur || 0) > 0 ? cur - 1 : 0);
         setTimeout(() => goPage('complete'), 600);
       }
     }, 900);
+
+    progressTimer = timerId;
   }
 
   function renderProgressList() {
@@ -1452,6 +1478,8 @@ ${historyText}
     stopRecogCamera();
     stopConfirmGesture();
     if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
+    isAdvancingServe = false;
+    fingerLocked = false;
     counts = Array(6).fill(0);
     serveStep = 0;
     goPage('recognition');
