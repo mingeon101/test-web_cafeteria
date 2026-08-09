@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>우리학교 급식 리뷰</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #FF6B35;
+      --primary-light: #fff0e8;
+      --secondary: #F7C59F;
+      --accent: #1A1A2E;
+      --bg: #FFF8F3;
+      --card: #FFFFFF;
+      --muted: #8B7355;
+      --success: #4CAF50;
+      --danger: #E53935;
+      --yellow: #FFB300;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      background: var(--bg);
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--accent);
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    textarea {
+      font-family: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ══════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════ */
+
+    .header {
+      background: var(--accent);
+      color: white;
+      padding: 18px 24px 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 24px rgba(26,26,46,0.35);
+    }
+
+    .header-logo {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .header-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .header-sub {
+      font-size: 11px;
+      opacity: 0.45;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .header-status {
+      margin-left: auto;
+      width: 9px;
+      height: 9px;
+      background: #4CAF50;
+      border-radius: 50%;
+      box-shadow: 0 0 0 5px rgba(76,175,80,0.12);
+    }
+
+    /* ══════════════════════════════════════════
+       USER BAR
+    ══════════════════════════════════════════ */
+
+    .user-bar {
+      background: var(--accent);
+      padding: 0 24px 16px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .user-sub {
+      font-size: 12px;
+      opacity: 0.5;
+      margin-top: 2px;
+    }
+
+    /* ══════════════════════════════════════════
+       CONTENT
+    ══════════════════════════════════════════ */
+
+    .content {
+      padding: 20px 16px 40px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .card.center {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ══════════════════════════════════════════
+       ANIMATION
+    ══════════════════════════════════════════ */
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-up {
+      animation: fadeUp 0.38s ease forwards;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .pop {
+      animation: pop 0.3s ease;
+    }
+
+    /* ══════════════════════════════════════════
+       BUTTON
+    ══════════════════════════════════════════ */
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      letter-spacing: -0.2px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
+    }
+
+    .btn-primary:hover {
+      background: #e85a26;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255,107,53,0.45);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #f0ebe5;
+      color: var(--accent);
+    }
+
+    .btn-secondary:hover {
+      background: #e8e0d8;
+    }
+
+    .btn-full {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    /* ══════════════════════════════════════════
+       TODAY MENU
+    ══════════════════════════════════════════ */
+
+    .today-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .today-date {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .today-title {
+      font-size: 23px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .today-emoji {
+      font-size: 40px;
+    }
+
+    .menu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .menu-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 12px 14px;
+      background: #faf7f4;
+      border-radius: 13px;
+    }
+
+    .menu-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .menu-category {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .menu-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .menu-rating {
+      margin-left: auto;
+      color: var(--yellow);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ══════════════════════════════════════════
+       RATING
+    ══════════════════════════════════════════ */
+
+    .rating-wrap {
+      text-align: center;
+      padding: 8px 0 20px;
+    }
+
+    .rating-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .stars {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .star {
+      background: none;
+      border: none;
+      font-size: 34px;
+      color: #e5ddd5;
+      cursor: pointer;
+      transition: transform 0.15s, color 0.15s;
+      line-height: 1;
+    }
+
+    .star:hover {
+      transform: scale(1.12);
+    }
+
+    .star.active {
+      color: var(--yellow);
+    }
+
+    .rating-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 9px;
+      color: var(--muted);
+    }
+
+    /* ══════════════════════════════════════════
+       SCORE ROW
+    ══════════════════════════════════════════ */
+
+    .score-section {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .score-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .score-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .score-btn {
+      width: 31px;
+      height: 31px;
+      border: none;
+      border-radius: 8px;
+      background: #f3eee9;
+      color: #b4a79a;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .score-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* ══════════════════════════════════════════
+       REVIEW TEXT
+    ══════════════════════════════════════════ */
+
+    .input-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .review-input {
+      width: 100%;
+      min-height: 105px;
+      resize: none;
+      border: 1px solid #eee6df;
+      border-radius: 14px;
+      background: #fcfaf8;
+      padding: 14px;
+      outline: none;
+      font-size: 14px;
+      color: var(--accent);
+      transition: border 0.2s;
+    }
+
+    .review-input:focus {
+      border-color: var(--primary);
+      background: white;
+    }
+
+    .review-input::placeholder {
+      color: #b9afa5;
+    }
+
+    /* ══════════════════════════════════════════
+       MENU CHECKBOX
+    ══════════════════════════════════════════ */
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .choice {
+      position: relative;
+    }
+
+    .choice input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #eee7e0;
+      background: #fcfaf8;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .choice input:checked + label {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* ══════════════════════════════════════════
+       RECOMMENDATION
+    ══════════════════════════════════════════ */
+
+    .recommend-card {
+      background: var(--accent);
+      color: white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .recommend-card::before {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255,107,53,0.16);
+      right: -70px;
+      top: -70px;
+    }
+
+    .recommend-label {
+      font-size: 10px;
+      color: var(--secondary);
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 9px;
+    }
+
+    .recommend-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-bottom: 4px;
+    }
+
+    .recommend-desc {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+    }
+
+    .recommend-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .recommend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 13px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 11px;
+    }
+
+    .recommend-item-icon {
+      font-size: 20px;
+    }
+
+    .recommend-item-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .recommend-score {
+      margin-left: auto;
+      color: var(--secondary);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ══════════════════════════════════════════
+       POPULAR
+    ══════════════════════════════════════════ */
+
+    .popular-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .popular-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rank {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: #f5f0eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .rank.top {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .popular-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .popular-count {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .popular-score {
+      width: 40px;
+      text-align: right;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* ══════════════════════════════════════════
+       REVIEW LIST
+    ══════════════════════════════════════════ */
+
+    .review-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .review-item {
+      padding: 15px;
+      border-radius: 14px;
+      background: #faf7f4;
+    }
+
+    .review-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+    }
+
+    .review-user {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .review-stars {
+      color: var(--yellow);
+      font-size: 12px;
+    }
+
+    .review-comment {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #665b52;
+    }
+
+    .review-date {
+      font-size: 10px;
+      color: #b2a69c;
+      margin-top: 7px;
+    }
+
+    /* ══════════════════════════════════════════
+       TOAST
+    ══════════════════════════════════════════ */
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 100px);
+      background: var(--accent);
+      color: white;
+      padding: 13px 18px;
+      border-radius: 13px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      width: max-content;
+      max-width: calc(100vw - 40px);
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* ══════════════════════════════════════════
+       LOADING
+    ══════════════════════════════════════════ */
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      padding: 15px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .loading-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: loading 1s infinite alternate;
+    }
+
+    .loading-dot:nth-child(2) {
+      animation-delay: .2s;
+    }
+
+    .loading-dot:nth-child(3) {
+      animation-delay: .4s;
+    }
+
+    @keyframes loading {
+      from {
+        opacity: .25;
+        transform: translateY(0);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(-4px);
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+
+    .footer {
+      text-align: center;
+      padding: 10px 0 25px;
+      color: #b6a99e;
+      font-size: 10px;
+    }
+
+    @media (min-width: 481px) {
+      body {
+        background: #f1e9e2;
+      }
+
+      #app {
+        background: var(--bg);
+        box-shadow: 0 0 40px rgba(0,0,0,0.08);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">🍽️</div>
+
+    <div>
+      <div class="header-title">우리학교 급식</div>
+      <div class="header-sub">Smart Cafeteria Review</div>
+    </div>
+
+    <div class="header-status"></div>
+  </header>
+
+  <!-- USER -->
+  <div class="user-bar">
+    <div class="user-avatar">👨‍🎓</div>
+
+    <div>
+      <div class="user-name" id="userName">학생</div>
+      <div class="user-sub">오늘의 급식을 평가해주세요</div>
+    </div>
+  </div>
+
+  <main class="content">
+
+    <!-- ══════════════════════════════════════
+         TODAY MENU
+    ══════════════════════════════════════ -->
+
+    <section class="card fade-up">
+
+      <div class="today-head">
+
+        <div>
+          <div class="today-date" id="todayDate"></div>
+          <div class="today-title">오늘의 급식</div>
+        </div>
+
+        <div class="today-emoji">🍱</div>
+
+      </div>
+
+      <div class="menu-list" id="todayMenuList">
+
+        <div class="menu-row">
+          <div class="menu-icon">🍚</div>
+
+          <div>
+            <div class="menu-category">밥</div>
+            <div class="menu-name">흰밥</div>
+          </div>
+
+          <div class="menu-rating" id="rating-rice">-</div>
+        </div>
+
+        <div class="menu-row">
+          <div class="menu-icon">🍲</div>
+
+          <div>
+            <div class="menu-category">국</div>
+            <div class="menu-name">미역국</div>
+          </div>
+
+          <div class="menu-rating" id="rating-soup">-</div>
+        </div>
+
+        <div class="menu-row">
+          <div class="menu-icon">🍗</div>
+
+          <div>
+            <div class="menu-category">메인</div>
+            <div class="menu-name">치킨마요</div>
+          </div>
+
+          <div class="menu-rating" id="rating-main">-</div>
+        </div>
+
+        <div class="menu-row">
+          <div class="menu-icon">🥗</div>
+
+          <div>
+            <div class="menu-category">반찬</div>
+            <div class="menu-name">콘샐러드</div>
+          </div>
+
+          <div class="menu-rating" id="rating-side">-</div>
+        </div>
+
+        <div class="menu-row">
+          <div class="menu-icon">🥬</div>
+
+          <div>
+            <div class="menu-category">김치</div>
+            <div class="menu-name">배추김치</div>
+          </div>
+
+          <div class="menu-rating" id="rating-kimchi">-</div>
+        </div>
+
+        <div class="menu-row">
+          <div class="menu-icon">🍓</div>
+
+          <div>
+            <div class="menu-category">후식</div>
+            <div class="menu-name">요거트</div>
+          </div>
+
+          <div class="menu-rating" id="rating-dessert">-</div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════
+         REVIEW
+    ══════════════════════════════════════ -->
+
+    <section class="card fade-up">
+
+      <div class="card-title">Today's Review</div>
+
+      <!-- 별점 -->
+      <div class="rating-wrap">
+
+        <div class="rating-label">
+          오늘 급식은 어땠나요?
+        </div>
+
+        <div class="stars" id="stars">
+
+          <button class="star" data-value="1">★</button>
+          <button class="star" data-value="2">★</button>
+          <button class="star" data-value="3">★</button>
+          <button class="star" data-value="4">★</button>
+          <button class="star" data-value="5">★</button>
+
+        </div>
+
+        <div class="rating-number" id="ratingText">
+          별점을 선택해주세요
+        </div>
+
+      </div>
+
+
+      <!-- 세부 점수 -->
+
+      <div class="score-section">
+
+        <div class="score-row">
+
+          <div class="score-name">
+            😋 맛
+          </div>
+
+          <div class="score-buttons" data-score="taste">
+            <button class="score-btn" data-value="1">1</button>
+            <button class="score-btn" data-value="2">2</button>
+            <button class="score-btn" data-value="3">3</button>
+            <button class="score-btn" data-value="4">4</button>
+            <button class="score-btn" data-value="5">5</button>
+          </div>
+
+        </div>
+
+
+        <div class="score-row">
+
+          <div class="score-name">
+            🍚 양
+          </div>
+
+          <div class="score-buttons" data-score="amount">
+            <button class="score-btn" data-value="1">1</button>
+            <button class="score-btn" data-value="2">2</button>
+            <button class="score-btn" data-value="3">3</button>
+            <button class="score-btn" data-value="4">4</button>
+            <button class="score-btn" data-value="5">5</button>
+          </div>
+
+        </div>
+
+
+        <div class="score-row">
+
+          <div class="score-name">
+            ❤️ 만족도
+          </div>
+
+          <div class="score-buttons" data-score="satisfaction">
+            <button class="score-btn" data-value="1">1</button>
+            <button class="score-btn" data-value="2">2</button>
+            <button class="score-btn" data-value="3">3</button>
+            <button class="score-btn" data-value="4">4</button>
+            <button class="score-btn" data-value="5">5</button>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- 다음에도 먹고 싶은 메뉴 -->
+
+      <label class="input-label">
+        ⭐ 다음에도 먹고 싶은 메뉴
+      </label>
+
+      <div class="choice-grid">
+
+        <div class="choice">
+          <input type="checkbox" id="choice-main" value="치킨마요">
+          <label for="choice-main">🍗 치킨마요</label>
+        </div>
+
+        <div class="choice">
+          <input type="checkbox" id="choice-soup" value="미역국">
+          <label for="choice-soup">🍲 미역국</label>
+        </div>
+
+        <div class="choice">
+          <input type="checkbox" id="choice-side" value="콘샐러드">
+          <label for="choice-side">🥗 콘샐러드</label>
+        </div>
+
+        <div class="choice">
+          <input type="checkbox" id="choice-kimchi" value="배추김치">
+          <label for="choice-kimchi">🥬 배추김치</label>
+        </div>
+
+        <div class="choice">
+          <input type="checkbox" id="choice-dessert" value="요거트">
+          <label for="choice-dessert">🍓 요거트</label>
+        </div>
+
+        <div class="choice">
+          <input type="checkbox" id="choice-rice" value="흰밥">
+          <label for="choice-rice">🍚 흰밥</label>
+        </div>
+
+      </div>
+
+
+      <!-- 리뷰 -->
+
+      <div style="margin-top:20px;">
+
+        <label class="input-label">
+          💬 한줄 리뷰
+        </label>
+
+        <textarea
+          id="reviewComment"
+          class="review-input"
+          maxlength="200"
+          placeholder="오늘 급식에 대한 솔직한 의견을 남겨주세요."
+        ></textarea>
+
+      </div>
+
+
+      <button
+        class="btn btn-primary btn-full"
+        id="submitReview"
+      >
+        ⭐ 리뷰 등록하기
+      </button>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════
+         RECOMMENDATION
+    ══════════════════════════════════════ -->
+
+    <section class="card recommend-card fade-up">
+
+      <div class="recommend-label">
+        AI MENU RECOMMENDATION
+      </div>
+
+      <div class="recommend-title">
+        다음 급식 추천
+      </div>
+
+      <div class="recommend-desc">
+        학생들이 남긴 리뷰와 선호도를 분석해<br>
+        가장 좋아할 만한 메뉴를 추천합니다.
+      </div>
+
+
+      <div class="recommend-menu" id="recommendMenu">
+
+        <div class="loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════
+         POPULAR
+    ══════════════════════════════════════════ -->
+
+    <section class="card">
+
+      <div class="card-title">
+        Popular Menus
+      </div>
+
+      <div class="popular-list" id="popularList">
+
+        <div class="loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════
+         RECENT REVIEWS
+    ══════════════════════════════════════ -->
+
+    <section class="card">
+
+      <div class="card-title">
+        Recent Reviews
+      </div>
+
+      <div class="review-list" id="reviewList">
+
+        <div class="loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <div class="footer">
+      Smart Cafeteria · 학생들의 의견으로 더 맛있는 급식
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+/* ══════════════════════════════════════════
+   FIREBASE INIT
+══════════════════════════════════════════ */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC3SvV8-bTyQClyZlGWybhR3z5vLGXYL0",
+  authDomain: "smart-cafeteria-8a2ce.firebaseapp.com",
+  databaseURL: "https://smart-cafeteria-8a2ce-default-rtdb.firebaseio.com",
+  projectId: "smart-cafeteria-8a2ce",
+  storageBucket: "smart-cafeteria-8a2ce.firebasestorage.app",
+  messagingSenderId: "304671336012",
+  appId: "1:304671336012:web:0fd90cf8e6cc06884176e9",
+  measurementId: "G-JWNDVQC63K"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+
+
+/* ══════════════════════════════════════════
+   오늘 날짜
+══════════════════════════════════════════ */
+
+const today = new Date();
+
+const dateString =
+  today.getFullYear() +
+  "-" +
+  String(today.getMonth() + 1).padStart(2, "0") +
+  "-" +
+  String(today.getDate()).padStart(2, "0");
+
+const koreanDate =
+  today.getFullYear() +
+  "년 " +
+  (today.getMonth() + 1) +
+  "월 " +
+  today.getDate() +
+  "일";
+
+document.getElementById("todayDate").textContent = koreanDate;
+
+
+/* ══════════════════════════════════════════
+   현재 급식 데이터
+══════════════════════════════════════════ */
+
+const todayMenu = {
+  rice: "흰밥",
+  soup: "미역국",
+  main: "치킨마요",
+  side: "콘샐러드",
+  kimchi: "배추김치",
+  dessert: "요거트"
+};
+
+
+/* ══════════════════════════════════════════
+   상태값
+══════════════════════════════════════════ */
+
+let selectedRating = 0;
+
+let scores = {
+  taste: 0,
+  amount: 0,
+  satisfaction: 0
+};
+
+
+/* ══════════════════════════════════════════
+   사용자 이름
+══════════════════════════════════════════ */
+
+const savedName = localStorage.getItem("cafeteriaUserName");
+
+if (savedName) {
+  document.getElementById("userName").textContent = savedName;
+}
+
+
+/* ══════════════════════════════════════════
+   별점
+══════════════════════════════════════════ */
+
+document.querySelectorAll(".star").forEach(star => {
+
+  star.addEventListener("click", () => {
+
+    selectedRating = Number(star.dataset.value);
+
+    updateStars();
+
+  });
+
+});
+
+
+function updateStars() {
+
+  document.querySelectorAll(".star").forEach(star => {
+
+    const value = Number(star.dataset.value);
+
+    if (value <= selectedRating) {
+      star.classList.add("active");
+    } else {
+      star.classList.remove("active");
+    }
+
+  });
+
+
+  const texts = [
+    "",
+    "아쉬웠어요",
+    "조금 아쉬워요",
+    "보통이에요",
+    "맛있었어요!",
+    "최고의 급식이에요! 🔥"
+  ];
+
+  document.getElementById("ratingText").textContent =
+    selectedRating + "점 · " + texts[selectedRating];
+
+}
+
+
+/* ══════════════════════════════════════════
+   세부 점수
+══════════════════════════════════════════ */
+
+document.querySelectorAll(".score-buttons").forEach(group => {
+
+  const type = group.dataset.score;
+
+  group.querySelectorAll(".score-btn").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      const value = Number(button.dataset.value);
+
+      scores[type] = value;
+
+      group.querySelectorAll(".score-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+    });
+
+  });
+
+});
+
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+
+function showToast(message) {
+
+  const toast = document.getElementById("toast");
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2500);
+
+}
+
+
+/* ══════════════════════════════════════════
+   리뷰 등록
+══════════════════════════════════════════ */
+
+document.getElementById("submitReview")
+  .addEventListener("click", async () => {
+
+    if (selectedRating === 0) {
+      showToast("⭐ 별점을 먼저 선택해주세요.");
+      return;
+    }
+
+    if (scores.taste === 0 ||
+        scores.amount === 0 ||
+        scores.satisfaction === 0) {
+
+      showToast("맛, 양, 만족도를 모두 평가해주세요.");
+      return;
+    }
+
+
+    const comment =
+      document.getElementById("reviewComment").value.trim();
+
+
+    if (!comment) {
+      showToast("💬 리뷰 내용을 입력해주세요.");
+      return;
+    }
+
+
+    const likedMenus = [];
+
+    document
+      .querySelectorAll(".choice input:checked")
+      .forEach(input => {
+        likedMenus.push(input.value);
+      });
+
+
+    const review = {
+
+      userName:
+        document.getElementById("userName").textContent || "학생",
+
+      date: dateString,
+
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
+
+      rating: selectedRating,
+
+      taste: scores.taste,
+
+      amount: scores.amount,
+
+      satisfaction: scores.satisfaction,
+
+      comment: comment,
+
+      likedMenus: likedMenus,
+
+      menu: todayMenu
+
+    };
+
+
+    try {
+
+      const newReview =
+        db.ref("reviews").push();
+
+      await newReview.set(review);
+
+      showToast("✅ 리뷰가 등록되었습니다!");
+
+      resetReviewForm();
+
+      loadReviews();
+
+      loadMenuStatistics();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showToast(
+        "리뷰 저장에 실패했습니다. Firebase 설정을 확인해주세요."
+      );
+
+    }
+
+  });
+
+
+/* ══════════════════════════════════════════
+   리뷰 폼 초기화
+══════════════════════════════════════════ */
+
+function resetReviewForm() {
+
+  selectedRating = 0;
+
+  scores = {
+    taste: 0,
+    amount: 0,
+    satisfaction: 0
+  };
+
+
+  document.querySelectorAll(".star")
+    .forEach(star => star.classList.remove("active"));
+
+
+  document.querySelectorAll(".score-btn")
+    .forEach(button => button.classList.remove("active"));
+
+
+  document.querySelectorAll(".choice input")
+    .forEach(input => input.checked = false);
+
+
+  document.getElementById("reviewComment").value = "";
+
+  document.getElementById("ratingText").textContent =
+    "별점을 선택해주세요";
+
+}
+
+
+/* ══════════════════════════════════════════
+   리뷰 불러오기
+══════════════════════════════════════════ */
+
+function loadReviews() {
+
+  db.ref("reviews")
+    .orderByChild("timestamp")
+    .limitToLast(10)
+    .once("value")
+    .then(snapshot => {
+
+      const reviews = [];
+
+      snapshot.forEach(child => {
+
+        reviews.push({
+          id: child.key,
+          ...child.val()
+        });
+
+      });
+
+      reviews.reverse();
+
+      renderReviews(reviews);
+
+    })
+    .catch(error => {
+
+      console.error(error);
+
+      document.getElementById("reviewList").innerHTML =
+        `
+        <div style="text-align:center;color:#8B7355;font-size:12px;padding:15px;">
+          리뷰를 불러오지 못했습니다.
+        </div>
+        `;
+
+    });
+
+}
+
+
+/* ══════════════════════════════════════════
+   리뷰 렌더링
+══════════════════════════════════════════ */
+
+function renderReviews(reviews) {
+
+  const container =
+    document.getElementById("reviewList");
+
+
+  if (!reviews.length) {
+
+    container.innerHTML =
+      `
+      <div style="
+        text-align:center;
+        padding:20px;
+        color:#8B7355;
+        font-size:12px;
+      ">
+        아직 등록된 리뷰가 없습니다.<br>
+        첫 번째 리뷰를 남겨보세요! 🍽️
+      </div>
+      `;
+
+    return;
+  }
+
+
+  container.innerHTML = reviews.map(review => {
+
+    const stars = "★".repeat(review.rating || 0) +
+                  "☆".repeat(5 - (review.rating || 0));
+
+
+    const safeComment =
+      escapeHtml(review.comment || "");
+
+
+    return `
+      <div class="review-item fade-up">
+
+        <div class="review-top">
+
+          <div class="review-user">
+            👤 ${escapeHtml(review.userName || "학생")}
+          </div>
+
+          <div class="review-stars">
+            ${stars}
+          </div>
+
+        </div>
+
+        <div class="review-comment">
+          ${safeComment}
+        </div>
+
+        <div class="review-date">
+          ${review.date || ""}
+        </div>
+
+      </div>
+    `;
+
+  }).join("");
+
+}
+
+
+/* ══════════════════════════════════════════
+   HTML ESCAPE
+══════════════════════════════════════════ */
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* ══════════════════════════════════════════
+   메뉴 통계
+══════════════════════════════════════════ */
+
+function loadMenuStatistics() {
+
+  db.ref("reviews")
+    .once("value")
+    .then(snapshot => {
+
+      const statistics = {};
+
+      snapshot.forEach(child => {
+
+        const review = child.val();
+
+
+        /*
+         * 좋아요 메뉴
+         */
+
+        if (Array.isArray(review.likedMenus)) {
+
+          review.likedMenus.forEach(menu => {
+
+            if (!statistics[menu]) {
+
+              statistics[menu] = {
+                likes: 0,
+                scoreTotal: 0,
+                scoreCount: 0
+              };
+
+            }
+
+            statistics[menu].likes++;
+
+            statistics[menu].scoreTotal +=
+              Number(review.rating || 0);
+
+            statistics[menu].scoreCount++;
+
+          });
+
+        }
+
+      });
+
+
+      renderPopular(statistics);
+
+      renderRecommendation(statistics);
+
+      loadIndividualRatings();
+
+    })
+    .catch(error => {
+
+      console.error(error);
+
+    });
+
+}
+
+
+/* ══════════════════════════════════════════
+   인기 메뉴
+══════════════════════════════════════════ */
+
+function renderPopular(statistics) {
+
+  const container =
+    document.getElementById("popularList");
+
+
+  const menus = Object.entries(statistics)
+    .map(([name, data]) => {
+
+      return {
+
+        name,
+
+        likes: data.likes,
+
+        score:
+          data.scoreCount
+            ? data.scoreTotal / data.scoreCount
+            : 0
+
+      };
+
+    })
+    .sort((a, b) => {
+
+      if (b.likes !== a.likes) {
+        return b.likes - a.likes;
+      }
+
+      return b.score - a.score;
+
+    })
+    .slice(0, 5);
+
+
+  if (!menus.length) {
+
+    container.innerHTML =
+      `
+      <div style="
+        text-align:center;
+        padding:15px;
+        color:#8B7355;
+        font-size:12px;
+      ">
+        리뷰가 쌓이면 인기 메뉴가 표시됩니다.
+      </div>
+      `;
+
+    return;
+  }
+
+
+  container.innerHTML = menus.map((menu, index) => {
+
+    return `
+      <div class="popular-item">
+
+        <div class="rank ${index < 3 ? "top" : ""}">
+          ${index + 1}
+        </div>
+
+        <div class="popular-name">
+          ${escapeHtml(menu.name)}
+        </div>
+
+        <div class="popular-count">
+          ❤️ ${menu.likes}
+        </div>
+
+        <div class="popular-score">
+          ${menu.score.toFixed(1)}
+        </div>
+
+      </div>
+    `;
+
+  }).join("");
+
+}
+
+
+/* ══════════════════════════════════════════
+   다음 메뉴 추천
+══════════════════════════════════════════ */
+
+function renderRecommendation(statistics) {
+
+  const container =
+    document.getElementById("recommendMenu");
+
+
+  const menus = Object.entries(statistics)
+    .map(([name, data]) => {
+
+      /*
+       * 추천 점수
+       *
+       * 좋아요 60%
+       * 평균 별점 40%
+       */
+
+      const average =
+        data.scoreCount
+          ? data.scoreTotal / data.scoreCount
+          : 0;
+
+
+      const recommendationScore =
+        (data.likes * 0.6) +
+        (average * 10 * 0.4);
+
+
+      return {
+
+        name,
+
+        likes: data.likes,
+
+        average,
+
+        recommendationScore
+
+      };
+
+    })
+    .sort(
+      (a, b) =>
+        b.recommendationScore -
+        a.recommendationScore
+    );
+
+
+  if (!menus.length) {
+
+    container.innerHTML = `
+      <div class="recommend-item">
+
+        <div class="recommend-item-icon">
+          🍽️
+        </div>
+
+        <div class="recommend-item-name">
+          리뷰를 남겨주시면 추천 메뉴가 생성됩니다.
+        </div>
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  const recommended =
+    menus.slice(0, 3);
+
+
+  container.innerHTML =
+    recommended.map((menu, index) => {
+
+      const icons = [
+        "🍗",
+        "🍜",
+        "🥗"
+      ];
+
+
+      const score =
+        Math.min(
+          99,
+          Math.round(
+            65 +
+            menu.average * 6 +
+            menu.likes * 3
+          )
+        );
+
+
+      return `
+        <div class="recommend-item pop">
+
+          <div class="recommend-item-icon">
+            ${icons[index] || "🍽️"}
+          </div>
+
+          <div class="recommend-item-name">
+            ${escapeHtml(menu.name)}
+          </div>
+
+          <div class="recommend-score">
+            ${score}% 추천
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+}
+
+
+/* ══════════════════════════════════════════
+   메뉴별 별점
+══════════════════════════════════════════ */
+
+function loadIndividualRatings() {
+
+  db.ref("reviews")
+    .once("value")
+    .then(snapshot => {
+
+      const menuScores = {};
+
+
+      snapshot.forEach(child => {
+
+        const review = child.val();
+
+
+        if (!review.menu) {
+          return;
+        }
+
+
+        Object.entries(review.menu).forEach(
+          ([category, menuName]) => {
+
+            if (!menuScores[category]) {
+
+              menuScores[category] = {
+                total: 0,
+                count: 0
+              };
+
+            }
+
+
+            menuScores[category].total +=
+              Number(review.rating || 0);
+
+            menuScores[category].count++;
+
+          }
+        );
+
+      });
+
+
+      const categoryIds = {
+        rice: "rating-rice",
+        soup: "rating-soup",
+        main: "rating-main",
+        side: "rating-side",
+        kimchi: "rating-kimchi",
+        dessert: "rating-dessert"
+      };
+
+
+      Object.entries(categoryIds).forEach(
+        ([category, elementId]) => {
+
+          const element =
+            document.getElementById(elementId);
+
+
+          if (
+            menuScores[category] &&
+            menuScores[category].count
+          ) {
+
+            const average =
+              menuScores[category].total /
+              menuScores[category].count;
+
+
+            element.textContent =
+              "★ " + average.toFixed(1);
+
+          } else {
+
+            element.textContent = "-";
+
+          }
+
+        }
+      );
+
+    });
+
+}
+
+
+/* ══════════════════════════════════════════
+   Firebase 실시간 리뷰 업데이트
+══════════════════════════════════════════ */
+
+db.ref("reviews").on("value", () => {
+
+  loadReviews();
+
+  loadMenuStatistics();
+
+});
+
+
+/* ══════════════════════════════════════════
+   초기 실행
+══════════════════════════════════════════ */
+
+loadReviews();
+
+loadMenuStatistics();
+
+
+/* ══════════════════════════════════════════
+   사용자 이름 입력 기능
+══════════════════════════════════════════ */
+
+document
+  .querySelector(".user-avatar")
+  .addEventListener("click", () => {
+
+    const currentName =
+      localStorage.getItem("cafeteriaUserName") || "";
+
+
+    const name =
+      prompt(
+        "사용자 이름을 입력하세요.",
+        currentName
+      );
+
+
+    if (name && name.trim()) {
+
+      const cleanName =
+        name.trim().substring(0, 20);
+
+      localStorage.setItem(
+        "cafeteriaUserName",
+        cleanName
+      );
+
+      document.getElementById("userName")
+        .textContent = cleanName;
+
+      showToast("👋 이름이 저장되었습니다.");
+
+    }
+
+  });
+
+</script>
+
+</body>
+</html>
