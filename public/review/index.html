@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -7,644 +8,491 @@
 <title>우리학교 급식</title>
 
 <style>
-*{
-  box-sizing:border-box;
+* {
+  box-sizing: border-box;
 }
 
-body{
-  margin:0;
-  background:#f5f7fb;
-  color:#111827;
+body {
+  margin: 0;
+  background: #f5f7fb;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     "Noto Sans KR",
     sans-serif;
+  color: #20242d;
 }
 
-button,
-input,
-textarea{
-  font-family:inherit;
-}
-
-.container{
-  width:100%;
-  max-width:720px;
-  margin:0 auto;
-  padding:24px 16px 50px;
+.container {
+  width: min(760px, 94%);
+  margin: 0 auto;
+  padding: 30px 0 60px;
 }
 
 /* HEADER */
 
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:25px;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
 }
 
-.header-title{
-  font-size:26px;
-  font-weight:800;
-  letter-spacing:-.7px;
+.header-title {
+  font-size: 28px;
+  font-weight: 800;
 }
 
-.header-sub{
-  margin-top:4px;
-  font-size:13px;
-  color:#6b7280;
+.header-sub {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #8b93a1;
 }
 
-.header-status{
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  background:#22c55e;
-  box-shadow:0 0 0 5px rgba(34,197,94,.12);
+.header-status {
+  font-size: 13px;
+  color: #4c8bf5;
 }
 
 /* USER */
 
-.user-card{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  background:#fff;
-  border-radius:20px;
-  padding:18px;
-  margin-bottom:18px;
-  box-shadow:0 5px 20px rgba(0,0,0,.05);
+.user-box {
+  background: white;
+  border-radius: 22px;
+  padding: 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.05);
 }
 
-.user-avatar{
-  width:48px;
-  height:48px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%;
-  background:#eef2ff;
-  font-size:23px;
-  flex-shrink:0;
+.user-name {
+  font-size: 22px;
+  font-weight: 800;
 }
 
-.user-name{
-  font-size:18px;
-  font-weight:800;
+.user-sub {
+  margin-top: 5px;
+  color: #9299a6;
+  font-size: 14px;
 }
 
-.user-sub{
-  margin-top:3px;
-  color:#6b7280;
-  font-size:13px;
+/* LOGIN */
+
+.login-card {
+  background: white;
+  border-radius: 22px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.05);
 }
 
-.logout-btn{
-  margin-left:auto;
-  border:0;
-  background:#f3f4f6;
-  padding:8px 12px;
-  border-radius:10px;
-  cursor:pointer;
-  font-size:12px;
-  color:#4b5563;
+.login-card h2 {
+  margin-top: 0;
+}
+
+.login-input {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #e1e5ec;
+  border-radius: 12px;
+  font-size: 16px;
+  outline: none;
+}
+
+.login-input:focus {
+  border-color: #4c8bf5;
 }
 
 /* CARD */
 
-.card{
-  background:#fff;
-  border-radius:22px;
-  padding:22px;
-  margin-bottom:18px;
-  box-shadow:0 5px 20px rgba(0,0,0,.045);
+.card {
+  background: white;
+  border-radius: 22px;
+  padding: 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.05);
 }
 
-.fade-up{
-  animation:fadeUp .45s ease;
-}
-
-@keyframes fadeUp{
-  from{
-    opacity:0;
-    transform:translateY(10px);
-  }
-
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-.card-title{
-  font-size:18px;
-  font-weight:800;
-  margin-bottom:18px;
+.card-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 18px;
 }
 
 /* TODAY MENU */
 
-.today-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:18px;
+.today-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-.today-date{
-  font-size:13px;
-  color:#6b7280;
+.today-date {
+  font-size: 13px;
+  color: #8d95a3;
 }
 
-.today-title{
-  margin-top:4px;
-  font-size:23px;
-  font-weight:800;
+.today-title {
+  font-size: 23px;
+  font-weight: 800;
+  margin-top: 5px;
 }
 
-.today-emoji{
-  font-size:38px;
+.today-emoji {
+  font-size: 40px;
 }
 
-.menu-list{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.menu-row{
-  display:flex;
-  align-items:center;
-  gap:13px;
-  padding:13px;
-  border-radius:14px;
-  background:#f8fafc;
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 15px;
+  background: #f7f8fa;
 }
 
-.menu-icon{
-  width:42px;
-  height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:12px;
-  background:#fff;
-  font-size:21px;
-  flex-shrink:0;
+.menu-icon {
+  font-size: 27px;
 }
 
-.menu-category{
-  font-size:11px;
-  color:#9ca3af;
-  margin-bottom:2px;
+.menu-category {
+  font-size: 12px;
+  color: #9299a6;
 }
 
-.menu-name{
-  font-size:14px;
-  font-weight:700;
+.menu-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 3px;
 }
 
-.menu-rating{
-  margin-left:auto;
-  min-width:38px;
-  padding:6px 9px;
-  border-radius:9px;
-  background:#eef2ff;
-  color:#4f46e5;
-  font-size:12px;
-  font-weight:700;
-  text-align:center;
+.menu-rating {
+  margin-left: auto;
+  font-weight: 800;
+  color: #ffb300;
 }
 
 /* REVIEW */
 
-.rating-wrap{
-  text-align:center;
-  padding:10px 0 25px;
-  border-bottom:1px solid #f0f0f0;
+.rating-wrap {
+  text-align: center;
+  padding: 10px 0 25px;
 }
 
-.rating-label{
-  font-size:14px;
-  color:#6b7280;
-  margin-bottom:12px;
+.rating-label {
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
-.stars{
-  display:flex;
-  justify-content:center;
-  gap:4px;
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
 }
 
-.star{
-  border:0;
-  background:transparent;
-  color:#d1d5db;
-  font-size:36px;
-  padding:2px;
-  cursor:pointer;
-  transition:.15s;
+.star {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 40px;
+  color: #dfe3e8;
+  transition: .15s;
 }
 
-.star.active{
-  color:#fbbf24;
+.star.active {
+  color: #ffc107;
 }
 
-.star:hover{
-  transform:scale(1.1);
+.rating-number {
+  margin-top: 8px;
+  color: #8d95a3;
 }
 
-.rating-number{
-  margin-top:6px;
-  font-size:13px;
-  color:#6b7280;
+/* SCORE */
+
+.score-section {
+  margin-bottom: 25px;
 }
 
-.score-section{
-  padding:22px 0;
-  border-bottom:1px solid #f0f0f0;
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
 }
 
-.score-row{
-  display:flex;
-  align-items:center;
-  margin-bottom:15px;
+.score-name {
+  font-weight: 700;
 }
 
-.score-row:last-child{
-  margin-bottom:0;
+.score-buttons {
+  display: flex;
+  gap: 5px;
 }
 
-.score-name{
-  width:80px;
-  font-size:14px;
-  font-weight:700;
-  flex-shrink:0;
+.score-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e0e4ea;
+  background: white;
+  border-radius: 9px;
+  cursor: pointer;
 }
 
-.score-buttons{
-  display:flex;
-  gap:6px;
+.score-btn.active {
+  background: #4c8bf5;
+  color: white;
+  border-color: #4c8bf5;
 }
 
-.score-btn{
-  width:34px;
-  height:34px;
-  border:1px solid #e5e7eb;
-  background:#fff;
-  border-radius:9px;
-  cursor:pointer;
-  color:#6b7280;
-  font-size:13px;
-  font-weight:700;
+/* CHOICE */
+
+.input-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
-.score-btn.active{
-  background:#4f46e5;
-  color:#fff;
-  border-color:#4f46e5;
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
 }
 
-.input-label{
-  display:block;
-  margin-top:20px;
-  margin-bottom:10px;
-  font-size:14px;
-  font-weight:700;
+.choice {
+  position: relative;
 }
 
-.choice-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:9px;
+.choice input {
+  display: none;
 }
 
-.choice input{
-  display:none;
+.choice label {
+  display: block;
+  padding: 13px;
+  border: 1px solid #e2e5ea;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 14px;
 }
 
-.choice label{
-  display:block;
-  padding:12px 10px;
-  border:1px solid #e5e7eb;
-  border-radius:12px;
-  text-align:center;
-  font-size:13px;
-  cursor:pointer;
-  transition:.15s;
+.choice input:checked + label {
+  background: #edf4ff;
+  border-color: #4c8bf5;
+  color: #3475dc;
+  font-weight: 700;
 }
 
-.choice input:checked+label{
-  background:#eef2ff;
-  border-color:#6366f1;
-  color:#4f46e5;
-  font-weight:700;
+/* TEXTAREA */
+
+.review-input,
+.recommend-input {
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+  border: 1px solid #e1e5ec;
+  border-radius: 13px;
+  padding: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
 }
 
-.review-input{
-  width:100%;
-  min-height:110px;
-  resize:vertical;
-  padding:14px;
-  border:1px solid #e5e7eb;
-  border-radius:14px;
-  outline:none;
-  font-size:14px;
-  line-height:1.6;
-}
-
-.review-input:focus{
-  border-color:#6366f1;
+.review-input:focus,
+.recommend-input:focus {
+  border-color: #4c8bf5;
 }
 
 /* BUTTON */
 
-.btn{
-  border:0;
-  cursor:pointer;
-  border-radius:13px;
-  padding:14px 18px;
-  font-size:14px;
-  font-weight:700;
+.btn {
+  border: 0;
+  cursor: pointer;
+  border-radius: 13px;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 700;
 }
 
-.btn-primary{
-  background:#4f46e5;
-  color:#fff;
+.btn-primary {
+  background: #4c8bf5;
+  color: white;
 }
 
-.btn-primary:hover{
-  background:#4338ca;
-}
-
-.btn-full{
-  width:100%;
-  margin-top:20px;
+.btn-full {
+  width: 100%;
+  margin-top: 20px;
 }
 
 /* RECOMMEND */
 
-.recommend-card{
-  background:linear-gradient(135deg,#eef2ff,#f5f3ff);
+.recommend-card {
+  background: linear-gradient(135deg, #f1f6ff, #ffffff);
 }
 
-.recommend-label{
-  font-size:11px;
-  font-weight:800;
-  color:#6366f1;
-  letter-spacing:1px;
+.recommend-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #4c8bf5;
+  letter-spacing: 1px;
 }
 
-.recommend-title{
-  margin-top:6px;
-  font-size:22px;
-  font-weight:800;
+.recommend-title {
+  font-size: 23px;
+  font-weight: 800;
+  margin-top: 6px;
 }
 
-.recommend-desc{
-  margin-top:8px;
-  color:#6b7280;
-  font-size:13px;
-  line-height:1.6;
+.recommend-desc {
+  margin-top: 8px;
+  color: #8a929f;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
-.recommend-menu{
-  margin-top:18px;
+.recommend-input-wrap {
+  margin-top: 20px;
+}
+
+.recommend-input {
+  min-height: 60px;
+}
+
+.recommend-result {
+  margin-top: 15px;
+}
+
+.recommend-item {
+  padding: 14px;
+  background: white;
+  border-radius: 13px;
+  margin-bottom: 8px;
+  font-weight: 700;
 }
 
 /* POPULAR */
 
 .popular-list,
-.review-list{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.popular-item{
-  display:flex;
-  align-items:center;
-  padding:14px;
-  border-radius:13px;
-  background:#f8fafc;
+.popular-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #f7f8fa;
+  border-radius: 13px;
 }
 
-.popular-rank{
-  width:30px;
-  font-weight:800;
-  color:#6366f1;
+.popular-name {
+  font-weight: 700;
 }
 
-.popular-name{
-  font-size:14px;
-  font-weight:700;
+.popular-rating {
+  color: #ffb300;
+  font-weight: 800;
 }
 
-.popular-score{
-  margin-left:auto;
-  font-size:13px;
-  font-weight:700;
+/* REVIEW LIST */
+
+.review-item {
+  padding: 15px;
+  border-radius: 13px;
+  background: #f7f8fa;
 }
 
-/* REVIEWS */
-
-.review-item{
-  padding:14px;
-  border-radius:13px;
-  background:#f8fafc;
+.review-top {
+  display: flex;
+  justify-content: space-between;
 }
 
-.review-header{
-  display:flex;
-  justify-content:space-between;
+.review-student {
+  font-weight: 700;
 }
 
-.review-user{
-  font-size:13px;
-  font-weight:700;
+.review-stars {
+  color: #ffc107;
 }
 
-.review-stars{
-  color:#fbbf24;
-  font-size:13px;
+.review-comment {
+  margin-top: 8px;
+  color: #636b78;
+  font-size: 14px;
 }
 
-.review-content{
-  margin-top:7px;
-  font-size:13px;
-  line-height:1.5;
-  color:#4b5563;
+.loading {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 20px;
 }
 
-/* LOADING */
-
-.loading{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
-  min-height:50px;
+.loading-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #b9c0ca;
+  animation: loading 1s infinite alternate;
 }
 
-.loading-dot{
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:#9ca3af;
-  animation:loading 1s infinite ease-in-out;
+.loading-dot:nth-child(2) {
+  animation-delay: .2s;
 }
 
-.loading-dot:nth-child(2){
-  animation-delay:.15s;
+.loading-dot:nth-child(3) {
+  animation-delay: .4s;
 }
 
-.loading-dot:nth-child(3){
-  animation-delay:.3s;
-}
-
-@keyframes loading{
-  0%,80%,100%{
-    transform:scale(.7);
-    opacity:.5;
+@keyframes loading {
+  from {
+    opacity: .3;
+    transform: translateY(0);
   }
-
-  40%{
-    transform:scale(1);
-    opacity:1;
+  to {
+    opacity: 1;
+    transform: translateY(-5px);
   }
 }
 
-/* FOOTER */
-
-.footer{
-  text-align:center;
-  margin-top:30px;
-  font-size:12px;
-  color:#9ca3af;
+.footer {
+  text-align: center;
+  color: #9aa1ad;
+  font-size: 12px;
+  margin-top: 30px;
 }
 
-/* LOGIN */
+/* MOBILE */
 
-.login-overlay{
-  position:fixed;
-  inset:0;
-  z-index:99999;
+@media(max-width:600px) {
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  padding:20px;
-
-  background:rgba(245,247,251,.97);
-  backdrop-filter:blur(15px);
-
-  transition:opacity .3s ease,
-             visibility .3s ease;
-}
-
-.login-overlay.hidden{
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-}
-
-.login-box{
-  width:100%;
-  max-width:390px;
-
-  padding:35px 27px;
-
-  background:#fff;
-
-  border-radius:25px;
-
-  box-shadow:
-    0 25px 70px rgba(0,0,0,.12);
-
-  text-align:center;
-}
-
-.login-icon{
-  font-size:48px;
-  margin-bottom:12px;
-}
-
-.login-title{
-  font-size:27px;
-  font-weight:800;
-  letter-spacing:-.7px;
-}
-
-.login-subtitle{
-  margin-top:8px;
-  margin-bottom:25px;
-  color:#6b7280;
-  font-size:14px;
-}
-
-.login-input{
-  width:100%;
-  padding:15px;
-
-  border:1px solid #e5e7eb;
-  border-radius:13px;
-
-  outline:none;
-
-  font-size:16px;
-  text-align:center;
-}
-
-.login-input:focus{
-  border-color:#6366f1;
-  box-shadow:
-    0 0 0 3px rgba(99,102,241,.12);
-}
-
-.login-message{
-  min-height:20px;
-  margin-top:11px;
-  font-size:13px;
-  color:#ef4444;
-}
-
-.login-loading{
-  opacity:.6;
-  pointer-events:none;
-}
-
-@media(max-width:500px){
-
-  .container{
-    padding:18px 12px 40px;
+  .container {
+    width: 92%;
   }
 
-  .card{
-    padding:18px;
+  .header-title {
+    font-size: 24px;
   }
 
-  .choice-grid{
-    grid-template-columns:1fr;
+  .score-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 
-  .score-name{
-    width:70px;
-  }
-
-  .score-buttons{
-    gap:4px;
-  }
-
-  .score-btn{
-    width:32px;
-    height:32px;
-  }
-
-  .star{
-    font-size:32px;
+  .choice-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
@@ -652,62 +500,11 @@ textarea{
 
 <body>
 
-<!-- =====================================================
-     LOGIN
-====================================================== -->
-
-<div id="loginOverlay" class="login-overlay">
-
-  <div class="login-box">
-
-    <div class="login-icon">
-      🍱
-    </div>
-
-    <div class="login-title">
-      우리학교 급식
-    </div>
-
-    <div class="login-subtitle">
-      학생 이름으로 로그인해주세요
-    </div>
-
-    <input
-      type="text"
-      id="studentNameInput"
-      class="login-input"
-      placeholder="이름을 입력하세요"
-      autocomplete="off"
-      maxlength="20"
-    >
-
-    <button
-      type="button"
-      id="studentLoginBtn"
-      class="btn btn-primary btn-full"
-    >
-      로그인
-    </button>
-
-    <div
-      id="loginMessage"
-      class="login-message"
-    ></div>
-
-  </div>
-
-</div>
-
-
-<!-- =====================================================
-     MAIN
-====================================================== -->
-
 <div class="container">
 
   <!-- HEADER -->
 
-  <div class="header">
+  <header class="header">
 
     <div>
       <div class="header-title">
@@ -719,48 +516,65 @@ textarea{
       </div>
     </div>
 
-    <div class="header-status"></div>
+    <div class="header-status" id="headerStatus">
+      로그인 필요
+    </div>
 
-  </div>
+  </header>
+
+
+  <!-- LOGIN -->
+
+  <section class="login-card" id="loginCard">
+
+    <h2>학생 로그인</h2>
+
+    <p style="color:#8d95a3;font-size:14px;">
+      Firebase에 등록된 이름을 입력해주세요.
+    </p>
+
+    <input
+      type="text"
+      id="nameInput"
+      class="login-input"
+      placeholder="이름을 입력하세요"
+      autocomplete="off"
+    >
+
+    <button
+      class="btn btn-primary btn-full"
+      id="loginButton"
+    >
+      학생으로 로그인
+    </button>
+
+    <div
+      id="loginMessage"
+      style="margin-top:12px;text-align:center;color:#e05252;font-size:13px;"
+    ></div>
+
+  </section>
 
 
   <!-- USER -->
 
-  <div class="user-card">
+  <div class="user-box">
 
-    <div class="user-avatar">
-      👨‍🎓
-    </div>
-
-    <div>
-
-      <div
-        class="user-name"
-        id="userName"
-      >
-        학생
-      </div>
-
-      <div class="user-sub">
-        오늘의 급식을 평가해주세요
-      </div>
-
-    </div>
-
-    <button
-      type="button"
-      class="logout-btn"
-      id="logoutBtn"
+    <div
+      class="user-name"
+      id="userName"
     >
-      로그아웃
-    </button>
+      학생
+    </div>
+
+    <div class="user-sub">
+      오늘의 급식을 평가해주세요
+    </div>
 
   </div>
 
 
-  <!-- =================================================
-       TODAY MENU
-  ================================================== -->
+  <!-- TODAY MENU -->
 
   <section class="card fade-up">
 
@@ -791,170 +605,11 @@ textarea{
       id="todayMenuList"
     >
 
-      <div class="menu-row">
+      <div class="loading">
 
-        <div class="menu-icon">
-          🍚
-        </div>
-
-        <div>
-
-          <div class="menu-category">
-            밥
-          </div>
-
-          <div class="menu-name">
-            흰밥
-          </div>
-
-        </div>
-
-        <div
-          class="menu-rating"
-          id="rating-rice"
-        >
-          -
-        </div>
-
-      </div>
-
-
-      <div class="menu-row">
-
-        <div class="menu-icon">
-          🍲
-        </div>
-
-        <div>
-
-          <div class="menu-category">
-            국
-          </div>
-
-          <div class="menu-name">
-            미역국
-          </div>
-
-        </div>
-
-        <div
-          class="menu-rating"
-          id="rating-soup"
-        >
-          -
-        </div>
-
-      </div>
-
-
-      <div class="menu-row">
-
-        <div class="menu-icon">
-          🍗
-        </div>
-
-        <div>
-
-          <div class="menu-category">
-            메인
-          </div>
-
-          <div class="menu-name">
-            치킨마요
-          </div>
-
-        </div>
-
-        <div
-          class="menu-rating"
-          id="rating-main"
-        >
-          -
-        </div>
-
-      </div>
-
-
-      <div class="menu-row">
-
-        <div class="menu-icon">
-          🥗
-        </div>
-
-        <div>
-
-          <div class="menu-category">
-            반찬
-          </div>
-
-          <div class="menu-name">
-            콘샐러드
-          </div>
-
-        </div>
-
-        <div
-          class="menu-rating"
-          id="rating-side"
-        >
-          -
-        </div>
-
-      </div>
-
-
-      <div class="menu-row">
-
-        <div class="menu-icon">
-          🥬
-        </div>
-
-        <div>
-
-          <div class="menu-category">
-            김치
-          </div>
-
-          <div class="menu-name">
-            배추김치
-          </div>
-
-        </div>
-
-        <div
-          class="menu-rating"
-          id="rating-kimchi"
-        >
-          -
-        </div>
-
-      </div>
-
-
-      <div class="menu-row">
-
-        <div class="menu-icon">
-          🍓
-        </div>
-
-        <div>
-
-          <div class="menu-category">
-            후식
-          </div>
-
-          <div class="menu-name">
-            요거트
-          </div>
-
-        </div>
-
-        <div
-          class="menu-rating"
-          id="rating-dessert"
-        >
-          -
-        </div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
 
       </div>
 
@@ -963,9 +618,7 @@ textarea{
   </section>
 
 
-  <!-- =================================================
-       REVIEW
-  ================================================== -->
+  <!-- REVIEW -->
 
   <section class="card fade-up">
 
@@ -973,6 +626,8 @@ textarea{
       Today's Review
     </div>
 
+
+    <!-- 별점 -->
 
     <div class="rating-wrap">
 
@@ -985,35 +640,25 @@ textarea{
         id="stars"
       >
 
-        <button
-          class="star"
-          data-value="1"
-          type="button"
-        >★</button>
+        <button class="star" data-value="1">
+          ★
+        </button>
 
-        <button
-          class="star"
-          data-value="2"
-          type="button"
-        >★</button>
+        <button class="star" data-value="2">
+          ★
+        </button>
 
-        <button
-          class="star"
-          data-value="3"
-          type="button"
-        >★</button>
+        <button class="star" data-value="3">
+          ★
+        </button>
 
-        <button
-          class="star"
-          data-value="4"
-          type="button"
-        >★</button>
+        <button class="star" data-value="4">
+          ★
+        </button>
 
-        <button
-          class="star"
-          data-value="5"
-          type="button"
-        >★</button>
+        <button class="star" data-value="5">
+          ★
+        </button>
 
       </div>
 
@@ -1026,6 +671,8 @@ textarea{
 
     </div>
 
+
+    <!-- 세부 점수 -->
 
     <div class="score-section">
 
@@ -1040,35 +687,11 @@ textarea{
           data-score="taste"
         >
 
-          <button
-            class="score-btn"
-            data-value="1"
-            type="button"
-          >1</button>
-
-          <button
-            class="score-btn"
-            data-value="2"
-            type="button"
-          >2</button>
-
-          <button
-            class="score-btn"
-            data-value="3"
-            type="button"
-          >3</button>
-
-          <button
-            class="score-btn"
-            data-value="4"
-            type="button"
-          >4</button>
-
-          <button
-            class="score-btn"
-            data-value="5"
-            type="button"
-          >5</button>
+          <button class="score-btn" data-value="1">1</button>
+          <button class="score-btn" data-value="2">2</button>
+          <button class="score-btn" data-value="3">3</button>
+          <button class="score-btn" data-value="4">4</button>
+          <button class="score-btn" data-value="5">5</button>
 
         </div>
 
@@ -1086,35 +709,11 @@ textarea{
           data-score="amount"
         >
 
-          <button
-            class="score-btn"
-            data-value="1"
-            type="button"
-          >1</button>
-
-          <button
-            class="score-btn"
-            data-value="2"
-            type="button"
-          >2</button>
-
-          <button
-            class="score-btn"
-            data-value="3"
-            type="button"
-          >3</button>
-
-          <button
-            class="score-btn"
-            data-value="4"
-            type="button"
-          >4</button>
-
-          <button
-            class="score-btn"
-            data-value="5"
-            type="button"
-          >5</button>
+          <button class="score-btn" data-value="1">1</button>
+          <button class="score-btn" data-value="2">2</button>
+          <button class="score-btn" data-value="3">3</button>
+          <button class="score-btn" data-value="4">4</button>
+          <button class="score-btn" data-value="5">5</button>
 
         </div>
 
@@ -1132,35 +731,11 @@ textarea{
           data-score="satisfaction"
         >
 
-          <button
-            class="score-btn"
-            data-value="1"
-            type="button"
-          >1</button>
-
-          <button
-            class="score-btn"
-            data-value="2"
-            type="button"
-          >2</button>
-
-          <button
-            class="score-btn"
-            data-value="3"
-            type="button"
-          >3</button>
-
-          <button
-            class="score-btn"
-            data-value="4"
-            type="button"
-          >4</button>
-
-          <button
-            class="score-btn"
-            data-value="5"
-            type="button"
-          >5</button>
+          <button class="score-btn" data-value="1">1</button>
+          <button class="score-btn" data-value="2">2</button>
+          <button class="score-btn" data-value="3">3</button>
+          <button class="score-btn" data-value="4">4</button>
+          <button class="score-btn" data-value="5">5</button>
 
         </div>
 
@@ -1169,80 +744,21 @@ textarea{
     </div>
 
 
+    <!-- 다음에도 먹고 싶은 메뉴 -->
+
     <label class="input-label">
       ⭐ 다음에도 먹고 싶은 메뉴
     </label>
 
-    <div class="choice-grid">
-
-      <div class="choice">
-        <input
-          type="checkbox"
-          id="choice-main"
-          value="치킨마요"
-        >
-        <label for="choice-main">
-          🍗 치킨마요
-        </label>
-      </div>
-
-      <div class="choice">
-        <input
-          type="checkbox"
-          id="choice-soup"
-          value="미역국"
-        >
-        <label for="choice-soup">
-          🍲 미역국
-        </label>
-      </div>
-
-      <div class="choice">
-        <input
-          type="checkbox"
-          id="choice-side"
-          value="콘샐러드"
-        >
-        <label for="choice-side">
-          🥗 콘샐러드
-        </label>
-      </div>
-
-      <div class="choice">
-        <input
-          type="checkbox"
-          id="choice-kimchi"
-          value="배추김치"
-        >
-        <label for="choice-kimchi">
-          🥬 배추김치
-        </label>
-      </div>
-
-      <div class="choice">
-        <input
-          type="checkbox"
-          id="choice-dessert"
-          value="요거트"
-        >
-        <label for="choice-dessert">
-          🍓 요거트
-        </label>
-      </div>
-
-      <div class="choice">
-        <input
-          type="checkbox"
-          id="choice-rice"
-          value="흰밥"
-        >
-        <label for="choice-rice">
-          🍚 흰밥
-        </label>
-      </div>
-
+    <div
+      class="choice-grid"
+      id="choiceGrid"
+    >
+      <!-- Firebase 메뉴 자동 생성 -->
     </div>
 
+
+    <!-- 리뷰 -->
 
     <div style="margin-top:20px;">
 
@@ -1263,7 +779,6 @@ textarea{
     <button
       class="btn btn-primary btn-full"
       id="submitReview"
-      type="button"
     >
       ⭐ 리뷰 등록하기
     </button>
@@ -1271,9 +786,7 @@ textarea{
   </section>
 
 
-  <!-- =================================================
-       RECOMMENDATION
-  ================================================== -->
+  <!-- RECOMMENDATION -->
 
   <section class="card recommend-card fade-up">
 
@@ -1286,29 +799,42 @@ textarea{
     </div>
 
     <div class="recommend-desc">
-      학생들이 남긴 리뷰와 선호도를 분석해<br>
-      가장 좋아할 만한 메뉴를 추천합니다.
+      원하는 다음 급식 메뉴를 직접 입력해주세요.
+      <br>
+      입력한 메뉴는 Firebase에 저장됩니다.
     </div>
 
+
+    <div class="recommend-input-wrap">
+
+      <input
+        type="text"
+        id="recommendInput"
+        class="review-input"
+        placeholder="예: 치즈돈까스"
+        maxlength="100"
+      >
+
+      <button
+        class="btn btn-primary btn-full"
+        id="saveRecommend"
+      >
+        ⭐ 추천 메뉴 저장
+      </button>
+
+    </div>
+
+
     <div
-      class="recommend-menu"
+      class="recommend-result"
       id="recommendMenu"
     >
-
-      <div class="loading">
-        <div class="loading-dot"></div>
-        <div class="loading-dot"></div>
-        <div class="loading-dot"></div>
-      </div>
-
     </div>
 
   </section>
 
 
-  <!-- =================================================
-       POPULAR
-  ================================================== -->
+  <!-- POPULAR -->
 
   <section class="card">
 
@@ -1322,9 +848,11 @@ textarea{
     >
 
       <div class="loading">
+
         <div class="loading-dot"></div>
         <div class="loading-dot"></div>
         <div class="loading-dot"></div>
+
       </div>
 
     </div>
@@ -1332,9 +860,7 @@ textarea{
   </section>
 
 
-  <!-- =================================================
-       RECENT REVIEWS
-  ================================================== -->
+  <!-- RECENT REVIEWS -->
 
   <section class="card">
 
@@ -1348,9 +874,11 @@ textarea{
     >
 
       <div class="loading">
+
         <div class="loading-dot"></div>
         <div class="loading-dot"></div>
         <div class="loading-dot"></div>
+
       </div>
 
     </div>
@@ -1365,31 +893,29 @@ textarea{
 </div>
 
 
-<script type="module">
+<!-- =====================================================
+     FIREBASE
+===================================================== -->
 
-/* =========================================================
-   FIREBASE
-========================================================= */
+<script type="module">
 
 import {
   initializeApp
-}
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getDatabase,
   ref,
-  query,
-  orderByChild,
-  equalTo,
   get,
+  set,
   push,
-  set
-}
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  update
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+
+/* =====================================================
+   FIREBASE CONFIG
+===================================================== */
 
 const firebaseConfig = {
 
@@ -1427,365 +953,681 @@ const db =
   getDatabase(app);
 
 
-/* =========================================================
-   DOM
-========================================================= */
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
 
-const loginOverlay =
-  document.getElementById(
-    "loginOverlay"
-  );
+let currentStudent = null;
 
-const studentNameInput =
-  document.getElementById(
-    "studentNameInput"
-  );
+let currentRating = 0;
 
-const studentLoginBtn =
-  document.getElementById(
-    "studentLoginBtn"
-  );
+let scores = {
 
-const loginMessage =
-  document.getElementById(
-    "loginMessage"
-  );
+  taste: 0,
 
-const userName =
-  document.getElementById(
-    "userName"
-  );
+  amount: 0,
+
+  satisfaction: 0
+
+};
+
+let menuData = {};
 
 
-/* =========================================================
-   DATE
-========================================================= */
+/* =====================================================
+   TODAY DATE
+===================================================== */
 
-function setTodayDate(){
+function setTodayDate() {
 
-  const now =
+  const today =
     new Date();
+
+  const days = [
+    "일",
+    "월",
+    "화",
+    "수",
+    "목",
+    "금",
+    "토"
+  ];
+
+  const dateText =
+    `${today.getFullYear()}년
+     ${today.getMonth() + 1}월
+     ${today.getDate()}일
+     (${days[today.getDay()]})`;
 
   document.getElementById(
     "todayDate"
   ).textContent =
-    now.toLocaleDateString(
-      "ko-KR",
-      {
-        year:"numeric",
-        month:"long",
-        day:"numeric",
-        weekday:"long"
-      }
-    );
+    dateText;
 }
 
 setTodayDate();
 
 
-/* =========================================================
+/* =====================================================
    LOGIN
-========================================================= */
-
-async function loginStudent(){
-
-  const name =
-    studentNameInput.value.trim();
-
-  loginMessage.textContent = "";
-
-  if(!name){
-
-    loginMessage.textContent =
-      "이름을 입력해주세요.";
-
-    studentNameInput.focus();
-
-    return;
-  }
-
-
-  studentLoginBtn.disabled = true;
-
-  studentLoginBtn.textContent =
-    "확인 중...";
-
-
-  try{
-
-    /*
-      Firebase 구조
-
-      students
-        ├── 20261001
-        │     ├── name: "홍길동"
-        │     ├── grade: 1
-        │     ├── class: 2
-        │     └── number: 10
-        │
-        └── 20261002
-              └── name: "김철수"
-    */
-
-
-    const studentsRef =
-      ref(
-        db,
-        "students"
-      );
-
-
-    const studentQuery =
-      query(
-        studentsRef,
-        orderByChild("name"),
-        equalTo(name)
-      );
-
-
-    const snapshot =
-      await get(
-        studentQuery
-      );
-
-
-    if(!snapshot.exists()){
-
-      loginMessage.textContent =
-        "등록된 학생을 찾을 수 없습니다.";
-
-      return;
-    }
-
-
-    let studentId = null;
-    let studentData = null;
-
-
-    snapshot.forEach(
-      child => {
-
-        studentId =
-          child.key;
-
-        studentData =
-          child.val();
-
-      }
-    );
-
-
-    if(!studentId){
-
-      loginMessage.textContent =
-        "학생 정보를 찾을 수 없습니다.";
-
-      return;
-    }
-
-
-    const actualName =
-      studentData.name || name;
-
-
-    /*
-      로그인 정보 저장
-    */
-
-    sessionStorage.setItem(
-      "cafeteriaStudentId",
-      studentId
-    );
-
-    sessionStorage.setItem(
-      "cafeteriaStudentName",
-      actualName
-    );
-
-
-    userName.textContent =
-      actualName;
-
-
-    /*
-      로그인 창 제거
-    */
-
-    loginOverlay.classList.add(
-      "hidden"
-    );
-
-
-    setTimeout(
-      () => {
-
-        loginOverlay.style.display =
-          "none";
-
-      },
-      300
-    );
-
-
-    loadPageData();
-
-
-  }
-  catch(error){
-
-    console.error(
-      "Firebase 로그인 오류:",
-      error
-    );
-
-    loginMessage.textContent =
-      "Firebase 연결 오류가 발생했습니다.";
-
-  }
-  finally{
-
-    studentLoginBtn.disabled =
-      false;
-
-    studentLoginBtn.textContent =
-      "로그인";
-
-  }
-
-}
-
-
-studentLoginBtn.addEventListener(
-  "click",
-  loginStudent
-);
-
-
-studentNameInput.addEventListener(
-  "keydown",
-  event => {
-
-    if(event.key === "Enter"){
-
-      loginStudent();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   SAVED LOGIN
-========================================================= */
-
-function checkSavedLogin(){
-
-  const savedId =
-    sessionStorage.getItem(
-      "cafeteriaStudentId"
-    );
-
-  const savedName =
-    sessionStorage.getItem(
-      "cafeteriaStudentName"
-    );
-
-
-  if(savedId && savedName){
-
-    userName.textContent =
-      savedName;
-
-
-    loginOverlay.classList.add(
-      "hidden"
-    );
-
-
-    setTimeout(
-      () => {
-
-        loginOverlay.style.display =
-          "none";
-
-      },
-      300
-    );
-
-
-    loadPageData();
-
-  }
-
-}
-
-
-checkSavedLogin();
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
+===================================================== */
 
 document
-  .getElementById(
-    "logoutBtn"
-  )
+  .getElementById("loginButton")
   .addEventListener(
     "click",
-    () => {
-
-      sessionStorage.removeItem(
-        "cafeteriaStudentId"
-      );
-
-      sessionStorage.removeItem(
-        "cafeteriaStudentName"
-      );
+    loginStudent
+  );
 
 
-      userName.textContent =
-        "학생";
+document
+  .getElementById("nameInput")
+  .addEventListener(
+    "keydown",
+    e => {
 
+      if (e.key === "Enter") {
 
-      studentNameInput.value =
-        "";
+        loginStudent();
 
-
-      loginMessage.textContent =
-        "";
-
-
-      loginOverlay.style.display =
-        "flex";
-
-
-      requestAnimationFrame(
-        () => {
-
-          loginOverlay.classList.remove(
-            "hidden"
-          );
-
-        }
-      );
+      }
 
     }
   );
 
 
-/* =========================================================
-   STAR
-========================================================= */
+async function loginStudent() {
 
-let selectedRating = 0;
+  const name =
+    document
+      .getElementById("nameInput")
+      .value
+      .trim();
 
+
+  const message =
+    document.getElementById(
+      "loginMessage"
+    );
+
+
+  if (!name) {
+
+    message.textContent =
+      "이름을 입력해주세요.";
+
+    return;
+
+  }
+
+
+  message.textContent =
+    "학생 정보를 찾는 중...";
+
+
+  try {
+
+    const studentsRef =
+      ref(db, "students");
+
+
+    const snapshot =
+      await get(studentsRef);
+
+
+    if (!snapshot.exists()) {
+
+      message.textContent =
+        "등록된 학생이 없습니다.";
+
+      return;
+
+    }
+
+
+    const students =
+      snapshot.val();
+
+
+    let foundStudent = null;
+
+
+    /*
+      students/{학번}
+        name: 홍길동
+        grade: 1
+        class: 2
+        number: 10
+
+      형태를 기준으로 검색
+    */
+
+    for (
+      const studentId
+      in students
+    ) {
+
+      const student =
+        students[studentId];
+
+
+      if (
+        student &&
+        student.name &&
+        String(student.name).trim()
+          === name
+      ) {
+
+        foundStudent = {
+
+          studentId:
+            studentId,
+
+          ...student
+
+        };
+
+        break;
+
+      }
+
+    }
+
+
+    if (!foundStudent) {
+
+      message.textContent =
+        "등록된 학생을 찾을 수 없습니다.";
+
+      return;
+
+    }
+
+
+    currentStudent =
+      foundStudent;
+
+
+    document
+      .getElementById("userName")
+      .textContent =
+      foundStudent.name;
+
+
+    document
+      .getElementById("headerStatus")
+      .textContent =
+      "로그인 완료";
+
+
+    message.textContent =
+      "";
+
+
+    document
+      .getElementById("loginCard")
+      .style.display =
+      "none";
+
+
+    /*
+      로그인 후 메뉴 불러오기
+    */
+
+    await loadMenus();
+
+    await loadPopularMenus();
+
+    await loadRecentReviews();
+
+    await loadStudentRecommendations();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    message.textContent =
+      "로그인 중 오류가 발생했습니다.";
+
+  }
+
+}
+
+
+/* =====================================================
+   MENU LOAD
+===================================================== */
+
+async function loadMenus() {
+
+  const list =
+    document.getElementById(
+      "todayMenuList"
+    );
+
+
+  const choiceGrid =
+    document.getElementById(
+      "choiceGrid"
+    );
+
+
+  try {
+
+    const snapshot =
+      await get(
+        ref(db, "menu")
+      );
+
+
+    if (!snapshot.exists()) {
+
+      list.innerHTML =
+        "<p>등록된 급식 메뉴가 없습니다.</p>";
+
+      return;
+
+    }
+
+
+    menuData =
+      snapshot.val();
+
+
+    list.innerHTML = "";
+
+    choiceGrid.innerHTML = "";
+
+
+    /*
+      메뉴 카테고리 순서
+    */
+
+    const categoryOrder = [
+
+      "밥",
+
+      "국",
+
+      "메인",
+
+      "반찬",
+
+      "김치",
+
+      "후식"
+
+    ];
+
+
+    const emoji = {
+
+      "밥": "🍚",
+
+      "국": "🍲",
+
+      "메인": "🍗",
+
+      "반찬": "🥗",
+
+      "김치": "🥬",
+
+      "후식": "🍓"
+
+    };
+
+
+    let allMenus = [];
+
+
+    /*
+      menu 안의 카테고리를 읽는다.
+    */
+
+    categoryOrder.forEach(
+      category => {
+
+        if (
+          !menuData[category]
+        ) {
+
+          return;
+
+        }
+
+
+        const categoryMenus =
+          menuData[category];
+
+
+        /*
+          menu/밥/흰밥
+          menu/국/미역국
+          같은 구조
+        */
+
+        Object
+          .keys(categoryMenus)
+          .forEach(
+            menuKey => {
+
+              let menuValue =
+                categoryMenus[
+                  menuKey
+                ];
+
+
+              let menuName;
+
+
+              if (
+                typeof menuValue
+                === "string"
+              ) {
+
+                menuName =
+                  menuValue;
+
+              } else if (
+                menuValue &&
+                menuValue.name
+              ) {
+
+                menuName =
+                  menuValue.name;
+
+              } else {
+
+                /*
+                  key 자체가 메뉴 이름인 경우
+                */
+
+                menuName =
+                  menuKey;
+
+              }
+
+
+              if (!menuName) {
+
+                return;
+
+              }
+
+
+              allMenus.push({
+
+                category,
+
+                name:
+                  menuName
+
+              });
+
+
+              /*
+                오늘의 메뉴
+              */
+
+              const row =
+                document.createElement(
+                  "div"
+                );
+
+              row.className =
+                "menu-row";
+
+
+              row.innerHTML = `
+
+                <div class="menu-icon">
+                  ${emoji[category] || "🍽️"}
+                </div>
+
+                <div>
+
+                  <div class="menu-category">
+                    ${category}
+                  </div>
+
+                  <div class="menu-name">
+                    ${escapeHtml(menuName)}
+                  </div>
+
+                </div>
+
+                <div
+                  class="menu-rating"
+                  data-menu-rating="${escapeHtml(menuName)}"
+                >
+                  -
+                </div>
+
+              `;
+
+
+              list.appendChild(row);
+
+
+              /*
+                다음에도 먹고 싶은 메뉴
+              */
+
+              const choice =
+                document.createElement(
+                  "div"
+                );
+
+              choice.className =
+                "choice";
+
+
+              const id =
+                "choice-" +
+                Math.random()
+                  .toString(36)
+                  .substring(2, 10);
+
+
+              choice.innerHTML = `
+
+                <input
+                  type="checkbox"
+                  id="${id}"
+                  value="${escapeHtml(menuName)}"
+                >
+
+                <label for="${id}">
+                  ${emoji[category] || "🍽️"}
+                  ${escapeHtml(menuName)}
+                </label>
+
+              `;
+
+
+              choiceGrid.appendChild(
+                choice
+              );
+
+            }
+
+          );
+
+      }
+    );
+
+
+    /*
+      Firebase에 카테고리가
+      다른 이름으로 저장되어 있어도
+      나머지 카테고리를 추가한다.
+    */
+
+    Object
+      .keys(menuData)
+      .forEach(
+        category => {
+
+          if (
+            categoryOrder
+              .includes(category)
+          ) {
+
+            return;
+
+          }
+
+
+          const categoryMenus =
+            menuData[category];
+
+
+          if (
+            !categoryMenus ||
+            typeof categoryMenus
+            !== "object"
+          ) {
+
+            return;
+
+          }
+
+
+          Object
+            .keys(categoryMenus)
+            .forEach(
+              menuKey => {
+
+                let value =
+                  categoryMenus[
+                    menuKey
+                  ];
+
+
+                let name;
+
+
+                if (
+                  typeof value
+                  === "string"
+                ) {
+
+                  name = value;
+
+                } else if (
+                  value &&
+                  value.name
+                ) {
+
+                  name =
+                    value.name;
+
+                } else {
+
+                  name =
+                    menuKey;
+
+                }
+
+
+                if (
+                  !name ||
+                  allMenus.some(
+                    m =>
+                      m.name === name
+                  )
+                ) {
+
+                  return;
+
+                }
+
+
+                allMenus.push({
+
+                  category,
+
+                  name
+
+                });
+
+
+                const choice =
+                  document.createElement(
+                    "div"
+                  );
+
+                choice.className =
+                  "choice";
+
+
+                const id =
+                  "choice-" +
+                  Math.random()
+                    .toString(36)
+                    .substring(2, 10);
+
+
+                choice.innerHTML = `
+
+                  <input
+                    type="checkbox"
+                    id="${id}"
+                    value="${escapeHtml(name)}"
+                  >
+
+                  <label for="${id}">
+                    🍽️ ${escapeHtml(name)}
+                  </label>
+
+                `;
+
+
+                choiceGrid.appendChild(
+                  choice
+                );
+
+              }
+
+          );
+
+        }
+      );
+
+
+    if (
+      list.children.length === 0
+    ) {
+
+      list.innerHTML =
+        "<p>오늘 급식 메뉴가 없습니다.</p>";
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "메뉴 불러오기 오류:",
+      error
+    );
+
+
+    list.innerHTML =
+      "<p>메뉴를 불러오지 못했습니다.</p>";
+
+  }
+
+}
+
+
+/* =====================================================
+   STAR RATING
+===================================================== */
 
 document
-  .querySelectorAll(
-    ".star"
-  )
+  .querySelectorAll(".star")
   .forEach(
     star => {
 
@@ -1793,34 +1635,39 @@ document
         "click",
         () => {
 
-          selectedRating =
+          currentRating =
             Number(
               star.dataset.value
             );
 
 
           document
-            .querySelectorAll(
-              ".star"
-            )
+            .querySelectorAll(".star")
             .forEach(
-              item => {
+              s => {
 
-                item.classList.toggle(
-                  "active",
+                const value =
                   Number(
-                    item.dataset.value
-                  ) <= selectedRating
+                    s.dataset.value
+                  );
+
+
+                s.classList.toggle(
+                  "active",
+                  value <=
+                  currentRating
                 );
 
               }
             );
 
 
-          document.getElementById(
-            "ratingText"
-          ).textContent =
-            `${selectedRating}점`;
+          document
+            .getElementById(
+              "ratingText"
+            )
+            .textContent =
+            `${currentRating}점`;
 
         }
       );
@@ -1829,36 +1676,17 @@ document
   );
 
 
-/* =========================================================
-   SCORE
-========================================================= */
-
-const selectedScores = {
-
-  taste:0,
-
-  amount:0,
-
-  satisfaction:0
-
-};
-
+/* =====================================================
+   DETAIL SCORES
+===================================================== */
 
 document
-  .querySelectorAll(
-    ".score-buttons"
-  )
+  .querySelectorAll(".score-buttons")
   .forEach(
     group => {
 
-      const scoreType =
-        group.dataset.score;
-
-
       group
-        .querySelectorAll(
-          ".score-btn"
-        )
+        .querySelectorAll(".score-btn")
         .forEach(
           button => {
 
@@ -1866,16 +1694,19 @@ document
               "click",
               () => {
 
+                const scoreName =
+                  group.dataset.score;
+
+
                 const value =
                   Number(
                     button.dataset.value
                   );
 
 
-                selectedScores[
-                  scoreType
-                ] =
-                  value;
+                scores[
+                  scoreName
+                ] = value;
 
 
                 group
@@ -1883,12 +1714,12 @@ document
                     ".score-btn"
                   )
                   .forEach(
-                    item => {
+                    b => {
 
-                      item.classList.toggle(
+                      b.classList.toggle(
                         "active",
                         Number(
-                          item.dataset.value
+                          b.dataset.value
                         ) === value
                       );
 
@@ -1905,29 +1736,9 @@ document
   );
 
 
-/* =========================================================
-   FAVORITE MENUS
-========================================================= */
-
-function getFavoriteMenus(){
-
-  return Array
-    .from(
-      document.querySelectorAll(
-        ".choice input:checked"
-      )
-    )
-    .map(
-      input =>
-        input.value
-    );
-
-}
-
-
-/* =========================================================
-   SUBMIT REVIEW
-========================================================= */
+/* =====================================================
+   REVIEW SAVE
+===================================================== */
 
 document
   .getElementById(
@@ -1939,51 +1750,60 @@ document
   );
 
 
-async function submitReview(){
+async function submitReview() {
 
-  const studentId =
-    sessionStorage.getItem(
-      "cafeteriaStudentId"
-    );
-
-  const studentName =
-    sessionStorage.getItem(
-      "cafeteriaStudentName"
-    );
-
-
-  if(!studentId){
+  if (!currentStudent) {
 
     alert(
-      "먼저 로그인해주세요."
+      "먼저 학생 로그인을 해주세요."
     );
 
     return;
+
   }
 
 
-  if(selectedRating === 0){
+  if (currentRating === 0) {
 
     alert(
-      "별점을 선택해주세요."
+      "전체 별점을 선택해주세요."
     );
 
     return;
+
   }
 
 
-  if(
-    selectedScores.taste === 0 ||
-    selectedScores.amount === 0 ||
-    selectedScores.satisfaction === 0
-  ){
+  if (
+    scores.taste === 0 ||
+    scores.amount === 0 ||
+    scores.satisfaction === 0
+  ) {
 
     alert(
       "맛, 양, 만족도를 모두 선택해주세요."
     );
 
     return;
+
   }
+
+
+  /*
+    선택 메뉴
+  */
+
+  const selectedMenus =
+    Array
+      .from(
+        document.querySelectorAll(
+          ".choice input:checked"
+        )
+      )
+      .map(
+        input =>
+          input.value
+      );
 
 
   const comment =
@@ -1995,78 +1815,89 @@ async function submitReview(){
       .trim();
 
 
-  const favoriteMenus =
-    getFavoriteMenus();
+  const reviewId =
+    push(
+      ref(db, "reviews")
+    ).key;
 
 
-  const submitButton =
-    document.getElementById(
-      "submitReview"
-    );
+  const reviewData = {
+
+    studentId:
+      currentStudent.studentId,
+
+    studentName:
+      currentStudent.name,
+
+    rating:
+      currentRating,
+
+    taste:
+      scores.taste,
+
+    amount:
+      scores.amount,
+
+    satisfaction:
+      scores.satisfaction,
+
+    favoriteMenus:
+      selectedMenus,
+
+    comment,
+
+    createdAt:
+      Date.now()
+
+  };
 
 
-  submitButton.disabled =
-    true;
-
-  submitButton.textContent =
-    "등록 중...";
-
-
-  try{
-
-    const reviewRef =
-      push(
-        ref(
-          db,
-          "reviews"
-        )
-      );
-
-
-    const now =
-      new Date();
-
+  try {
 
     await set(
-      reviewRef,
-      {
-
-        studentId:
-          studentId,
-
-        studentName:
-          studentName,
-
-        rating:
-          selectedRating,
-
-        scores:{
-
-          taste:
-            selectedScores.taste,
-
-          amount:
-            selectedScores.amount,
-
-          satisfaction:
-            selectedScores.satisfaction
-
-        },
-
-        favoriteMenus:
-          favoriteMenus,
-
-        comment:
-          comment,
-
-        date:
-          now.toISOString(),
-
-        timestamp:
-          Date.now()
-
-      }
+      ref(
+        db,
+        "reviews/" +
+        reviewId
+      ),
+      reviewData
     );
+
+
+    /*
+      메뉴별 선호도도 저장
+    */
+
+    for (
+      const menu of selectedMenus
+    ) {
+
+      const safeKey =
+        encodeFirebaseKey(menu);
+
+
+      await set(
+        ref(
+          db,
+          "menuPreferences/" +
+          safeKey +
+          "/" +
+          currentStudent.studentId
+        ),
+        {
+
+          name:
+            currentStudent.name,
+
+          menu,
+
+          createdAt:
+            Date.now()
+
+        }
+      );
+
+    }
 
 
     alert(
@@ -2074,147 +1905,309 @@ async function submitReview(){
     );
 
 
-    resetReview();
+    /*
+      입력 초기화
+    */
 
-    loadRecentReviews();
+    currentRating = 0;
 
-    loadPopularMenus();
 
-    loadRecommendation();
+    document
+      .querySelectorAll(".star")
+      .forEach(
+        star =>
+          star.classList.remove(
+            "active"
+          )
+      );
+
+
+    document
+      .getElementById(
+        "ratingText"
+      )
+      .textContent =
+      "별점을 선택해주세요";
+
+
+    document
+      .querySelectorAll(
+        ".score-btn"
+      )
+      .forEach(
+        button =>
+          button.classList.remove(
+            "active"
+          )
+      );
+
+
+    document
+      .querySelectorAll(
+        ".choice input"
+      )
+      .forEach(
+        input =>
+          input.checked = false
+      );
+
+
+    document
+      .getElementById(
+        "reviewComment"
+      )
+      .value = "";
+
+
+    scores = {
+
+      taste: 0,
+
+      amount: 0,
+
+      satisfaction: 0
+
+    };
+
+
+    await loadPopularMenus();
+
+    await loadRecentReviews();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "리뷰 저장 중 오류가 발생했습니다."
+    );
 
   }
-  catch(error){
 
-    console.error(
-      "리뷰 등록 오류:",
-      error
+}
+
+
+/* =====================================================
+   RECOMMEND MENU SAVE
+===================================================== */
+
+document
+  .getElementById(
+    "saveRecommend"
+  )
+  .addEventListener(
+    "click",
+    saveRecommendation
+  );
+
+
+async function saveRecommendation() {
+
+  if (!currentStudent) {
+
+    alert(
+      "먼저 학생 로그인을 해주세요."
     );
+
+    return;
+
+  }
+
+
+  const input =
+    document
+      .getElementById(
+        "recommendInput"
+      );
+
+
+  const menuName =
+    input.value.trim();
+
+
+  if (!menuName) {
+
+    alert(
+      "추천하고 싶은 메뉴를 입력해주세요."
+    );
+
+    return;
+
+  }
+
+
+  const recommendationId =
+    push(
+      ref(
+        db,
+        "recommendations"
+      )
+    ).key;
+
+
+  const data = {
+
+    studentId:
+      currentStudent.studentId,
+
+    studentName:
+      currentStudent.name,
+
+    menu:
+      menuName,
+
+    createdAt:
+      Date.now()
+
+  };
+
+
+  try {
+
+    await set(
+      ref(
+        db,
+        "recommendations/" +
+        recommendationId
+      ),
+      data
+    );
+
+
+    input.value = "";
 
 
     alert(
-      "리뷰 등록 중 오류가 발생했습니다."
+      `"${menuName}" 추천이 저장되었습니다!`
+    );
+
+
+    await loadStudentRecommendations();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "추천 메뉴 저장에 실패했습니다."
     );
 
   }
-  finally{
 
-    submitButton.disabled =
-      false;
+}
 
-    submitButton.textContent =
-      "⭐ 리뷰 등록하기";
+
+/* =====================================================
+   MY RECOMMENDATIONS
+===================================================== */
+
+async function loadStudentRecommendations() {
+
+  if (!currentStudent) {
+
+    return;
+
+  }
+
+
+  const result =
+    document.getElementById(
+      "recommendMenu"
+    );
+
+
+  try {
+
+    const snapshot =
+      await get(
+        ref(
+          db,
+          "recommendations"
+        )
+      );
+
+
+    if (!snapshot.exists()) {
+
+      result.innerHTML =
+        "<div style='color:#999;'>아직 추천한 메뉴가 없습니다.</div>";
+
+      return;
+
+    }
+
+
+    const data =
+      snapshot.val();
+
+
+    const recommendations =
+      Object
+        .values(data)
+        .filter(
+          item =>
+            item.studentId ===
+            currentStudent.studentId
+        )
+        .sort(
+          (a,b) =>
+            (b.createdAt || 0)
+            -
+            (a.createdAt || 0)
+        );
+
+
+    if (
+      recommendations.length === 0
+    ) {
+
+      result.innerHTML =
+        "<div style='color:#999;'>아직 추천한 메뉴가 없습니다.</div>";
+
+      return;
+
+    }
+
+
+    result.innerHTML =
+      recommendations
+        .slice(0, 5)
+        .map(
+          item => `
+
+            <div class="recommend-item">
+              ⭐ ${escapeHtml(item.menu)}
+            </div>
+
+          `
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(error);
 
   }
 
 }
 
 
-/* =========================================================
-   RESET
-========================================================= */
+/* =====================================================
+   POPULAR MENUS
+===================================================== */
 
-function resetReview(){
-
-  selectedRating =
-    0;
-
-
-  document
-    .querySelectorAll(
-      ".star"
-    )
-    .forEach(
-      star => {
-
-        star.classList.remove(
-          "active"
-        );
-
-      }
-    );
-
-
-  document.getElementById(
-    "ratingText"
-  ).textContent =
-    "별점을 선택해주세요";
-
-
-  selectedScores.taste =
-    0;
-
-  selectedScores.amount =
-    0;
-
-  selectedScores.satisfaction =
-    0;
-
-
-  document
-    .querySelectorAll(
-      ".score-btn"
-    )
-    .forEach(
-      button => {
-
-        button.classList.remove(
-          "active"
-        );
-
-      }
-    );
-
-
-  document
-    .querySelectorAll(
-      ".choice input"
-    )
-    .forEach(
-      input => {
-
-        input.checked =
-          false;
-
-      }
-    );
-
-
-  document.getElementById(
-    "reviewComment"
-  ).value =
-    "";
-
-}
-
-
-/* =========================================================
-   PAGE DATA
-========================================================= */
-
-function loadPageData(){
-
-  loadRecentReviews();
-
-  loadPopularMenus();
-
-  loadRecommendation();
-
-}
-
-
-/* =========================================================
-   RECENT REVIEWS
-========================================================= */
-
-async function loadRecentReviews(){
+async function loadPopularMenus() {
 
   const list =
     document.getElementById(
-      "reviewList"
+      "popularList"
     );
 
 
-  try{
+  try {
 
     const snapshot =
       await get(
@@ -2225,68 +2218,197 @@ async function loadRecentReviews(){
       );
 
 
-    if(!snapshot.exists()){
+    if (!snapshot.exists()) {
 
-      list.innerHTML = `
-        <div class="review-item">
-          아직 등록된 리뷰가 없습니다.
-        </div>
-      `;
+      list.innerHTML =
+        "<div style='color:#999;'>아직 리뷰가 없습니다.</div>";
 
       return;
+
     }
 
 
-    const reviews = [];
+    const reviews =
+      Object.values(
+        snapshot.val()
+      );
 
 
-    snapshot.forEach(
-      child => {
+    const menuScores = {};
 
-        reviews.push({
 
-          id:
-            child.key,
+    reviews.forEach(
+      review => {
 
-          ...child.val()
+        const rating =
+          Number(
+            review.rating || 0
+          );
 
-        });
+
+        const menus =
+          review.favoriteMenus
+          || [];
+
+
+        menus.forEach(
+          menu => {
+
+            if (
+              !menuScores[menu]
+            ) {
+
+              menuScores[menu] = {
+
+                count: 0,
+
+                total: 0
+
+              };
+
+            }
+
+
+            menuScores[menu].count++;
+
+            menuScores[menu].total +=
+              rating;
+
+          }
+        );
 
       }
     );
 
 
-    reviews.sort(
-      (a,b) =>
-        (b.timestamp || 0) -
-        (a.timestamp || 0)
-    );
+    const popular =
+      Object
+        .entries(menuScores)
+        .map(
+          ([name, data]) => ({
+
+            name,
+
+            count:
+              data.count,
+
+            rating:
+              data.total /
+              data.count
+
+          })
+        )
+        .sort(
+          (a,b) =>
+            b.count - a.count
+        )
+        .slice(0, 10);
 
 
-    const recent =
-      reviews.slice(
-        0,
-        10
-      );
+    if (
+      popular.length === 0
+    ) {
+
+      list.innerHTML =
+        "<div style='color:#999;'>아직 인기 메뉴가 없습니다.</div>";
+
+      return;
+
+    }
 
 
     list.innerHTML =
-      recent
+      popular
+        .map(
+          item => `
+
+            <div class="popular-item">
+
+              <div class="popular-name">
+                🍽️ ${escapeHtml(item.name)}
+              </div>
+
+              <div class="popular-rating">
+                ⭐ ${item.rating.toFixed(1)}
+                (${item.count})
+              </div>
+
+            </div>
+
+          `
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    list.innerHTML =
+      "<div>인기 메뉴를 불러오지 못했습니다.</div>";
+
+  }
+
+}
+
+
+/* =====================================================
+   RECENT REVIEWS
+===================================================== */
+
+async function loadRecentReviews() {
+
+  const list =
+    document.getElementById(
+      "reviewList"
+    );
+
+
+  try {
+
+    const snapshot =
+      await get(
+        ref(
+          db,
+          "reviews"
+        )
+      );
+
+
+    if (!snapshot.exists()) {
+
+      list.innerHTML =
+        "<div style='color:#999;'>아직 리뷰가 없습니다.</div>";
+
+      return;
+
+    }
+
+
+    const reviews =
+      Object
+        .values(
+          snapshot.val()
+        )
+        .sort(
+          (a,b) =>
+            (b.createdAt || 0)
+            -
+            (a.createdAt || 0)
+        )
+        .slice(0, 10);
+
+
+    list.innerHTML =
+      reviews
         .map(
           review => {
 
-            const rating =
-              Number(
-                review.rating || 0
-              );
-
-
             const stars =
               "★".repeat(
-                rating
-              ) +
-              "☆".repeat(
-                5-rating
+                Number(
+                  review.rating || 0
+                )
               );
 
 
@@ -2294,10 +2416,10 @@ async function loadRecentReviews(){
 
               <div class="review-item">
 
-                <div class="review-header">
+                <div class="review-top">
 
-                  <div class="review-user">
-                    ${escapeHTML(
+                  <div class="review-student">
+                    ${escapeHtml(
                       review.studentName ||
                       "학생"
                     )}
@@ -2309,12 +2431,17 @@ async function loadRecentReviews(){
 
                 </div>
 
-                <div class="review-content">
-                  ${escapeHTML(
-                    review.comment ||
-                    "리뷰 내용이 없습니다."
-                  )}
-                </div>
+                ${
+                  review.comment
+                    ?
+                    `<div class="review-comment">
+                      ${escapeHtml(
+                        review.comment
+                      )}
+                    </div>`
+                    :
+                    ""
+                }
 
               </div>
 
@@ -2325,364 +2452,89 @@ async function loadRecentReviews(){
         .join("");
 
 
-  }
-  catch(error){
+  } catch (error) {
 
-    console.error(
-      "리뷰 불러오기 오류:",
-      error
-    );
-
-
-    list.innerHTML = `
-      <div class="review-item">
-        리뷰를 불러오지 못했습니다.
-      </div>
-    `;
-
-  }
-
-}
-
-
-/* =========================================================
-   POPULAR MENUS
-========================================================= */
-
-async function loadPopularMenus(){
-
-  const list =
-    document.getElementById(
-      "popularList"
-    );
-
-
-  try{
-
-    const snapshot =
-      await get(
-        ref(
-          db,
-          "reviews"
-        )
-      );
-
-
-    if(!snapshot.exists()){
-
-      list.innerHTML = `
-        <div class="popular-item">
-          아직 데이터가 없습니다.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    const menuCount = {};
-
-
-    snapshot.forEach(
-      child => {
-
-        const review =
-          child.val();
-
-
-        const menus =
-          Array.isArray(
-            review.favoriteMenus
-          )
-            ? review.favoriteMenus
-            : [];
-
-
-        menus.forEach(
-          menu => {
-
-            menuCount[menu] =
-              (menuCount[menu] || 0) +
-              1;
-
-          }
-        );
-
-      }
-    );
-
-
-    const popular =
-      Object
-        .entries(
-          menuCount
-        )
-        .sort(
-          (a,b) =>
-            b[1]-a[1]
-        )
-        .slice(
-          0,
-          5
-        );
-
-
-    if(popular.length === 0){
-
-      list.innerHTML = `
-        <div class="popular-item">
-          아직 인기 메뉴 데이터가 없습니다.
-        </div>
-      `;
-
-      return;
-    }
-
+    console.error(error);
 
     list.innerHTML =
-      popular
-        .map(
-          ([menu,count],index) => `
-
-            <div class="popular-item">
-
-              <div class="popular-rank">
-                ${index+1}
-              </div>
-
-              <div class="popular-name">
-                ${escapeHTML(menu)}
-              </div>
-
-              <div class="popular-score">
-                ${count}표
-              </div>
-
-            </div>
-
-          `
-        )
-        .join("");
-
-
-  }
-  catch(error){
-
-    console.error(
-      "인기 메뉴 오류:",
-      error
-    );
-
-
-    list.innerHTML = `
-      <div class="popular-item">
-        데이터를 불러오지 못했습니다.
-      </div>
-    `;
+      "<div>리뷰를 불러오지 못했습니다.</div>";
 
   }
 
 }
 
 
-/* =========================================================
-   RECOMMENDATION
-========================================================= */
+/* =====================================================
+   FIREBASE KEY SAFE
+===================================================== */
 
-async function loadRecommendation(){
-
-  const box =
-    document.getElementById(
-      "recommendMenu"
-    );
-
-
-  try{
-
-    const snapshot =
-      await get(
-        ref(
-          db,
-          "reviews"
-        )
-      );
-
-
-    if(!snapshot.exists()){
-
-      box.innerHTML = `
-        <div
-          style="
-            padding:16px;
-            background:white;
-            border-radius:14px;
-            font-size:14px;
-          "
-        >
-          아직 리뷰 데이터가 없습니다.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    const menuCount = {};
-
-
-    snapshot.forEach(
-      child => {
-
-        const review =
-          child.val();
-
-
-        const menus =
-          Array.isArray(
-            review.favoriteMenus
-          )
-            ? review.favoriteMenus
-            : [];
-
-
-        menus.forEach(
-          menu => {
-
-            menuCount[menu] =
-              (menuCount[menu] || 0) +
-              1;
-
-          }
-        );
-
-      }
-    );
-
-
-    const sorted =
-      Object
-        .entries(
-          menuCount
-        )
-        .sort(
-          (a,b) =>
-            b[1]-a[1]
-        );
-
-
-    if(sorted.length === 0){
-
-      box.innerHTML = `
-        <div
-          style="
-            padding:16px;
-            background:white;
-            border-radius:14px;
-            font-size:14px;
-          "
-        >
-          아직 추천할 메뉴가 없습니다.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    const recommended =
-      sorted[0][0];
-
-
-    box.innerHTML = `
-
-      <div
-        style="
-          padding:16px;
-          background:white;
-          border-radius:14px;
-        "
-      >
-
-        <div
-          style="
-            font-size:12px;
-            color:#6366f1;
-            font-weight:700;
-          "
-        >
-          TODAY'S RECOMMENDATION
-        </div>
-
-        <div
-          style="
-            margin-top:6px;
-            font-size:17px;
-            font-weight:800;
-          "
-        >
-          🍽️ ${escapeHTML(
-            recommended
-          )}
-        </div>
-
-        <div
-          style="
-            margin-top:5px;
-            font-size:12px;
-            color:#6b7280;
-          "
-        >
-          학생들이 가장 많이 선택한 메뉴입니다.
-        </div>
-
-      </div>
-
-    `;
-
-
-  }
-  catch(error){
-
-    console.error(
-      "추천 오류:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHTML(value){
+function encodeFirebaseKey(value) {
 
   return String(value)
 
-    .replace(
-      /&/g,
+    .replaceAll(
+      ".",
+      "_"
+    )
+
+    .replaceAll(
+      "#",
+      "_"
+    )
+
+    .replaceAll(
+      "$",
+      "_"
+    )
+
+    .replaceAll(
+      "[",
+      "_"
+    )
+
+    .replaceAll(
+      "]",
+      "_"
+    )
+
+    .replaceAll(
+      "/",
+      "_"
+    );
+
+}
+
+
+/* =====================================================
+   HTML ESCAPE
+===================================================== */
+
+function escapeHtml(value) {
+
+  return String(value)
+
+    .replaceAll(
+      "&",
       "&amp;"
     )
 
-    .replace(
-      /</g,
+    .replaceAll(
+      "<",
       "&lt;"
     )
 
-    .replace(
-      />/g,
+    .replaceAll(
+      ">",
       "&gt;"
     )
 
-    .replace(
-      /"/g,
+    .replaceAll(
+      '"',
       "&quot;"
     )
 
-    .replace(
-      /'/g,
+    .replaceAll(
+      "'",
       "&#039;"
     );
 
@@ -2692,3 +2544,4 @@ function escapeHTML(value){
 
 </body>
 </html>
+```
