@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>리뷰 관리자</title>
+<title>Smart Cafeteria 관리자</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
@@ -1307,7 +1307,10 @@ button {
       </div>
 
     </div>
-    <a href="https://mingeon101.github.io/test-web_cafeteria/system/" role="button" style="color: white;">대시보드 페이지</a>
+
+    <div class="admin-badge">
+      관리자
+    </div>
 
   </header>
 
@@ -3605,16 +3608,207 @@ async function loadNutritionSheet(force = false) {
   }
 }
 
-function getNutritionPromptData() {
+function normalizeFoodName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\[[^\]]*\]/g, " ")
+    .replace(/[^0-9a-z가-힣]/g, "")
+    .trim();
+}
 
-  return foodNutritionData.map(item => ({
-    식품명: item.food,
-    열량_kcal: item.calories,
-    탄수화물_g: item.carbohydrate,
-    단백질_g: item.protein,
-    지방_g: item.fat,
-    나트륨_mg: item.sodium
-  }));
+function foodTokens(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^0-9a-z가-힣\s]/g, " ")
+    .split(/\s+/)
+    .filter(token => token.length >= 2);
+}
+
+/*
+  19,495개 전체 데이터를 Gemini로 보내지 않습니다.
+  브라우저에서는 전체 데이터를 보유하되, 현재 메뉴/인기 메뉴/추천 메뉴와
+  실제로 관련성이 높은 식품만 최대 120개를 골라 Gemini에 제공합니다.
+*/
+function getNutritionPromptData(maxItems = 120) {
+
+  if (!foodNutritionData.length) return [];
+
+  const sourceNames = [
+    ...Object.values(currentMenu || {}),
+    ...popularMenus.slice(0, 10).map(item => item.name),
+    ...recommendedMenus.slice(0, 10).map(item => item.name)
+  ]
+    .map(value => String(value || "").trim())
+    .filter(Boolean);
+
+  const queryNames = [...new Set(sourceNames)];
+  const selected = new Map();
+
+  function add(item, score) {
+    if (!item || !item.food) return;
+    const key = normalizeFoodName(item.food);
+    if (!key) return;
+
+    const old = selected.get(key);
+    if (!old || score > old.score) {
+      selected.set(key, { item, score });
+    }
+  }
+
+  // 1. 현재/인기/추천 메뉴와 정확히 일치하거나 포함되는 식품 우선
+  queryNames.forEach(query => {
+    const normalizedQuery = normalizeFoodName(query);
+    const tokens = foodTokens(query);
+
+    foodNutritionData.forEach(item => {
+      const normalizedFood = normalizeFoodName(item.food);
+      if (!normalizedFood) return;
+
+      let score = 0;
+
+      if (normalizedFood === normalizedQuery) {
+        score = 1000;
+      } else if (
+        normalizedFood.includes(normalizedQuery) ||
+        normalizedQuery.includes(normalizedFood)
+      ) {
+        score = 800;
+      } else {
+        const matchedTokens = tokens.filter(token =>
+          normalizedFood.includes(token)
+        ).length;
+        if (matchedTokens) {
+          score = 400 + matchedTokens * 40;
+        }
+      }
+
+      if (score) add(item, score);
+    });
+  });
+
+  // 2. 메뉴 데이터가 적더라도 학교급식에서 흔히 쓰이는 식품 후보를 확보
+  const categoryKeywords = [
+    "밥", "볶음밥", "비빔밥", "국", "찌개", "탕", "전골",
+    "닭", "돼지", "소고기", "생선", "두부", "계란", "달걀",
+    "김치", "나물", "채소", "샐러드", "과일", "우유", "요거트"
+  ];
+
+  foodNutritionData.forEach(item => {
+    const normalizedFood = normalizeFoodName(item.food);
+    const matched = categoryKeywords.filter(keyword =>
+      normalizedFood.includes(normalizeFoodName(keyword))
+    ).length;
+
+    if (matched) add(item, 100 + matched * 5);
+  });
+
+  return Array.from(selected.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxItems)
+    .map(({ item }) => ({
+      식품명: item.food,
+      열량_kcal: item.calories,
+      탄수화물_g: item.carbohydrate,
+      단백질_g: item.protein,
+      지방_g: item.fat,
+      나트륨_mg: item.sodium
+    }));
+}
+
+function findNutritionForMenu(menuName) {
+  const name = String(menuName || "").trim();
+  if (!name || !foodNutritionData.length) return null;
+
+  const normalizedName = normalizeFoodName(name);
+
+  // 정확히 일치
+  const exact = foodNutritionData.find(item =>
+    normalizeFoodName(item.food) === normalizedName
+  );
+  if (exact) return exact;
+
+  // 포함 관계
+  const contained = foodNutritionData
+    .filter(item => {
+      const food = normalizeFoodName(item.food);
+      return food && (
+        food.includes(normalizedName) ||
+        normalizedName.includes(food)
+      );
+    })
+    .sort((a, b) =>
+      Math.abs(normalizeFoodName(a.food).length - normalizedName.length) -
+      Math.abs(normalizeFoodName(b.food).length - normalizedName.length)
+    );
+
+  if (contained.length) return contained[0];
+
+  // 공백/기호가 다른 경우 토큰 겹침으로 검색
+  const tokens = foodTokens(name);
+  if (!tokens.length) return null;
+
+  let best = null;
+  let bestScore = 0;
+
+  foodNutritionData.forEach(item => {
+    const food = normalizeFoodName(item.food);
+    if (!food) return;
+
+    const matched = tokens.filter(token => food.includes(token)).length;
+    const score = matched / tokens.length;
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = item;
+    }
+  });
+
+  return bestScore >= 0.5 ? best : null;
+}
+
+function calculateNutritionFromSheet(menus) {
+  const total = {
+    calories: 0,
+    carbohydrate: 0,
+    protein: 0,
+    fat: 0,
+    sodium: 0
+  };
+
+  const matches = [];
+
+  (menus || []).forEach(menu => {
+    const match = findNutritionForMenu(menu?.name);
+    matches.push({
+      menu: menu?.name || "",
+      matchedFood: match?.food || null,
+      nutrition: match ? {
+        calories: match.calories,
+        carbohydrate: match.carbohydrate,
+        protein: match.protein,
+        fat: match.fat,
+        sodium: match.sodium
+      } : null
+    });
+
+    if (!match) return;
+
+    if (Number.isFinite(match.calories)) total.calories += match.calories;
+    if (Number.isFinite(match.carbohydrate)) total.carbohydrate += match.carbohydrate;
+    if (Number.isFinite(match.protein)) total.protein += match.protein;
+    if (Number.isFinite(match.fat)) total.fat += match.fat;
+    if (Number.isFinite(match.sodium)) total.sodium += match.sodium;
+  });
+
+  return {
+    calories: Math.round(total.calories * 10) / 10,
+    carbohydrate: Math.round(total.carbohydrate * 10) / 10,
+    protein: Math.round(total.protein * 10) / 10,
+    fat: Math.round(total.fat * 10) / 10,
+    sodium: Math.round(total.sodium * 10) / 10,
+    matches
+  };
 }
 
 /* =====================================================
@@ -3784,20 +3978,21 @@ ${JSON.stringify(
   2
 )}
 
-[Google Sheets 식품영양정보]
+[Google Sheets 식품영양정보 후보]
+주의: Google Sheets에는 약 19,495개의 식품이 있지만, 토큰 절약을 위해 현재 메뉴/인기 메뉴/추천 메뉴와 관련성이 높은 후보만 전달합니다. 아래 후보 데이터는 실제 Google Sheets에서 읽은 값입니다.
 ${JSON.stringify(
-  getNutritionPromptData(),
+  getNutritionPromptData(120),
   null,
   2
 )}
 
 [영양정보 사용 규칙]
-1. 위 Google Sheets 데이터가 식품 영양값의 최우선 기준입니다.
-2. 식품명과 영양값은 가능한 한 Google Sheets에 실제 등록된 식품을 사용하세요.
-3. Google Sheets에 없는 식품의 영양값을 임의로 만들어내지 마세요.
-4. 최종 식단의 calories, carbohydrate, protein, fat은 Google Sheets 영양정보를 기준으로 계산한 값으로 작성하세요.
-5. Google Sheets에 나트륨 정보가 있으면 나트륨도 함께 고려하세요.
-6. 제공된 영양정보만으로 정확한 조리량 계산이 불가능한 경우 영양값을 임의의 정밀한 수치로 꾸미지 말고 합리적인 범위의 값으로 표시하며, reason에 계산 기준을 간단히 설명하세요.
+1. 위 후보 데이터의 식품명과 영양값을 최우선 기준으로 사용하세요.
+2. 가능한 경우 후보 데이터에 실제 등록된 식품명을 그대로 사용하세요.
+3. 영양값을 임의로 만들어내지 마세요.
+4. Gemini는 최종 영양값을 확정하지 않습니다. 식단을 만든 뒤 웹앱이 Google Sheets 원본 데이터와 다시 매칭하여 영양값을 계산합니다.
+5. 후보 데이터에 없는 메뉴를 선택할 수는 있지만, 그런 메뉴의 영양값을 추정해서 JSON에 넣지 마세요.
+6. nutrition 값은 0 또는 null로 두어도 되며, 실제 표시되는 최종 영양값은 웹앱이 Google Sheets에서 계산합니다.
 
 [식단 설계 규칙]
 
@@ -3854,10 +4049,10 @@ ${JSON.stringify(
     }
   ],
   "nutrition": {
-    "calories": 700,
-    "carbohydrate": 100,
-    "protein": 25,
-    "fat": 20
+    "calories": null,
+    "carbohydrate": null,
+    "protein": null,
+    "fat": null
   },
   "recipes": [
     {
@@ -4056,6 +4251,25 @@ async function generateAiMenu() {
       result
     );
 
+    // Gemini가 만든 메뉴명을 Google Sheets 원본과 다시 매칭합니다.
+    // 최종 영양값은 Gemini가 만든 숫자가 아니라 Sheet 데이터의 합계입니다.
+    const sheetNutrition = calculateNutritionFromSheet(result.menus || []);
+
+    result.nutrition = {
+      calories: sheetNutrition.calories,
+      carbohydrate: sheetNutrition.carbohydrate,
+      protein: sheetNutrition.protein,
+      fat: sheetNutrition.fat
+    };
+
+    result.nutritionSource = {
+      type: "Google Sheets",
+      sheetId: NUTRITION_SHEET_ID,
+      gid: NUTRITION_SHEET_GID,
+      foodCount: foodNutritionData.length,
+      matchedMenus: sheetNutrition.matches,
+      calculatedAt: Date.now()
+    };
 
     currentAiResult =
       result;
@@ -4066,8 +4280,12 @@ async function generateAiMenu() {
     );
 
 
+    const matchedCount = (sheetNutrition.matches || [])
+      .filter(item => item.matchedFood)
+      .length;
+
     showStatus(
-      "✨ AI 식단이 생성되었습니다."
+      `✨ AI 식단이 생성되었습니다. Google Sheets ${matchedCount}/${(result.menus || []).length}개 메뉴 영양정보 매칭`
     );
 
 
@@ -4465,13 +4683,14 @@ async function saveAiResult() {
         currentAiResult.nutrition ||
         {},
 
-      nutritionSource: {
-        type: "Google Sheets",
-        sheetId: NUTRITION_SHEET_ID,
-        gid: NUTRITION_SHEET_GID,
-        foodCount: foodNutritionData.length,
-        loadedAt: Date.now()
-      },
+      nutritionSource:
+        currentAiResult.nutritionSource || {
+          type: "Google Sheets",
+          sheetId: NUTRITION_SHEET_ID,
+          gid: NUTRITION_SHEET_GID,
+          foodCount: foodNutritionData.length,
+          loadedAt: Date.now()
+        },
 
       recipes:
         currentAiResult.recipes ||
