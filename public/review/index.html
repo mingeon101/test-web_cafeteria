@@ -2607,7 +2607,7 @@ async function loadMenus() {
     list.innerHTML = "";
     choiceGrid.innerHTML = "";
 
-    // Firebase에 있는 실제 노드 이름
+    // Firebase의 key
     const categories = ["밥", "국", "김치"];
 
     // 화면에 표시할 이름
@@ -2624,79 +2624,69 @@ async function loadMenus() {
     };
 
     categories.forEach(category => {
-      const categoryData = menu[category];
 
-      if (!categoryData) return;
+      // Firebase에서 value 가져오기
+      const menuName = menu[category];
 
-      // menu/밥/메뉴이름
-      // menu/국/메뉴이름
-      // menu/김치/메뉴이름
-      Object.keys(categoryData).forEach(menuName => {
+      if (!menuName) return;
 
-        // =========================
-        // 오늘의 메뉴
-        // =========================
+      // =========================
+      // 오늘의 메뉴
+      // =========================
 
-        const row = document.createElement("div");
-        row.className = "menu-row";
+      const row = document.createElement("div");
+      row.className = "menu-row";
 
-        row.innerHTML = `
-          <div class="menu-icon">
-            ${emojis[category]}
+      row.innerHTML = `
+        <div class="menu-icon">
+          ${emojis[category]}
+        </div>
+
+        <div>
+          <div class="menu-category">
+            ${escapeHTML(displayCategory[category])}
           </div>
 
-          <div>
-            <div class="menu-category">
-              ${escapeHTML(displayCategory[category])}
-            </div>
-
-            <div class="menu-name">
-              ${escapeHTML(menuName)}
-            </div>
-          </div>
-        `;
-
-        list.appendChild(row);
-
-
-        // =========================
-        // 다음에도 먹고 싶은 메뉴
-        // =========================
-
-        const choice = document.createElement("div");
-        choice.className = "choice";
-
-        choice.innerHTML = `
-          <input
-            type="checkbox"
-            value="${escapeHTML(menuName)}"
-          >
-
-          <label>
-            ${emojis[category]}
+          <div class="menu-name">
             ${escapeHTML(menuName)}
-          </label>
-        `;
+          </div>
+        </div>
+      `;
 
-        choiceGrid.appendChild(choice);
-      });
+      list.appendChild(row);
+
+
+      // =========================
+      // 다음에도 먹고 싶은 메뉴
+      // =========================
+
+      const choice = document.createElement("div");
+      choice.className = "choice";
+
+      choice.innerHTML = `
+        <input
+          type="checkbox"
+          value="${escapeHTML(menuName)}"
+        >
+
+        <label>
+          ${emojis[category]}
+          ${escapeHTML(menuName)}
+        </label>
+      `;
+
+      choiceGrid.appendChild(choice);
     });
 
 
-    // 메뉴가 하나도 없을 경우
     if (list.children.length === 0) {
       list.innerHTML = `
         <p>오늘 급식 메뉴가 없습니다.</p>
       `;
     }
 
-    if (choiceGrid.children.length === 0) {
-      choiceGrid.innerHTML = `
-        <p>선택할 메뉴가 없습니다.</p>
-      `;
-    }
-
   } catch (error) {
+
     console.error("메뉴 불러오기 오류:", error);
 
     list.innerHTML = `
@@ -2707,6 +2697,15 @@ async function loadMenus() {
   }
 }
 
+
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 /* =====================================================
    LOAD ALL
