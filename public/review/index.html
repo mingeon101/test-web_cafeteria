@@ -2625,15 +2625,16 @@ async function loadMenus() {
 
     categories.forEach(category => {
 
-      // Firebase에서 value 가져오기
+      // 예:
+      // menu["밥"] = "흰밥"
+      // menu["국"] = "미역국"
+      // menu["김치"] = "배추김치"
+
       const menuName = menu[category];
 
       if (!menuName) return;
 
-      // =========================
       // 오늘의 메뉴
-      // =========================
-
       const row = document.createElement("div");
       row.className = "menu-row";
 
@@ -2656,10 +2657,7 @@ async function loadMenus() {
       list.appendChild(row);
 
 
-      // =========================
       // 다음에도 먹고 싶은 메뉴
-      // =========================
-
       const choice = document.createElement("div");
       choice.className = "choice";
 
@@ -2678,35 +2676,21 @@ async function loadMenus() {
       choiceGrid.appendChild(choice);
     });
 
-
     if (list.children.length === 0) {
-      list.innerHTML = `
-        <p>오늘 급식 메뉴가 없습니다.</p>
-      `;
+      list.innerHTML = "<p>오늘 급식 메뉴가 없습니다.</p>";
+    }
+
+    if (choiceGrid.children.length === 0) {
+      choiceGrid.innerHTML = "<p>선택할 메뉴가 없습니다.</p>";
     }
 
   } catch (error) {
-
     console.error("메뉴 불러오기 오류:", error);
 
-    list.innerHTML = `
-      <p>메뉴를 불러오지 못했습니다.</p>
-    `;
-
+    list.innerHTML = "<p>메뉴를 불러오지 못했습니다.</p>";
     choiceGrid.innerHTML = "";
   }
 }
-
-
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 /* =====================================================
    LOAD ALL
 ===================================================== */
