@@ -951,6 +951,26 @@ button {
   cursor: wait;
 }
 
+.ai-apply-menu-button {
+  flex: 1;
+  height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: #1f7a4d;
+  color: white;
+  font-weight: 900;
+  box-shadow: 0 4px 14px rgba(31,122,77,.20);
+}
+
+.ai-apply-menu-button:hover {
+  background: #17613c;
+}
+
+.ai-apply-menu-button:disabled {
+  opacity: .5;
+  cursor: wait;
+}
+
 
 /* =====================================================
    SAVED AI MENUS
@@ -1251,6 +1271,10 @@ button {
 
   .ai-actions {
     flex-direction: column;
+  }
+
+  .ai-apply-menu-button {
+    width: 100%;
   }
 
   .ai-new-button {
@@ -1913,6 +1937,13 @@ button {
         <!-- ACTIONS -->
 
         <div class="ai-actions">
+
+          <button
+            class="ai-apply-menu-button"
+            id="applyAiMenuButton"
+          >
+            ✅ 현재 급식 메뉴에 적용하기
+          </button>
 
           <button
             class="ai-save-button"
@@ -4642,6 +4673,85 @@ function renderAiRecipes(
 
 
 /* =====================================================
+   APPLY AI MENU TO FIREBASE menu
+===================================================== */
+async function applyAiMenuToFirebase() {
+  if (!currentAiResult || !Array.isArray(currentAiResult.menus)) {
+    alert("먼저 AI 식단을 생성해주세요.");
+    return;
+  }
+
+  const menus = currentAiResult.menus;
+  const rice = menus.find(menu => String(menu?.category || "").trim() === "밥");
+  const soup = menus.find(menu => String(menu?.category || "").trim() === "국");
+  const sideDishes = menus.filter(menu => String(menu?.category || "").trim() === "반찬");
+
+  // Firebase의 /menu/김치 키는 실제 음식 분류상 "김치"만 의미하는 것이 아니라
+  // 현재 시스템에서 사용하는 "반찬" 슬롯입니다. 따라서 AI 결과의 반찬을 적용합니다.
+  // 여러 반찬이 있으면 첫 번째 반찬을 /menu/김치 값으로 사용합니다.
+  const sideDish = sideDishes[0];
+
+  const menu = {
+    밥: String(rice?.name || "").trim(),
+    김치: String(sideDish?.name || "").trim(),
+    국: String(soup?.name || "").trim()
+  };
+
+  const missing = [];
+  if (!menu.밥) missing.push("밥");
+  if (!menu.국) missing.push("국");
+  if (!menu.김치) missing.push("반찬");
+
+  if (missing.length) {
+    alert(
+      "AI 식단에 다음 메뉴가 없어 적용할 수 없습니다.\n\n" +
+      missing.join(", ") +
+      "\n\nAI 식단을 다시 생성해주세요."
+    );
+    return;
+  }
+
+  const confirmed = confirm(
+    "AI 식단을 현재 급식 메뉴에 적용할까요?\n\n" +
+    `🍚 밥: ${menu.밥}\n` +
+    `🍲 국: ${menu.국}\n` +
+    `🥬 반찬: ${menu.김치}\n\n` +
+    "적용하면 Firebase /menu의 기존 값이 이 메뉴로 변경됩니다."
+  );
+
+  if (!confirmed) return;
+
+  const button = document.getElementById("applyAiMenuButton");
+  button.disabled = true;
+  button.textContent = "✅ Firebase에 적용하는 중...";
+
+  try {
+    await set(ref(db, "menu"), menu);
+    currentMenu = menu;
+
+    // 관리자 화면의 메뉴 입력칸도 즉시 새 값으로 갱신
+    document.querySelectorAll("[data-menu-key]").forEach(input => {
+      const key = input.dataset.menuKey;
+      if (Object.prototype.hasOwnProperty.call(menu, key)) {
+        input.value = menu[key];
+      }
+    });
+
+    await updateAiSourceDisplay();
+    showStatus(
+      `✅ AI 식단이 현재 급식 메뉴에 적용되었습니다. 밥: ${menu.밥} / 국: ${menu.국} / 반찬: ${menu.김치}`
+    );
+  } catch (error) {
+    console.error("AI 메뉴 적용 오류:", error);
+    alert("Firebase menu 적용에 실패했습니다.\n\n" + error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "✅ 현재 급식 메뉴에 적용하기";
+  }
+}
+
+
+/* =====================================================
    SAVE AI RESULT
 ===================================================== */
 
@@ -5277,6 +5387,14 @@ document
     "click",
     generateAiMenu
   );
+
+
+/* =====================================================
+   APPLY AI MENU BUTTON
+===================================================== */
+document
+  .getElementById("applyAiMenuButton")
+  .addEventListener("click", applyAiMenuToFirebase);
 
 
 /* =====================================================
