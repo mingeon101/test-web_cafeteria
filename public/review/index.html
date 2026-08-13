@@ -6250,8 +6250,19 @@ function escapeHtml(value) {
 
 (async function initReviewPage() {
   const raw = sessionStorage.getItem("currentStudent");
-  if (!raw) { window.location.href = "index.html"; return; }
-  try { currentStudent = JSON.parse(raw); } catch (e) { sessionStorage.removeItem("currentStudent"); window.location.href = "index.html"; return; }
+
+  if (!raw) {
+      window.location.href = "/index.html";
+      return;
+  }
+
+  try {
+      currentStudent = JSON.parse(raw);
+  } catch (e) {
+      sessionStorage.removeItem("currentStudent");
+      window.location.href = "/index.html";
+      return;
+  }
   const userNameEl = document.getElementById("userName");
   const headerStatusEl = document.getElementById("headerStatus");
   if (userNameEl) userNameEl.textContent = currentStudent.name || "학생";
