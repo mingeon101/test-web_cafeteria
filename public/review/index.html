@@ -1,122 +1,192 @@
-```html
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>우리학교 급식 · 학생 로그인</title><style>
 
-<title>우리학교 급식</title>
-
-<style>
-* {
+*, *::before, *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #FF6B35;
+  --primary-light: #fff0e8;
+  --secondary: #F7C59F;
+  --accent: #1A1A2E;
+  --bg: #FFF8F3;
+  --card: #FFFFFF;
+  --muted: #8B7355;
+  --success: #4CAF50;
+  --danger: #E53935;
+  --line: #eee5dd;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--accent);
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
-  margin: 0;
-  background: #f5f7fb;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "Noto Sans KR",
-    sans-serif;
-  color: #20242d;
+  overflow-x: hidden;
 }
 
 .container {
-  width: min(760px, 94%);
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 30px 0 60px;
+  padding: 0 16px 40px;
 }
 
 /* HEADER */
 
 .header {
+  margin: 0 -16px 0;
+  padding: 18px 24px 16px;
+  background: var(--accent);
+  color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 24px rgba(26,26,46,.35);
 }
 
 .header-title {
-  font-size: 28px;
-  font-weight: 800;
+  font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.3px;
 }
 
 .header-sub {
-  margin-top: 5px;
-  font-size: 13px;
-  color: #8b93a1;
+  margin-top: 2px;
+  font-size: 11px;
+  opacity: .45;
+  letter-spacing: .8px;
+  text-transform: uppercase;
 }
 
 .header-status {
-  font-size: 13px;
-  color: #4c8bf5;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.65);
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 /* USER */
 
 .user-box {
-  background: white;
-  border-radius: 22px;
-  padding: 22px;
-  margin-bottom: 18px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.05);
+  margin: 0 -16px 16px;
+  padding: 14px 24px 17px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 0;
+  box-shadow: 0 4px 18px rgba(26,26,46,.18);
+}
+
+.user-box::before {
+  content: "👤";
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
 .user-name {
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .user-sub {
-  margin-top: 5px;
-  color: #9299a6;
-  font-size: 14px;
+  margin-top: 2px;
+  color: rgba(255,255,255,.5);
+  font-size: 12px;
 }
 
 /* LOGIN */
 
 .login-card {
-  background: white;
-  border-radius: 22px;
-  padding: 25px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.05);
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,.04);
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
 }
 
 .login-card h2 {
-  margin-top: 0;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.login-card p {
+  line-height: 1.6;
 }
 
 .login-input {
   width: 100%;
-  padding: 15px;
-  border: 1px solid #e1e5ec;
+  padding: 13px 15px;
+  margin-top: 4px;
+  border: 1.5px solid #e8e0d8;
   border-radius: 12px;
-  font-size: 16px;
+  background: #fff;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 15px;
   outline: none;
+  transition: .2s;
 }
 
 .login-input:focus {
-  border-color: #4c8bf5;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,107,53,.1);
 }
 
 /* CARD */
 
 .card {
-  background: white;
-  border-radius: 22px;
-  padding: 24px;
-  margin-bottom: 18px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.05);
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,.04);
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
 }
 
 .card-title {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* ANIMATION */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp .38s ease forwards;
 }
 
 /* TODAY MENU */
@@ -125,110 +195,152 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .today-date {
-  font-size: 13px;
-  color: #8d95a3;
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .today-title {
-  font-size: 23px;
-  font-weight: 800;
-  margin-top: 5px;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-top: 4px;
 }
 
 .today-emoji {
-  font-size: 40px;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
 }
 
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .menu-row {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 15px;
-  background: #f7f8fa;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 14px;
+  background: #faf7f3;
+  border: 1px solid #f1e9e2;
+  transition: .2s;
+}
+
+.menu-row:hover {
+  transform: translateY(-1px);
+  border-color: var(--secondary);
 }
 
 .menu-icon {
-  font-size: 27px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  flex-shrink: 0;
 }
 
 .menu-category {
-  font-size: 12px;
-  color: #9299a6;
+  font-size: 11px;
+  color: var(--muted);
 }
 
 .menu-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .menu-rating {
   margin-left: auto;
-  font-weight: 800;
-  color: #ffb300;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  color: var(--primary);
 }
 
 /* REVIEW */
 
 .rating-wrap {
   text-align: center;
-  padding: 10px 0 25px;
+  padding: 6px 0 22px;
 }
 
 .rating-label {
   font-weight: 700;
-  margin-bottom: 12px;
+  font-size: 14px;
+  margin-bottom: 10px;
 }
 
 .stars {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 3px;
 }
 
 .star {
+  width: 42px;
+  height: 42px;
   border: 0;
-  background: none;
+  background: transparent;
+  color: #ddd5ce;
   cursor: pointer;
-  font-size: 40px;
-  color: #dfe3e8;
+  font-size: 35px;
+  line-height: 1;
   transition: .15s;
 }
 
+.star:hover {
+  transform: scale(1.08);
+}
+
 .star.active {
-  color: #ffc107;
+  color: var(--primary);
 }
 
 .rating-number {
-  margin-top: 8px;
-  color: #8d95a3;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 /* SCORE */
 
 .score-section {
-  margin-bottom: 25px;
+  margin-bottom: 22px;
 }
 
 .score-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 13px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #f2ebe5;
+}
+
+.score-row:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
 }
 
 .score-name {
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -240,30 +352,39 @@ body {
 .score-btn {
   width: 34px;
   height: 34px;
-  border: 1px solid #e0e4ea;
-  background: white;
-  border-radius: 9px;
+  border: 0;
+  background: #f5f0eb;
+  color: var(--accent);
+  border-radius: 10px;
   cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  transition: .15s;
+}
+
+.score-btn:hover {
+  background: var(--secondary);
 }
 
 .score-btn.active {
-  background: #4c8bf5;
-  color: white;
-  border-color: #4c8bf5;
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(255,107,53,.28);
 }
 
 /* CHOICE */
 
 .input-label {
   display: block;
+  font-size: 13px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .choice-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 9px;
+  gap: 8px;
 }
 
 .choice {
@@ -276,105 +397,140 @@ body {
 
 .choice label {
   display: block;
-  padding: 13px;
-  border: 1px solid #e2e5ea;
+  padding: 12px 10px;
+  border: 1.5px solid #e8e0d8;
   border-radius: 12px;
+  background: #fff;
   cursor: pointer;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
+  transition: .18s;
+}
+
+.choice label:hover {
+  border-color: var(--secondary);
+  background: #fffaf7;
 }
 
 .choice input:checked + label {
-  background: #edf4ff;
-  border-color: #4c8bf5;
-  color: #3475dc;
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--accent);
   font-weight: 700;
 }
 
-/* TEXTAREA */
+/* INPUT */
 
 .review-input,
 .recommend-input {
   width: 100%;
-  min-height: 100px;
+  min-height: 96px;
   resize: vertical;
-  border: 1px solid #e1e5ec;
+  border: 1.5px solid #e8e0d8;
   border-radius: 13px;
-  padding: 14px;
+  background: #fff;
+  color: var(--accent);
+  padding: 13px;
   font-family: inherit;
   font-size: 14px;
   outline: none;
+  transition: .2s;
 }
 
 .review-input:focus,
 .recommend-input:focus {
-  border-color: #4c8bf5;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,107,53,.08);
+}
+
+.recommend-input {
+  min-height: 52px;
+  resize: none;
 }
 
 /* BUTTON */
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 0;
-  cursor: pointer;
-  border-radius: 13px;
-  padding: 14px 20px;
-  font-size: 15px;
+  border-radius: 14px;
+  padding: 13px 20px;
+  font-family: inherit;
+  font-size: 14px;
   font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
 }
 
 .btn-primary {
-  background: #4c8bf5;
-  color: white;
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255,107,53,.28);
+}
+
+.btn-primary:hover {
+  background: #e85a26;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,107,53,.38);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-full {
   width: 100%;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 /* RECOMMEND */
 
 .recommend-card {
-  background: linear-gradient(135deg, #f1f6ff, #ffffff);
+  background: linear-gradient(135deg, #fff8f3, #fff0e8);
+  border-color: var(--secondary);
 }
 
 .recommend-label {
-  font-size: 11px;
-  font-weight: 800;
-  color: #4c8bf5;
-  letter-spacing: 1px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
 }
 
 .recommend-title {
   font-size: 23px;
-  font-weight: 800;
-  margin-top: 6px;
+  font-weight: 900;
+  letter-spacing: -.7px;
+  margin-top: 5px;
 }
 
 .recommend-desc {
-  margin-top: 8px;
-  color: #8a929f;
-  font-size: 13px;
-  line-height: 1.6;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .recommend-input-wrap {
-  margin-top: 20px;
-}
-
-.recommend-input {
-  min-height: 60px;
+  margin-top: 17px;
 }
 
 .recommend-result {
-  margin-top: 15px;
+  margin-top: 13px;
 }
 
 .recommend-item {
-  padding: 14px;
-  background: white;
+  padding: 13px 14px;
+  background: #fff;
+  border: 1px solid #f0e4da;
   border-radius: 13px;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -384,53 +540,68 @@ body {
 .review-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .popular-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  background: #f7f8fa;
+  gap: 10px;
+  padding: 13px 14px;
+  background: #faf7f3;
+  border: 1px solid #f1e9e2;
   border-radius: 13px;
 }
 
 .popular-name {
+  font-size: 13px;
   font-weight: 700;
 }
 
 .popular-rating {
-  color: #ffb300;
-  font-weight: 800;
+  color: var(--primary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 /* REVIEW LIST */
 
 .review-item {
-  padding: 15px;
-  border-radius: 13px;
-  background: #f7f8fa;
+  padding: 14px;
+  border-radius: 14px;
+  background: #faf7f3;
+  border: 1px solid #f1e9e2;
 }
 
 .review-top {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .review-student {
+  font-size: 13px;
   font-weight: 700;
 }
 
 .review-stars {
-  color: #ffc107;
+  color: var(--primary);
+  font-size: 12px;
+  letter-spacing: 1px;
 }
 
 .review-comment {
   margin-top: 8px;
-  color: #636b78;
-  font-size: 14px;
+  color: #6f665f;
+  font-size: 13px;
+  line-height: 1.6;
 }
+
+/* LOADING */
 
 .loading {
   display: flex;
@@ -443,7 +614,7 @@ body {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #b9c0ca;
+  background: var(--primary);
   animation: loading 1s infinite alternate;
 }
 
@@ -456,55 +627,1251 @@ body {
 }
 
 @keyframes loading {
-  from {
-    opacity: .3;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(-5px);
-  }
+  from { opacity: .3; transform: translateY(0); }
+  to { opacity: 1; transform: translateY(-5px); }
 }
+
+/* FOOTER */
 
 .footer {
   text-align: center;
-  color: #9aa1ad;
-  font-size: 12px;
-  margin-top: 30px;
+  color: #a28f7d;
+  font-size: 10px;
+  letter-spacing: .3px;
+  margin-top: 22px;
 }
 
 /* MOBILE */
 
-@media(max-width:600px) {
-
+@media (max-width: 380px) {
   .container {
-    width: 92%;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
-  .header-title {
-    font-size: 24px;
+  .header {
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+
+  .user-box {
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+
+  .card,
+  .login-card {
+    padding: 18px;
   }
 
   .score-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
   }
 
   .choice-grid {
     grid-template-columns: 1fr;
   }
 }
-</style>
-</head>
 
-<body>
 
-<div class="container">
+/* =====================================================
+   GEMINI OCR LOGIN
+===================================================== */
 
-  <!-- HEADER -->
+.ocr-login-card {
+  padding: 20px;
+}
 
-  <header class="header">
+.ocr-login-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.ocr-video-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--accent);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.ocr-video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary);
+  opacity: .9;
+  animation: scanDown 2s ease-in-out infinite;
+}
+
+@keyframes scanDown {
+  0% { top: 0; }
+  50% { top: calc(100% - 3px); }
+  100% { top: 0; }
+}
+
+.scan-corners {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+}
+
+.sc {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: var(--primary);
+  border-style: solid;
+  opacity: .9;
+}
+
+.sc-tl {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+  border-radius: 4px 0 0 0;
+}
+
+.sc-tr {
+  top: 0;
+  right: 0;
+  border-width: 2px 2px 0 0;
+  border-radius: 0 4px 0 0;
+}
+
+.sc-bl {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 2px 2px;
+  border-radius: 0 0 0 4px;
+}
+
+.sc-br {
+  bottom: 0;
+  right: 0;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 4px 0;
+}
+
+.ocr-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(26,26,46,.84);
+  backdrop-filter: blur(6px);
+  border-radius: 100px;
+  padding: 9px 18px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ocr-status-bar.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ocr-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2.5px solid rgba(255,255,255,.25);
+  border-top-color: var(--primary);
+  animation: ocrSpin .75s linear infinite;
+}
+
+@keyframes ocrSpin {
+  to { transform: rotate(360deg); }
+}
+
+.ocr-result-box {
+  width: 100%;
+  background: var(--primary-light);
+  border: 2px solid var(--secondary);
+  border-radius: 14px;
+  padding: 13px 16px;
+  display: none;
+  margin-bottom: 12px;
+}
+
+.ocr-result-box.visible {
+  display: block;
+}
+
+.ocr-result-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.ocr-result-name {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.firebase-status {
+  width: 100%;
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  display: none;
+  margin-bottom: 12px;
+}
+
+.firebase-status.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.firebase-status.found {
+  display: block;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1.5px solid #a5d6a7;
+}
+
+.firebase-status.not-found {
+  display: block;
+  background: #fff3e0;
+  color: #e65100;
+  border: 1.5px solid #ffcc80;
+}
+
+.firebase-status.error {
+  display: block;
+  background: #ffeaea;
+  color: var(--danger);
+  border: 1.5px solid #ffcdd2;
+}
+
+.btn-capture {
+  width: 100%;
+  margin-top: 0;
+}
+
+.manual-input-wrap {
+  width: 100%;
+  background: #f5f0eb;
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 10px;
+  display: none;
+}
+
+.manual-input-wrap.visible {
+  display: block;
+}
+
+.manual-input-wrap label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 7px;
+}
+
+.shutter-flash { animation: shutterFlash .3s ease; }
+@keyframes shutterFlash { 0% { opacity:1; } 15% { opacity:.05; } 100% { opacity:1; } }
+
+/* ===== 완전 분리된 로그인 / 리뷰 페이지 ===== */
+#reviewPage {
+  display: none !important;
+}
+
+#reviewPage.active {
+  display: block !important;
+}
+
+#loginCard {
+  display: block;
+}
+
+/* 로그인 전에는 리뷰 페이지의 공간도 차지하지 않음 */
+body.review-locked #reviewPage {
+  display: none !important;
+}
+
+body.review-unlocked #loginCard {
+  display: none !important;
+}
+
+body.review-unlocked #reviewPage {
+  display: block !important;
+}
+
+</style><style>.page-container{width:min(760px,94%);margin:0 auto;padding:30px 0 60px}.login-only-note{text-align:center;color:#8d95a3;font-size:13px;margin-top:12px}.logout-btn{background:#fff;color:#4c8bf5;border:1px solid #dce5f5;padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:700}</style><style>
+
+/* ===== MERGED REVIEW PAGE CSS ===== */
+
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #FF6B35;
+  --primary-light: #fff0e8;
+  --secondary: #F7C59F;
+  --accent: #1A1A2E;
+  --bg: #FFF8F3;
+  --card: #FFFFFF;
+  --muted: #8B7355;
+  --success: #4CAF50;
+  --danger: #E53935;
+  --line: #eee5dd;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--accent);
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+
+/* HEADER */
+
+.header {
+  margin: 0 -16px 0;
+  padding: 18px 24px 16px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 24px rgba(26,26,46,.35);
+}
+
+.header-title {
+  font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+}
+
+.header-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  opacity: .45;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+}
+
+.header-status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.65);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* USER */
+
+.user-box {
+  margin: 0 -16px 16px;
+  padding: 14px 24px 17px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 0;
+  box-shadow: 0 4px 18px rgba(26,26,46,.18);
+}
+
+.user-box::before {
+  content: "👤";
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.user-sub {
+  margin-top: 2px;
+  color: rgba(255,255,255,.5);
+  font-size: 12px;
+}
+
+/* LOGIN */
+
+.login-card {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,.04);
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+
+.login-card h2 {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.login-card p {
+  line-height: 1.6;
+}
+
+.login-input {
+  width: 100%;
+  padding: 13px 15px;
+  margin-top: 4px;
+  border: 1.5px solid #e8e0d8;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: .2s;
+}
+
+.login-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,107,53,.1);
+}
+
+/* CARD */
+
+.card {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,.04);
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+
+.card-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* ANIMATION */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp .38s ease forwards;
+}
+
+/* TODAY MENU */
+
+.today-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.today-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.today-title {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-top: 4px;
+}
+
+.today-emoji {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 14px;
+  background: #faf7f3;
+  border: 1px solid #f1e9e2;
+  transition: .2s;
+}
+
+.menu-row:hover {
+  transform: translateY(-1px);
+  border-color: var(--secondary);
+}
+
+.menu-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  flex-shrink: 0;
+}
+
+.menu-category {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.menu-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.menu-rating {
+  margin-left: auto;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* REVIEW */
+
+.rating-wrap {
+  text-align: center;
+  padding: 6px 0 22px;
+}
+
+.rating-label {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+
+.star {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  color: #ddd5ce;
+  cursor: pointer;
+  font-size: 35px;
+  line-height: 1;
+  transition: .15s;
+}
+
+.star:hover {
+  transform: scale(1.08);
+}
+
+.star.active {
+  color: var(--primary);
+}
+
+.rating-number {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* SCORE */
+
+.score-section {
+  margin-bottom: 22px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 13px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #f2ebe5;
+}
+
+.score-row:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+
+.score-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.score-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.score-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: #f5f0eb;
+  color: var(--accent);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  transition: .15s;
+}
+
+.score-btn:hover {
+  background: var(--secondary);
+}
+
+.score-btn.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(255,107,53,.28);
+}
+
+/* CHOICE */
+
+.input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.choice {
+  position: relative;
+}
+
+.choice input {
+  display: none;
+}
+
+.choice label {
+  display: block;
+  padding: 12px 10px;
+  border: 1.5px solid #e8e0d8;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  font-size: 13px;
+  transition: .18s;
+}
+
+.choice label:hover {
+  border-color: var(--secondary);
+  background: #fffaf7;
+}
+
+.choice input:checked + label {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* INPUT */
+
+.review-input,
+.recommend-input {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  border: 1.5px solid #e8e0d8;
+  border-radius: 13px;
+  background: #fff;
+  color: var(--accent);
+  padding: 13px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: .2s;
+}
+
+.review-input:focus,
+.recommend-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,107,53,.08);
+}
+
+.recommend-input {
+  min-height: 52px;
+  resize: none;
+}
+
+/* BUTTON */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 14px;
+  padding: 13px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255,107,53,.28);
+}
+
+.btn-primary:hover {
+  background: #e85a26;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,107,53,.38);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* RECOMMEND */
+
+.recommend-card {
+  background: linear-gradient(135deg, #fff8f3, #fff0e8);
+  border-color: var(--secondary);
+}
+
+.recommend-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.recommend-title {
+  font-size: 23px;
+  font-weight: 900;
+  letter-spacing: -.7px;
+  margin-top: 5px;
+}
+
+.recommend-desc {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.recommend-input-wrap {
+  margin-top: 17px;
+}
+
+.recommend-result {
+  margin-top: 13px;
+}
+
+.recommend-item {
+  padding: 13px 14px;
+  background: #fff;
+  border: 1px solid #f0e4da;
+  border-radius: 13px;
+  margin-bottom: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* POPULAR */
+
+.popular-list,
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popular-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  background: #faf7f3;
+  border: 1px solid #f1e9e2;
+  border-radius: 13px;
+}
+
+.popular-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.popular-rating {
+  color: var(--primary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* REVIEW LIST */
+
+.review-item {
+  padding: 14px;
+  border-radius: 14px;
+  background: #faf7f3;
+  border: 1px solid #f1e9e2;
+}
+
+.review-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-student {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.review-stars {
+  color: var(--primary);
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.review-comment {
+  margin-top: 8px;
+  color: #6f665f;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* LOADING */
+
+.loading {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 20px;
+}
+
+.loading-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: loading 1s infinite alternate;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: .4s;
+}
+
+@keyframes loading {
+  from { opacity: .3; transform: translateY(0); }
+  to { opacity: 1; transform: translateY(-5px); }
+}
+
+/* FOOTER */
+
+.footer {
+  text-align: center;
+  color: #a28f7d;
+  font-size: 10px;
+  letter-spacing: .3px;
+  margin-top: 22px;
+}
+
+/* MOBILE */
+
+@media (max-width: 380px) {
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .header {
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+
+  .user-box {
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+
+  .card,
+  .login-card {
+    padding: 18px;
+  }
+
+  .score-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =====================================================
+   GEMINI OCR LOGIN
+===================================================== */
+
+.ocr-login-card {
+  padding: 20px;
+}
+
+.ocr-login-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.ocr-video-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--accent);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.ocr-video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary);
+  opacity: .9;
+  animation: scanDown 2s ease-in-out infinite;
+}
+
+@keyframes scanDown {
+  0% { top: 0; }
+  50% { top: calc(100% - 3px); }
+  100% { top: 0; }
+}
+
+.scan-corners {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+}
+
+.sc {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: var(--primary);
+  border-style: solid;
+  opacity: .9;
+}
+
+.sc-tl {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+  border-radius: 4px 0 0 0;
+}
+
+.sc-tr {
+  top: 0;
+  right: 0;
+  border-width: 2px 2px 0 0;
+  border-radius: 0 4px 0 0;
+}
+
+.sc-bl {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 2px 2px;
+  border-radius: 0 0 0 4px;
+}
+
+.sc-br {
+  bottom: 0;
+  right: 0;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 4px 0;
+}
+
+.ocr-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(26,26,46,.84);
+  backdrop-filter: blur(6px);
+  border-radius: 100px;
+  padding: 9px 18px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ocr-status-bar.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ocr-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2.5px solid rgba(255,255,255,.25);
+  border-top-color: var(--primary);
+  animation: ocrSpin .75s linear infinite;
+}
+
+@keyframes ocrSpin {
+  to { transform: rotate(360deg); }
+}
+
+.ocr-result-box {
+  width: 100%;
+  background: var(--primary-light);
+  border: 2px solid var(--secondary);
+  border-radius: 14px;
+  padding: 13px 16px;
+  display: none;
+  margin-bottom: 12px;
+}
+
+.ocr-result-box.visible {
+  display: block;
+}
+
+.ocr-result-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.ocr-result-name {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.firebase-status {
+  width: 100%;
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  display: none;
+  margin-bottom: 12px;
+}
+
+.firebase-status.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.firebase-status.found {
+  display: block;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1.5px solid #a5d6a7;
+}
+
+.firebase-status.not-found {
+  display: block;
+  background: #fff3e0;
+  color: #e65100;
+  border: 1.5px solid #ffcc80;
+}
+
+.firebase-status.error {
+  display: block;
+  background: #ffeaea;
+  color: var(--danger);
+  border: 1.5px solid #ffcdd2;
+}
+
+.btn-capture {
+  width: 100%;
+  margin-top: 0;
+}
+
+.manual-input-wrap {
+  width: 100%;
+  background: #f5f0eb;
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 10px;
+  display: none;
+}
+
+.manual-input-wrap.visible {
+  display: block;
+}
+
+.manual-input-wrap label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 7px;
+}
+
+.shutter-flash { animation: shutterFlash .3s ease; }
+@keyframes shutterFlash { 0% { opacity:1; } 15% { opacity:.05; } 100% { opacity:1; } }
+
+/* ===== 완전 분리된 로그인 / 리뷰 페이지 ===== */
+#reviewPage {
+  display: none !important;
+}
+
+#reviewPage.active {
+  display: block !important;
+}
+
+#loginCard {
+  display: block;
+}
+
+/* 로그인 전에는 리뷰 페이지의 공간도 차지하지 않음 */
+body.review-locked #reviewPage {
+  display: none !important;
+}
+
+body.review-unlocked #loginCard {
+  display: none !important;
+}
+
+body.review-unlocked #reviewPage {
+  display: block !important;
+}
+
+
+
+.page-container{width:min(760px,94%);margin:0 auto;padding:30px 0 60px}.login-only-note{text-align:center;color:#8d95a3;font-size:13px;margin-top:12px}.logout-btn{background:#fff;color:#4c8bf5;border:1px solid #dce5f5;padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:700}</style>
+</head><body><div class="page-container"><header class="header">
 
     <div>
       <div class="header-title">
@@ -520,384 +1887,63 @@ body {
       로그인 필요
     </div>
 
-  </header>
+  </header><section class="login-card ocr-login-card" id="loginCard">
+  <div class="ocr-login-title">🔍 학생증 / 명찰 OCR 인식</div>
 
+  <div class="ocr-video-wrap" id="ocr-video-wrap">
+    <video id="video-recog" autoplay muted playsinline></video>
 
-  <!-- LOGIN -->
+    <div class="scan-line"></div>
 
-  <section class="login-card" id="loginCard">
+    <div class="scan-corners">
+      <div class="sc sc-tl"></div>
+      <div class="sc sc-tr"></div>
+      <div class="sc sc-bl"></div>
+      <div class="sc sc-br"></div>
+    </div>
 
-    <h2>학생 로그인</h2>
+    <div class="ocr-status-bar hidden" id="ocr-status-bar">
+      <div class="ocr-spinner" id="ocr-spinner"></div>
+      <span id="ocr-status-text">인식 중...</span>
+    </div>
+  </div>
 
-    <p style="color:#8d95a3;font-size:14px;">
-      Firebase에 등록된 이름을 입력해주세요.
-    </p>
+  <canvas id="ocr-canvas" style="display:none;"></canvas>
 
+  <div class="ocr-result-box" id="ocr-result-box">
+    <div class="ocr-result-label">📝 인식된 이름</div>
+    <div class="ocr-result-name" id="ocr-result-name">—</div>
+  </div>
+
+  <div class="firebase-status" id="firebase-status"></div>
+
+  <button class="btn btn-primary btn-full btn-capture" id="btn-capture">
+    📷 학생증 인식
+  </button>
+
+  <div class="manual-input-wrap" id="manual-input-wrap">
+    <label>이름 직접 입력</label>
     <input
       type="text"
-      id="nameInput"
+      id="manual-name-input"
       class="login-input"
-      placeholder="이름을 입력하세요"
+      placeholder="홍길동"
+      maxlength="10"
       autocomplete="off"
     >
-
     <button
       class="btn btn-primary btn-full"
-      id="loginButton"
+      id="manual-search-button"
     >
-      학생으로 로그인
+      🔍 학생 조회
     </button>
-
-    <div
-      id="loginMessage"
-      style="margin-top:12px;text-align:center;color:#e05252;font-size:13px;"
-    ></div>
-
-  </section>
-
-
-  <!-- USER -->
-
-  <div class="user-box">
-
-    <div
-      class="user-name"
-      id="userName"
-    >
-      학생
-    </div>
-
-    <div class="user-sub">
-      오늘의 급식을 평가해주세요
-    </div>
-
   </div>
 
-
-  <!-- TODAY MENU -->
-
-  <section class="card fade-up">
-
-    <div class="today-head">
-
-      <div>
-
-        <div
-          class="today-date"
-          id="todayDate"
-        ></div>
-
-        <div class="today-title">
-          오늘의 급식
-        </div>
-
-      </div>
-
-      <div class="today-emoji">
-        🍱
-      </div>
-
-    </div>
-
-
-    <div
-      class="menu-list"
-      id="todayMenuList"
-    >
-
-      <div class="loading">
-
-        <div class="loading-dot"></div>
-        <div class="loading-dot"></div>
-        <div class="loading-dot"></div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- REVIEW -->
-
-  <section class="card fade-up">
-
-    <div class="card-title">
-      Today's Review
-    </div>
-
-
-    <!-- 별점 -->
-
-    <div class="rating-wrap">
-
-      <div class="rating-label">
-        오늘 급식은 어땠나요?
-      </div>
-
-      <div
-        class="stars"
-        id="stars"
-      >
-
-        <button class="star" data-value="1">
-          ★
-        </button>
-
-        <button class="star" data-value="2">
-          ★
-        </button>
-
-        <button class="star" data-value="3">
-          ★
-        </button>
-
-        <button class="star" data-value="4">
-          ★
-        </button>
-
-        <button class="star" data-value="5">
-          ★
-        </button>
-
-      </div>
-
-      <div
-        class="rating-number"
-        id="ratingText"
-      >
-        별점을 선택해주세요
-      </div>
-
-    </div>
-
-
-    <!-- 세부 점수 -->
-
-    <div class="score-section">
-
-      <div class="score-row">
-
-        <div class="score-name">
-          😋 맛
-        </div>
-
-        <div
-          class="score-buttons"
-          data-score="taste"
-        >
-
-          <button class="score-btn" data-value="1">1</button>
-          <button class="score-btn" data-value="2">2</button>
-          <button class="score-btn" data-value="3">3</button>
-          <button class="score-btn" data-value="4">4</button>
-          <button class="score-btn" data-value="5">5</button>
-
-        </div>
-
-      </div>
-
-
-      <div class="score-row">
-
-        <div class="score-name">
-          🍚 양
-        </div>
-
-        <div
-          class="score-buttons"
-          data-score="amount"
-        >
-
-          <button class="score-btn" data-value="1">1</button>
-          <button class="score-btn" data-value="2">2</button>
-          <button class="score-btn" data-value="3">3</button>
-          <button class="score-btn" data-value="4">4</button>
-          <button class="score-btn" data-value="5">5</button>
-
-        </div>
-
-      </div>
-
-
-      <div class="score-row">
-
-        <div class="score-name">
-          ❤️ 만족도
-        </div>
-
-        <div
-          class="score-buttons"
-          data-score="satisfaction"
-        >
-
-          <button class="score-btn" data-value="1">1</button>
-          <button class="score-btn" data-value="2">2</button>
-          <button class="score-btn" data-value="3">3</button>
-          <button class="score-btn" data-value="4">4</button>
-          <button class="score-btn" data-value="5">5</button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- 다음에도 먹고 싶은 메뉴 -->
-
-    <label class="input-label">
-      ⭐ 다음에도 먹고 싶은 메뉴
-    </label>
-
-    <div
-      class="choice-grid"
-      id="choiceGrid"
-    >
-      <!-- Firebase 메뉴 자동 생성 -->
-    </div>
-
-
-    <!-- 리뷰 -->
-
-    <div style="margin-top:20px;">
-
-      <label class="input-label">
-        💬 한줄 리뷰
-      </label>
-
-      <textarea
-        id="reviewComment"
-        class="review-input"
-        maxlength="200"
-        placeholder="오늘 급식에 대한 솔직한 의견을 남겨주세요."
-      ></textarea>
-
-    </div>
-
-
-    <button
-      class="btn btn-primary btn-full"
-      id="submitReview"
-    >
-      ⭐ 리뷰 등록하기
-    </button>
-
-  </section>
-
-
-  <!-- RECOMMENDATION -->
-
-  <section class="card recommend-card fade-up">
-
-    <div class="recommend-label">
-      AI MENU RECOMMENDATION
-    </div>
-
-    <div class="recommend-title">
-      다음 급식 추천
-    </div>
-
-    <div class="recommend-desc">
-      원하는 다음 급식 메뉴를 직접 입력해주세요.
-      <br>
-      입력한 메뉴는 Firebase에 저장됩니다.
-    </div>
-
-
-    <div class="recommend-input-wrap">
-
-      <input
-        type="text"
-        id="recommendInput"
-        class="review-input"
-        placeholder="예: 치즈돈까스"
-        maxlength="100"
-      >
-
-      <button
-        class="btn btn-primary btn-full"
-        id="saveRecommend"
-      >
-        ⭐ 추천 메뉴 저장
-      </button>
-
-    </div>
-
-
-    <div
-      class="recommend-result"
-      id="recommendMenu"
-    >
-    </div>
-
-  </section>
-
-
-  <!-- POPULAR -->
-
-  <section class="card">
-
-    <div class="card-title">
-      Popular Menus
-    </div>
-
-    <div
-      class="popular-list"
-      id="popularList"
-    >
-
-      <div class="loading">
-
-        <div class="loading-dot"></div>
-        <div class="loading-dot"></div>
-        <div class="loading-dot"></div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- RECENT REVIEWS -->
-
-  <section class="card">
-
-    <div class="card-title">
-      Recent Reviews
-    </div>
-
-    <div
-      class="review-list"
-      id="reviewList"
-    >
-
-      <div class="loading">
-
-        <div class="loading-dot"></div>
-        <div class="loading-dot"></div>
-        <div class="loading-dot"></div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <div class="footer">
-    Smart Cafeteria · 학생들의 의견으로 더 맛있는 급식
-  </div>
-
-</div>
-
-
-<!-- =====================================================
-     FIREBASE
-===================================================== -->
-
-<script type="module">
+  <div
+    id="loginMessage"
+    style="margin-top:12px;text-align:center;color:#e05252;font-size:13px;"
+  ></div>
+</section><div class="login-only-note">로그인하면 오늘의 급식 리뷰 페이지로 이동합니다.</div></div><script type="module">
 
 import {
   initializeApp
@@ -999,201 +2045,520 @@ function setTodayDate() {
      ${today.getDate()}일
      (${days[today.getDay()]})`;
 
-  document.getElementById(
-    "todayDate"
-  ).textContent =
-    dateText;
+  const el = document.getElementById("todayDate");
+  if (el) el.textContent = dateText;
 }
 
 setTodayDate();
 
 
 /* =====================================================
-   LOGIN
+   GEMINI OCR LOGIN
 ===================================================== */
 
-document
-  .getElementById("loginButton")
-  .addEventListener(
-    "click",
-    loginStudent
-  );
+let recogStream = null;
+let GEMINI_API_KEY = "";
+const GEMINI_MODEL = "gemini-3.1-flash-lite";
+let GEMINI_ENDPOINT = "";
 
+async function initGeminiKey() {
+  try {
+    const res = await fetch('/.netlify/functions/get-key');
 
-document
-  .getElementById("nameInput")
-  .addEventListener(
-    "keydown",
-    e => {
-
-      if (e.key === "Enter") {
-
-        loginStudent();
-
-      }
-
+    if (res.ok) {
+      const json = await res.json();
+      GEMINI_API_KEY = json.apiKey || "";
     }
-  );
-
-
-async function loginStudent() {
-
-  const name =
-    document
-      .getElementById("nameInput")
-      .value
-      .trim();
-
-
-  const message =
-    document.getElementById(
-      "loginMessage"
-    );
-
-
-  if (!name) {
-
-    message.textContent =
-      "이름을 입력해주세요.";
-
-    return;
-
+  } catch (e) {
+    console.warn("Netlify key fetch 실패:", e);
   }
 
+  GEMINI_ENDPOINT =
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+}
 
-  message.textContent =
-    "학생 정보를 찾는 중...";
+function setOcrStatus(state, text) {
+  const bar = document.getElementById("ocr-status-bar");
+  const spinner = document.getElementById("ocr-spinner");
+  const txt = document.getElementById("ocr-status-text");
 
+  if (!bar) return;
+
+  if (state === "hidden") {
+    bar.classList.add("hidden");
+    return;
+  }
+
+  bar.classList.remove("hidden");
+
+  if (txt) {
+    txt.textContent = text || "";
+  }
+
+  if (spinner) {
+    spinner.style.display =
+      state === "loading" ? "block" : "none";
+  }
+}
+
+function setFirebaseStatus(type, text) {
+  const el = document.getElementById("firebase-status");
+
+  if (!el) return;
+
+  el.className = "firebase-status";
+
+  if (!type || type === "hidden") {
+    el.style.display = "none";
+    el.textContent = "";
+    return;
+  }
+
+  el.classList.add(type);
+  el.textContent = text || "";
+}
+
+function resetOcrUI() {
+  setFirebaseStatus("hidden");
+
+  const resultBox =
+    document.getElementById("ocr-result-box");
+
+  if (resultBox) {
+    resultBox.classList.remove("visible");
+  }
+
+  const manual =
+    document.getElementById("manual-input-wrap");
+
+  if (manual) {
+    manual.classList.remove("visible");
+  }
+}
+
+async function initRecognition() {
+  resetOcrUI();
+
+  const btn =
+    document.getElementById("btn-capture");
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = "📷 학생증 인식";
+    btn.onclick = captureAndOCR;
+  }
+
+  const video =
+    document.getElementById("video-recog");
+
+  if (!video) return;
+
+  try {
+    recogStream =
+      await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+
+    video.srcObject = recogStream;
+
+  } catch (e) {
+
+    try {
+      recogStream =
+        await navigator.mediaDevices.getUserMedia({
+          video: true
+        });
+
+      video.srcObject = recogStream;
+
+    } catch (e2) {
+      console.error("카메라 접근 실패:", e2);
+
+      setFirebaseStatus(
+        "error",
+        "카메라를 사용할 수 없습니다. 이름을 직접 입력해주세요."
+      );
+
+      const manual =
+        document.getElementById("manual-input-wrap");
+
+      if (manual) {
+        manual.classList.add("visible");
+      }
+    }
+  }
+}
+
+function stopRecogCamera() {
+  if (recogStream) {
+    recogStream.getTracks().forEach(track => track.stop());
+    recogStream = null;
+  }
+}
+
+async function handleNameFound(recognizedName) {
+
+  const message =
+    document.getElementById("loginMessage");
+
+  if (message) {
+    message.textContent = "";
+  }
+
+  setFirebaseStatus(
+    "loading",
+    `🔍 ${recognizedName} 학생 정보를 찾는 중...`
+  );
 
   try {
 
     const studentsRef =
       ref(db, "students");
 
-
     const snapshot =
       await get(studentsRef);
 
-
     if (!snapshot.exists()) {
 
-      message.textContent =
-        "등록된 학생이 없습니다.";
+      setFirebaseStatus(
+        "not-found",
+        "등록된 학생이 없습니다."
+      );
 
+      showManualInput();
       return;
-
     }
-
 
     const students =
       snapshot.val();
 
-
     let foundStudent = null;
 
-
-    /*
-      students/{학번}
-        name: 홍길동
-        grade: 1
-        class: 2
-        number: 10
-
-      형태를 기준으로 검색
-    */
-
-    for (
-      const studentId
-      in students
-    ) {
+    for (const studentId in students) {
 
       const student =
         students[studentId];
 
-
       if (
         student &&
         student.name &&
-        String(student.name).trim()
-          === name
+        String(student.name).trim() === recognizedName
       ) {
 
         foundStudent = {
-
-          studentId:
-            studentId,
-
+          studentId: studentId,
           ...student
-
         };
 
         break;
-
       }
-
     }
-
 
     if (!foundStudent) {
 
-      message.textContent =
-        "등록된 학생을 찾을 수 없습니다.";
+      setFirebaseStatus(
+        "not-found",
+        `⚠️ "${recognizedName}" 학생을 찾을 수 없습니다.`
+      );
 
+      showManualInput();
       return;
-
     }
 
+    currentStudent = foundStudent;
+    sessionStorage.setItem("currentStudent", JSON.stringify(foundStudent));
+    const userNameEl = document.getElementById("userName");
+    if (userNameEl) userNameEl.textContent = foundStudent.name;
 
-    currentStudent =
-      foundStudent;
-
-
-    document
-      .getElementById("userName")
-      .textContent =
-      foundStudent.name;
-
-
-    document
-      .getElementById("headerStatus")
-      .textContent =
+    document.getElementById(
+      "headerStatus"
+    ).textContent =
       "로그인 완료";
 
+    setFirebaseStatus(
+      "found",
+      `✓ ${foundStudent.name} 학생 확인 완료`
+    );
 
-    message.textContent =
-      "";
+    const resultBox =
+      document.getElementById("ocr-result-box");
 
+    const resultName =
+      document.getElementById("ocr-result-name");
 
-    document
-      .getElementById("loginCard")
-      .style.display =
-      "none";
+    if (resultName) {
+      resultName.textContent =
+        foundStudent.name;
+    }
 
+    if (resultBox) {
+      resultBox.classList.add("visible");
+    }
 
-    /*
-      로그인 후 메뉴 불러오기
-    */
+    stopRecogCamera();
 
-    await loadMenus();
-
-    await loadPopularMenus();
-
-    await loadRecentReviews();
-
-    await loadStudentRecommendations();
-
+    stopRecogCamera();
+    window.location.href = "review.html";
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "학생 조회 오류:",
+      error
+    );
 
-    message.textContent =
-      "로그인 중 오류가 발생했습니다.";
+    setFirebaseStatus(
+      "error",
+      "학생 정보를 불러오는 중 오류가 발생했습니다."
+    );
 
+    showManualInput();
   }
-
 }
 
+function showManualInput() {
+
+  const manual =
+    document.getElementById("manual-input-wrap");
+
+  if (manual) {
+    manual.classList.add("visible");
+  }
+}
+
+async function manualSearch() {
+
+  const input =
+    document.getElementById("manual-name-input");
+
+  if (!input) return;
+
+  const name =
+    input.value.trim();
+
+  if (!name) {
+
+    setFirebaseStatus(
+      "not-found",
+      "이름을 입력해주세요."
+    );
+
+    return;
+  }
+
+  await handleNameFound(name);
+}
+
+async function captureAndOCR() {
+
+  const video =
+    document.getElementById("video-recog");
+
+  const canvas =
+    document.getElementById("ocr-canvas");
+
+  const btn =
+    document.getElementById("btn-capture");
+
+  if (!video || !canvas || !btn) {
+    return;
+  }
+
+  resetOcrUI();
+
+  const wrap =
+    document.getElementById("ocr-video-wrap");
+
+  if (wrap) {
+
+    wrap.classList.add("shutter-flash");
+
+    setTimeout(() => {
+      wrap.classList.remove("shutter-flash");
+    }, 350);
+  }
+
+  btn.disabled = true;
+  btn.textContent = "학생 검색 중...";
+
+  setOcrStatus(
+    "loading",
+    "Gemini가 학생증을 인식하는 중..."
+  );
+
+  canvas.width =
+    video.videoWidth || 640;
+
+  canvas.height =
+    video.videoHeight || 480;
+
+  const ctx =
+    canvas.getContext("2d");
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  const base64Img =
+    canvas
+      .toDataURL("image/jpeg", 0.92)
+      .split(",")[1];
+
+  let recognizedName = null;
+
+  try {
+
+    if (!GEMINI_ENDPOINT || !GEMINI_API_KEY) {
+      await initGeminiKey();
+    }
+
+    if (!GEMINI_API_KEY) {
+      throw new Error(
+        "Gemini API Key를 불러오지 못했습니다."
+      );
+    }
+
+    const res =
+      await fetch(
+        GEMINI_ENDPOINT,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                {
+                  text:
+                    "이 이미지에서 사람 이름(한국어 또는 영어)만 찾아서 이름만 답하세요. 이름이 없거나 읽을 수 없으면 정확히 NONE 이라고만 답하세요. 다른 설명은 절대 하지 마세요."
+                },
+                {
+                  inline_data: {
+                    mime_type: "image/jpeg",
+                    data: base64Img
+                  }
+                }
+              ]
+            }],
+            generationConfig: {
+              temperature: 0.1,
+              topP: 1
+            }
+          })
+        }
+      );
+
+    const data =
+      await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data.error?.message ||
+        "Gemini 연결 실패"
+      );
+    }
+
+    const raw =
+      (
+        data.candidates?.[0]
+          ?.content?.parts?.[0]
+          ?.text || ""
+      ).trim();
+
+    if (
+      raw &&
+      raw !== "NONE" &&
+      raw.length >= 2 &&
+      raw.length <= 15
+    ) {
+      recognizedName = raw;
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Gemini OCR 오류:",
+      error
+    );
+
+    setFirebaseStatus(
+      "error",
+      "Gemini OCR 처리에 실패했습니다. 다시 시도해주세요."
+    );
+  }
+
+  setOcrStatus("hidden");
+
+  if (recognizedName) {
+
+    const resultName =
+      document.getElementById("ocr-result-name");
+
+    if (resultName) {
+      resultName.textContent =
+        recognizedName;
+    }
+
+    const resultBox =
+      document.getElementById("ocr-result-box");
+
+    if (resultBox) {
+      resultBox.classList.add("visible");
+    }
+
+    await handleNameFound(
+      recognizedName
+    );
+
+  } else {
+
+    btn.textContent = "📷 다시 찍기";
+    btn.disabled = false;
+    btn.onclick = captureAndOCR;
+
+    setFirebaseStatus(
+      "not-found",
+      "⚠️ 이름을 인식하지 못했어요. 직접 입력해 주세요."
+    );
+
+    showManualInput();
+  }
+}
+
+/* OCR 로그인 이벤트 */
+document
+  .getElementById("btn-capture")
+  ?.addEventListener(
+    "click",
+    captureAndOCR
+  );
+
+document
+  .getElementById("manual-search-button")
+  ?.addEventListener(
+    "click",
+    manualSearch
+  );
+
+document
+  .getElementById("manual-name-input")
+  ?.addEventListener(
+    "keydown",
+    e => {
+      if (e.key === "Enter") {
+        manualSearch();
+      }
+    }
+  );
 
 /* =====================================================
    MENU LOAD
@@ -2540,8 +3905,2403 @@ function escapeHtml(value) {
 
 }
 
+
+/* =====================================================
+   OCR 초기화
+===================================================== */
+
+(async function initGeminiOCRLogin() {
+  await initGeminiKey();
+  await initRecognition();
+})();
+
+</script>
+<!-- ===== REVIEW PAGE (SINGLE HTML FILE) ===== -->
+<div id="reviewPage" style="display:none;">
+<div class="page-container"><header class="header">
+
+    <div>
+      <div class="header-title">
+        우리학교 급식
+      </div>
+
+      <div class="header-sub">
+        Smart Cafeteria Review
+      </div>
+    </div>
+
+    <div class="header-status" id="headerStatus">
+      로그인 필요
+    </div>
+
+  </header><div class="user-box">
+
+    <div
+      class="user-name"
+      id="userName"
+    >
+      학생
+    </div>
+
+    <div class="user-sub">
+      오늘의 급식을 평가해주세요
+    </div><div class="review-page active">
+<!-- TODAY MENU -->
+
+  <section class="card fade-up">
+
+    <div class="today-head">
+
+      <div>
+
+        <div
+          class="today-date"
+          id="todayDate"
+        ></div>
+
+        <div class="today-title">
+          오늘의 급식
+        </div>
+
+      </div>
+
+      <div class="today-emoji">
+        🍱
+      </div>
+
+    </div>
+
+
+    <div
+      class="menu-list"
+      id="todayMenuList"
+    >
+
+      <div class="loading">
+
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- REVIEW -->
+
+  <section class="card fade-up">
+
+    <div class="card-title">
+      Today's Review
+    </div>
+
+
+    <!-- 별점 -->
+
+    <div class="rating-wrap">
+
+      <div class="rating-label">
+        오늘 급식은 어땠나요?
+      </div>
+
+      <div
+        class="stars"
+        id="stars"
+      >
+
+        <button class="star" data-value="1">
+          ★
+        </button>
+
+        <button class="star" data-value="2">
+          ★
+        </button>
+
+        <button class="star" data-value="3">
+          ★
+        </button>
+
+        <button class="star" data-value="4">
+          ★
+        </button>
+
+        <button class="star" data-value="5">
+          ★
+        </button>
+
+      </div>
+
+      <div
+        class="rating-number"
+        id="ratingText"
+      >
+        별점을 선택해주세요
+      </div>
+
+    </div>
+
+
+    <!-- 세부 점수 -->
+
+    <div class="score-section">
+
+      <div class="score-row">
+
+        <div class="score-name">
+          😋 맛
+        </div>
+
+        <div
+          class="score-buttons"
+          data-score="taste"
+        >
+
+          <button class="score-btn" data-value="1">1</button>
+          <button class="score-btn" data-value="2">2</button>
+          <button class="score-btn" data-value="3">3</button>
+          <button class="score-btn" data-value="4">4</button>
+          <button class="score-btn" data-value="5">5</button>
+
+        </div>
+
+      </div>
+
+
+      <div class="score-row">
+
+        <div class="score-name">
+          🍚 양
+        </div>
+
+        <div
+          class="score-buttons"
+          data-score="amount"
+        >
+
+          <button class="score-btn" data-value="1">1</button>
+          <button class="score-btn" data-value="2">2</button>
+          <button class="score-btn" data-value="3">3</button>
+          <button class="score-btn" data-value="4">4</button>
+          <button class="score-btn" data-value="5">5</button>
+
+        </div>
+
+      </div>
+
+
+      <div class="score-row">
+
+        <div class="score-name">
+          ❤️ 만족도
+        </div>
+
+        <div
+          class="score-buttons"
+          data-score="satisfaction"
+        >
+
+          <button class="score-btn" data-value="1">1</button>
+          <button class="score-btn" data-value="2">2</button>
+          <button class="score-btn" data-value="3">3</button>
+          <button class="score-btn" data-value="4">4</button>
+          <button class="score-btn" data-value="5">5</button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- 다음에도 먹고 싶은 메뉴 -->
+
+    <label class="input-label">
+      ⭐ 다음에도 먹고 싶은 메뉴
+    </label>
+
+    <div
+      class="choice-grid"
+      id="choiceGrid"
+    >
+      <!-- Firebase 메뉴 자동 생성 -->
+    </div>
+
+
+    <!-- 리뷰 -->
+
+    <div style="margin-top:20px;">
+
+      <label class="input-label">
+        💬 한줄 리뷰
+      </label>
+
+      <textarea
+        id="reviewComment"
+        class="review-input"
+        maxlength="200"
+        placeholder="오늘 급식에 대한 솔직한 의견을 남겨주세요."
+      ></textarea>
+
+    </div>
+
+
+    <button
+      class="btn btn-primary btn-full"
+      id="submitReview"
+    >
+      ⭐ 리뷰 등록하기
+    </button>
+
+  </section>
+
+
+  <!-- RECOMMENDATION -->
+
+  <section class="card recommend-card fade-up">
+
+    <div class="recommend-label">
+      AI MENU RECOMMENDATION
+    </div>
+
+    <div class="recommend-title">
+      다음 급식 추천
+    </div>
+
+    <div class="recommend-desc">
+      원하는 다음 급식 메뉴를 직접 입력해주세요.
+      <br>
+      입력한 메뉴는 Firebase에 저장됩니다.
+    </div>
+
+
+    <div class="recommend-input-wrap">
+
+      <input
+        type="text"
+        id="recommendInput"
+        class="review-input"
+        placeholder="예: 치즈돈까스"
+        maxlength="100"
+      >
+
+      <button
+        class="btn btn-primary btn-full"
+        id="saveRecommend"
+      >
+        ⭐ 추천 메뉴 저장
+      </button>
+
+    </div>
+
+
+    <div
+      class="recommend-result"
+      id="recommendMenu"
+    >
+    </div>
+
+  </section>
+
+
+  <!-- POPULAR -->
+
+  <section class="card">
+
+    <div class="card-title">
+      Popular Menus
+    </div>
+
+    <div
+      class="popular-list"
+      id="popularList"
+    >
+
+      <div class="loading">
+
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- RECENT REVIEWS -->
+
+  <section class="card">
+
+    <div class="card-title">
+      Recent Reviews
+    </div>
+
+    <div
+      class="review-list"
+      id="reviewList"
+    >
+
+      <div class="loading">
+
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+
+      </div>
+
+    </div><div class="footer">
+    Smart Cafeteria · 학생들의 의견으로 더 맛있는 급식
+  </div></div><script type="module">
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  get,
+  set,
+  push,
+  update
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+
+/* =====================================================
+   FIREBASE CONFIG
+===================================================== */
+
+const firebaseConfig = {
+
+  apiKey:
+    "AIzaSyC3SvV8-bTyQClyZlGWybhR3z5YvLGXYL0",
+
+  authDomain:
+    "smart-cafeteria-8a2ce.firebaseapp.com",
+
+  databaseURL:
+    "https://smart-cafeteria-8a2ce-default-rtdb.firebaseio.com",
+
+  projectId:
+    "smart-cafeteria-8a2ce",
+
+  storageBucket:
+    "smart-cafeteria-8a2ce.firebasestorage.app",
+
+  messagingSenderId:
+    "304671336012",
+
+  appId:
+    "1:304671336012:web:0fd90cf8e6cc06884176e9",
+
+  measurementId:
+    "G-JWNDVQC63K"
+
+};
+
+
+const app =
+  initializeApp(firebaseConfig);
+
+const db =
+  getDatabase(app);
+
+
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
+
+let currentStudent = null;
+
+let currentRating = 0;
+
+let scores = {
+
+  taste: 0,
+
+  amount: 0,
+
+  satisfaction: 0
+
+};
+
+let menuData = {};
+
+
+/* =====================================================
+   TODAY DATE
+===================================================== */
+
+function setTodayDate() {
+
+  const today =
+    new Date();
+
+  const days = [
+    "일",
+    "월",
+    "화",
+    "수",
+    "목",
+    "금",
+    "토"
+  ];
+
+  const dateText =
+    `${today.getFullYear()}년
+     ${today.getMonth() + 1}월
+     ${today.getDate()}일
+     (${days[today.getDay()]})`;
+
+  const el = document.getElementById("todayDate");
+  if (el) el.textContent = dateText;
+}
+
+setTodayDate();
+
+
+/* =====================================================
+   GEMINI OCR LOGIN
+===================================================== */
+
+let recogStream = null;
+let GEMINI_API_KEY = "";
+const GEMINI_MODEL = "gemini-3.1-flash-lite";
+let GEMINI_ENDPOINT = "";
+
+async function initGeminiKey() {
+  try {
+    const res = await fetch('/.netlify/functions/get-key');
+
+    if (res.ok) {
+      const json = await res.json();
+      GEMINI_API_KEY = json.apiKey || "";
+    }
+  } catch (e) {
+    console.warn("Netlify key fetch 실패:", e);
+  }
+
+  GEMINI_ENDPOINT =
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+}
+
+function setOcrStatus(state, text) {
+  const bar = document.getElementById("ocr-status-bar");
+  const spinner = document.getElementById("ocr-spinner");
+  const txt = document.getElementById("ocr-status-text");
+
+  if (!bar) return;
+
+  if (state === "hidden") {
+    bar.classList.add("hidden");
+    return;
+  }
+
+  bar.classList.remove("hidden");
+
+  if (txt) {
+    txt.textContent = text || "";
+  }
+
+  if (spinner) {
+    spinner.style.display =
+      state === "loading" ? "block" : "none";
+  }
+}
+
+function setFirebaseStatus(type, text) {
+  const el = document.getElementById("firebase-status");
+
+  if (!el) return;
+
+  el.className = "firebase-status";
+
+  if (!type || type === "hidden") {
+    el.style.display = "none";
+    el.textContent = "";
+    return;
+  }
+
+  el.classList.add(type);
+  el.textContent = text || "";
+}
+
+function resetOcrUI() {
+  setFirebaseStatus("hidden");
+
+  const resultBox =
+    document.getElementById("ocr-result-box");
+
+  if (resultBox) {
+    resultBox.classList.remove("visible");
+  }
+
+  const manual =
+    document.getElementById("manual-input-wrap");
+
+  if (manual) {
+    manual.classList.remove("visible");
+  }
+}
+
+async function initRecognition() {
+  resetOcrUI();
+
+  const btn =
+    document.getElementById("btn-capture");
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = "📷 학생증 인식";
+    btn.onclick = captureAndOCR;
+  }
+
+  const video =
+    document.getElementById("video-recog");
+
+  if (!video) return;
+
+  try {
+    recogStream =
+      await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+
+    video.srcObject = recogStream;
+
+  } catch (e) {
+
+    try {
+      recogStream =
+        await navigator.mediaDevices.getUserMedia({
+          video: true
+        });
+
+      video.srcObject = recogStream;
+
+    } catch (e2) {
+      console.error("카메라 접근 실패:", e2);
+
+      setFirebaseStatus(
+        "error",
+        "카메라를 사용할 수 없습니다. 이름을 직접 입력해주세요."
+      );
+
+      const manual =
+        document.getElementById("manual-input-wrap");
+
+      if (manual) {
+        manual.classList.add("visible");
+      }
+    }
+  }
+}
+
+function stopRecogCamera() {
+  if (recogStream) {
+    recogStream.getTracks().forEach(track => track.stop());
+    recogStream = null;
+  }
+}
+
+async function handleNameFound(recognizedName) {
+
+  const message =
+    document.getElementById("loginMessage");
+
+  if (message) {
+    message.textContent = "";
+  }
+
+  setFirebaseStatus(
+    "loading",
+    `🔍 ${recognizedName} 학생 정보를 찾는 중...`
+  );
+
+  try {
+
+    const studentsRef =
+      ref(db, "students");
+
+    const snapshot =
+      await get(studentsRef);
+
+    if (!snapshot.exists()) {
+
+      setFirebaseStatus(
+        "not-found",
+        "등록된 학생이 없습니다."
+      );
+
+      showManualInput();
+      return;
+    }
+
+    const students =
+      snapshot.val();
+
+    let foundStudent = null;
+
+    for (const studentId in students) {
+
+      const student =
+        students[studentId];
+
+      if (
+        student &&
+        student.name &&
+        String(student.name).trim() === recognizedName
+      ) {
+
+        foundStudent = {
+          studentId: studentId,
+          ...student
+        };
+
+        break;
+      }
+    }
+
+    if (!foundStudent) {
+
+      setFirebaseStatus(
+        "not-found",
+        `⚠️ "${recognizedName}" 학생을 찾을 수 없습니다.`
+      );
+
+      showManualInput();
+      return;
+    }
+
+    currentStudent =
+      foundStudent;
+
+    document.getElementById(
+      "userName"
+    ).textContent =
+      foundStudent.name;
+
+    document.getElementById(
+      "headerStatus"
+    ).textContent =
+      "로그인 완료";
+
+    setFirebaseStatus(
+      "found",
+      `✓ ${foundStudent.name} 학생 확인 완료`
+    );
+
+    const resultBox =
+      document.getElementById("ocr-result-box");
+
+    const resultName =
+      document.getElementById("ocr-result-name");
+
+    if (resultName) {
+      resultName.textContent =
+        foundStudent.name;
+    }
+
+    if (resultBox) {
+      resultBox.classList.add("visible");
+    }
+
+    stopRecogCamera();
+
+    // 로그인 화면과 리뷰 화면을 완전히 분리해서 전환
+    document.body.classList.remove("review-locked");
+    document.body.classList.add("review-unlocked");
+
+    const reviewPage = document.getElementById("reviewPage");
+    if (reviewPage) {
+      reviewPage.classList.add("active");
+    }
+
+    // 로그인 카드 숨김
+    setTimeout(async () => {
+
+      const loginCard =
+        document.getElementById("loginCard");
+
+      if (loginCard) {
+        loginCard.style.display = "none";
+      }
+
+      await loadMenus();
+      await loadPopularMenus();
+      await loadRecentReviews();
+      await loadStudentRecommendations();
+
+    }, 500);
+
+  } catch (error) {
+
+    console.error(
+      "학생 조회 오류:",
+      error
+    );
+
+    setFirebaseStatus(
+      "error",
+      "학생 정보를 불러오는 중 오류가 발생했습니다."
+    );
+
+    showManualInput();
+  }
+}
+
+function showManualInput() {
+
+  const manual =
+    document.getElementById("manual-input-wrap");
+
+  if (manual) {
+    manual.classList.add("visible");
+  }
+}
+
+async function manualSearch() {
+
+  const input =
+    document.getElementById("manual-name-input");
+
+  if (!input) return;
+
+  const name =
+    input.value.trim();
+
+  if (!name) {
+
+    setFirebaseStatus(
+      "not-found",
+      "이름을 입력해주세요."
+    );
+
+    return;
+  }
+
+  await handleNameFound(name);
+}
+
+async function captureAndOCR() {
+
+  const video =
+    document.getElementById("video-recog");
+
+  const canvas =
+    document.getElementById("ocr-canvas");
+
+  const btn =
+    document.getElementById("btn-capture");
+
+  if (!video || !canvas || !btn) {
+    return;
+  }
+
+  resetOcrUI();
+
+  const wrap =
+    document.getElementById("ocr-video-wrap");
+
+  if (wrap) {
+
+    wrap.classList.add("shutter-flash");
+
+    setTimeout(() => {
+      wrap.classList.remove("shutter-flash");
+    }, 350);
+  }
+
+  btn.disabled = true;
+  btn.textContent = "학생 검색 중...";
+
+  setOcrStatus(
+    "loading",
+    "Gemini가 학생증을 인식하는 중..."
+  );
+
+  canvas.width =
+    video.videoWidth || 640;
+
+  canvas.height =
+    video.videoHeight || 480;
+
+  const ctx =
+    canvas.getContext("2d");
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  const base64Img =
+    canvas
+      .toDataURL("image/jpeg", 0.92)
+      .split(",")[1];
+
+  let recognizedName = null;
+
+  try {
+
+    if (!GEMINI_ENDPOINT || !GEMINI_API_KEY) {
+      await initGeminiKey();
+    }
+
+    if (!GEMINI_API_KEY) {
+      throw new Error(
+        "Gemini API Key를 불러오지 못했습니다."
+      );
+    }
+
+    const res =
+      await fetch(
+        GEMINI_ENDPOINT,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                {
+                  text:
+                    "이 이미지에서 사람 이름(한국어 또는 영어)만 찾아서 이름만 답하세요. 이름이 없거나 읽을 수 없으면 정확히 NONE 이라고만 답하세요. 다른 설명은 절대 하지 마세요."
+                },
+                {
+                  inline_data: {
+                    mime_type: "image/jpeg",
+                    data: base64Img
+                  }
+                }
+              ]
+            }],
+            generationConfig: {
+              temperature: 0.1,
+              topP: 1
+            }
+          })
+        }
+      );
+
+    const data =
+      await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data.error?.message ||
+        "Gemini 연결 실패"
+      );
+    }
+
+    const raw =
+      (
+        data.candidates?.[0]
+          ?.content?.parts?.[0]
+          ?.text || ""
+      ).trim();
+
+    if (
+      raw &&
+      raw !== "NONE" &&
+      raw.length >= 2 &&
+      raw.length <= 15
+    ) {
+      recognizedName = raw;
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Gemini OCR 오류:",
+      error
+    );
+
+    setFirebaseStatus(
+      "error",
+      "Gemini OCR 처리에 실패했습니다. 다시 시도해주세요."
+    );
+  }
+
+  setOcrStatus("hidden");
+
+  if (recognizedName) {
+
+    const resultName =
+      document.getElementById("ocr-result-name");
+
+    if (resultName) {
+      resultName.textContent =
+        recognizedName;
+    }
+
+    const resultBox =
+      document.getElementById("ocr-result-box");
+
+    if (resultBox) {
+      resultBox.classList.add("visible");
+    }
+
+    await handleNameFound(
+      recognizedName
+    );
+
+  } else {
+
+    btn.textContent = "📷 다시 찍기";
+    btn.disabled = false;
+    btn.onclick = captureAndOCR;
+
+    setFirebaseStatus(
+      "not-found",
+      "⚠️ 이름을 인식하지 못했어요. 직접 입력해 주세요."
+    );
+
+    showManualInput();
+  }
+}
+
+/* OCR 로그인 이벤트 */
+document
+  .getElementById("btn-capture")
+  ?.addEventListener(
+    "click",
+    captureAndOCR
+  );
+
+document
+  .getElementById("manual-search-button")
+  ?.addEventListener(
+    "click",
+    manualSearch
+  );
+
+document
+  .getElementById("manual-name-input")
+  ?.addEventListener(
+    "keydown",
+    e => {
+      if (e.key === "Enter") {
+        manualSearch();
+      }
+    }
+  );
+
+/* =====================================================
+   MENU LOAD
+===================================================== */
+
+async function loadMenus() {
+
+  const list =
+    document.getElementById(
+      "todayMenuList"
+    );
+
+
+  const choiceGrid =
+    document.getElementById(
+      "choiceGrid"
+    );
+
+
+  try {
+
+    const snapshot =
+      await get(
+        ref(db, "menu")
+      );
+
+
+    if (!snapshot.exists()) {
+
+      list.innerHTML =
+        "<p>등록된 급식 메뉴가 없습니다.</p>";
+
+      return;
+
+    }
+
+
+    menuData =
+      snapshot.val();
+
+
+    list.innerHTML = "";
+
+    choiceGrid.innerHTML = "";
+
+
+    /*
+      메뉴 카테고리 순서
+    */
+
+    const categoryOrder = [
+
+      "밥",
+
+      "국",
+
+      "메인",
+
+      "반찬",
+
+      "김치",
+
+      "후식"
+
+    ];
+
+
+    const emoji = {
+
+      "밥": "🍚",
+
+      "국": "🍲",
+
+      "메인": "🍗",
+
+      "반찬": "🥗",
+
+      "김치": "🥬",
+
+      "후식": "🍓"
+
+    };
+
+
+    let allMenus = [];
+
+
+    /*
+      menu 안의 카테고리를 읽는다.
+    */
+
+    categoryOrder.forEach(
+      category => {
+
+        if (
+          !menuData[category]
+        ) {
+
+          return;
+
+        }
+
+
+        const categoryMenus =
+          menuData[category];
+
+
+        /*
+          menu/밥/흰밥
+          menu/국/미역국
+          같은 구조
+        */
+
+        Object
+          .keys(categoryMenus)
+          .forEach(
+            menuKey => {
+
+              let menuValue =
+                categoryMenus[
+                  menuKey
+                ];
+
+
+              let menuName;
+
+
+              if (
+                typeof menuValue
+                === "string"
+              ) {
+
+                menuName =
+                  menuValue;
+
+              } else if (
+                menuValue &&
+                menuValue.name
+              ) {
+
+                menuName =
+                  menuValue.name;
+
+              } else {
+
+                /*
+                  key 자체가 메뉴 이름인 경우
+                */
+
+                menuName =
+                  menuKey;
+
+              }
+
+
+              if (!menuName) {
+
+                return;
+
+              }
+
+
+              allMenus.push({
+
+                category,
+
+                name:
+                  menuName
+
+              });
+
+
+              /*
+                오늘의 메뉴
+              */
+
+              const row =
+                document.createElement(
+                  "div"
+                );
+
+              row.className =
+                "menu-row";
+
+
+              row.innerHTML = `
+
+                <div class="menu-icon">
+                  ${emoji[category] || "🍽️"}
+                </div>
+
+                <div>
+
+                  <div class="menu-category">
+                    ${category}
+                  </div>
+
+                  <div class="menu-name">
+                    ${escapeHtml(menuName)}
+                  </div>
+
+                </div>
+
+                <div
+                  class="menu-rating"
+                  data-menu-rating="${escapeHtml(menuName)}"
+                >
+                  -
+                </div>
+
+              `;
+
+
+              list.appendChild(row);
+
+
+              /*
+                다음에도 먹고 싶은 메뉴
+              */
+
+              const choice =
+                document.createElement(
+                  "div"
+                );
+
+              choice.className =
+                "choice";
+
+
+              const id =
+                "choice-" +
+                Math.random()
+                  .toString(36)
+                  .substring(2, 10);
+
+
+              choice.innerHTML = `
+
+                <input
+                  type="checkbox"
+                  id="${id}"
+                  value="${escapeHtml(menuName)}"
+                >
+
+                <label for="${id}">
+                  ${emoji[category] || "🍽️"}
+                  ${escapeHtml(menuName)}
+                </label>
+
+              `;
+
+
+              choiceGrid.appendChild(
+                choice
+              );
+
+            }
+
+          );
+
+      }
+    );
+
+
+    /*
+      Firebase에 카테고리가
+      다른 이름으로 저장되어 있어도
+      나머지 카테고리를 추가한다.
+    */
+
+    Object
+      .keys(menuData)
+      .forEach(
+        category => {
+
+          if (
+            categoryOrder
+              .includes(category)
+          ) {
+
+            return;
+
+          }
+
+
+          const categoryMenus =
+            menuData[category];
+
+
+          if (
+            !categoryMenus ||
+            typeof categoryMenus
+            !== "object"
+          ) {
+
+            return;
+
+          }
+
+
+          Object
+            .keys(categoryMenus)
+            .forEach(
+              menuKey => {
+
+                let value =
+                  categoryMenus[
+                    menuKey
+                  ];
+
+
+                let name;
+
+
+                if (
+                  typeof value
+                  === "string"
+                ) {
+
+                  name = value;
+
+                } else if (
+                  value &&
+                  value.name
+                ) {
+
+                  name =
+                    value.name;
+
+                } else {
+
+                  name =
+                    menuKey;
+
+                }
+
+
+                if (
+                  !name ||
+                  allMenus.some(
+                    m =>
+                      m.name === name
+                  )
+                ) {
+
+                  return;
+
+                }
+
+
+                allMenus.push({
+
+                  category,
+
+                  name
+
+                });
+
+
+                const choice =
+                  document.createElement(
+                    "div"
+                  );
+
+                choice.className =
+                  "choice";
+
+
+                const id =
+                  "choice-" +
+                  Math.random()
+                    .toString(36)
+                    .substring(2, 10);
+
+
+                choice.innerHTML = `
+
+                  <input
+                    type="checkbox"
+                    id="${id}"
+                    value="${escapeHtml(name)}"
+                  >
+
+                  <label for="${id}">
+                    🍽️ ${escapeHtml(name)}
+                  </label>
+
+                `;
+
+
+                choiceGrid.appendChild(
+                  choice
+                );
+
+              }
+
+          );
+
+        }
+      );
+
+
+    if (
+      list.children.length === 0
+    ) {
+
+      list.innerHTML =
+        "<p>오늘 급식 메뉴가 없습니다.</p>";
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "메뉴 불러오기 오류:",
+      error
+    );
+
+
+    list.innerHTML =
+      "<p>메뉴를 불러오지 못했습니다.</p>";
+
+  }
+
+}
+
+
+/* =====================================================
+   STAR RATING
+===================================================== */
+
+document
+  .querySelectorAll(".star")
+  .forEach(
+    star => {
+
+      star.addEventListener(
+        "click",
+        () => {
+
+          currentRating =
+            Number(
+              star.dataset.value
+            );
+
+
+          document
+            .querySelectorAll(".star")
+            .forEach(
+              s => {
+
+                const value =
+                  Number(
+                    s.dataset.value
+                  );
+
+
+                s.classList.toggle(
+                  "active",
+                  value <=
+                  currentRating
+                );
+
+              }
+            );
+
+
+          document
+            .getElementById(
+              "ratingText"
+            )
+            .textContent =
+            `${currentRating}점`;
+
+        }
+      );
+
+    }
+  );
+
+
+/* =====================================================
+   DETAIL SCORES
+===================================================== */
+
+document
+  .querySelectorAll(".score-buttons")
+  .forEach(
+    group => {
+
+      group
+        .querySelectorAll(".score-btn")
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                const scoreName =
+                  group.dataset.score;
+
+
+                const value =
+                  Number(
+                    button.dataset.value
+                  );
+
+
+                scores[
+                  scoreName
+                ] = value;
+
+
+                group
+                  .querySelectorAll(
+                    ".score-btn"
+                  )
+                  .forEach(
+                    b => {
+
+                      b.classList.toggle(
+                        "active",
+                        Number(
+                          b.dataset.value
+                        ) === value
+                      );
+
+                    }
+                  );
+
+              }
+            );
+
+          }
+        );
+
+    }
+  );
+
+
+/* =====================================================
+   REVIEW SAVE
+===================================================== */
+
+document
+  .getElementById(
+    "submitReview"
+  )
+  .addEventListener(
+    "click",
+    submitReview
+  );
+
+
+async function submitReview() {
+
+  if (!currentStudent) {
+
+    alert(
+      "먼저 학생 로그인을 해주세요."
+    );
+
+    return;
+
+  }
+
+
+  if (currentRating === 0) {
+
+    alert(
+      "전체 별점을 선택해주세요."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    scores.taste === 0 ||
+    scores.amount === 0 ||
+    scores.satisfaction === 0
+  ) {
+
+    alert(
+      "맛, 양, 만족도를 모두 선택해주세요."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    선택 메뉴
+  */
+
+  const selectedMenus =
+    Array
+      .from(
+        document.querySelectorAll(
+          ".choice input:checked"
+        )
+      )
+      .map(
+        input =>
+          input.value
+      );
+
+
+  const comment =
+    document
+      .getElementById(
+        "reviewComment"
+      )
+      .value
+      .trim();
+
+
+  const reviewId =
+    push(
+      ref(db, "reviews")
+    ).key;
+
+
+  const reviewData = {
+
+    studentId:
+      currentStudent.studentId,
+
+    studentName:
+      currentStudent.name,
+
+    rating:
+      currentRating,
+
+    taste:
+      scores.taste,
+
+    amount:
+      scores.amount,
+
+    satisfaction:
+      scores.satisfaction,
+
+    favoriteMenus:
+      selectedMenus,
+
+    comment,
+
+    createdAt:
+      Date.now()
+
+  };
+
+
+  try {
+
+    await set(
+      ref(
+        db,
+        "reviews/" +
+        reviewId
+      ),
+      reviewData
+    );
+
+
+    /*
+      메뉴별 선호도도 저장
+    */
+
+    for (
+      const menu of selectedMenus
+    ) {
+
+      const safeKey =
+        encodeFirebaseKey(menu);
+
+
+      await set(
+        ref(
+          db,
+          "menuPreferences/" +
+          safeKey +
+          "/" +
+          currentStudent.studentId
+        ),
+        {
+
+          name:
+            currentStudent.name,
+
+          menu,
+
+          createdAt:
+            Date.now()
+
+        }
+      );
+
+    }
+
+
+    alert(
+      "리뷰가 등록되었습니다!"
+    );
+
+
+    /*
+      입력 초기화
+    */
+
+    currentRating = 0;
+
+
+    document
+      .querySelectorAll(".star")
+      .forEach(
+        star =>
+          star.classList.remove(
+            "active"
+          )
+      );
+
+
+    document
+      .getElementById(
+        "ratingText"
+      )
+      .textContent =
+      "별점을 선택해주세요";
+
+
+    document
+      .querySelectorAll(
+        ".score-btn"
+      )
+      .forEach(
+        button =>
+          button.classList.remove(
+            "active"
+          )
+      );
+
+
+    document
+      .querySelectorAll(
+        ".choice input"
+      )
+      .forEach(
+        input =>
+          input.checked = false
+      );
+
+
+    document
+      .getElementById(
+        "reviewComment"
+      )
+      .value = "";
+
+
+    scores = {
+
+      taste: 0,
+
+      amount: 0,
+
+      satisfaction: 0
+
+    };
+
+
+    await loadPopularMenus();
+
+    await loadRecentReviews();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "리뷰 저장 중 오류가 발생했습니다."
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   RECOMMEND MENU SAVE
+===================================================== */
+
+document
+  .getElementById(
+    "saveRecommend"
+  )
+  .addEventListener(
+    "click",
+    saveRecommendation
+  );
+
+
+async function saveRecommendation() {
+
+  if (!currentStudent) {
+
+    alert(
+      "먼저 학생 로그인을 해주세요."
+    );
+
+    return;
+
+  }
+
+
+  const input =
+    document
+      .getElementById(
+        "recommendInput"
+      );
+
+
+  const menuName =
+    input.value.trim();
+
+
+  if (!menuName) {
+
+    alert(
+      "추천하고 싶은 메뉴를 입력해주세요."
+    );
+
+    return;
+
+  }
+
+
+  const recommendationId =
+    push(
+      ref(
+        db,
+        "recommendations"
+      )
+    ).key;
+
+
+  const data = {
+
+    studentId:
+      currentStudent.studentId,
+
+    studentName:
+      currentStudent.name,
+
+    menu:
+      menuName,
+
+    createdAt:
+      Date.now()
+
+  };
+
+
+  try {
+
+    await set(
+      ref(
+        db,
+        "recommendations/" +
+        recommendationId
+      ),
+      data
+    );
+
+
+    input.value = "";
+
+
+    alert(
+      `"${menuName}" 추천이 저장되었습니다!`
+    );
+
+
+    await loadStudentRecommendations();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "추천 메뉴 저장에 실패했습니다."
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   MY RECOMMENDATIONS
+===================================================== */
+
+async function loadStudentRecommendations() {
+
+  if (!currentStudent) {
+
+    return;
+
+  }
+
+
+  const result =
+    document.getElementById(
+      "recommendMenu"
+    );
+
+
+  try {
+
+    const snapshot =
+      await get(
+        ref(
+          db,
+          "recommendations"
+        )
+      );
+
+
+    if (!snapshot.exists()) {
+
+      result.innerHTML =
+        "<div style='color:#999;'>아직 추천한 메뉴가 없습니다.</div>";
+
+      return;
+
+    }
+
+
+    const data =
+      snapshot.val();
+
+
+    const recommendations =
+      Object
+        .values(data)
+        .filter(
+          item =>
+            item.studentId ===
+            currentStudent.studentId
+        )
+        .sort(
+          (a,b) =>
+            (b.createdAt || 0)
+            -
+            (a.createdAt || 0)
+        );
+
+
+    if (
+      recommendations.length === 0
+    ) {
+
+      result.innerHTML =
+        "<div style='color:#999;'>아직 추천한 메뉴가 없습니다.</div>";
+
+      return;
+
+    }
+
+
+    result.innerHTML =
+      recommendations
+        .slice(0, 5)
+        .map(
+          item => `
+
+            <div class="recommend-item">
+              ⭐ ${escapeHtml(item.menu)}
+            </div>
+
+          `
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+}
+
+
+/* =====================================================
+   POPULAR MENUS
+===================================================== */
+
+async function loadPopularMenus() {
+
+  const list =
+    document.getElementById(
+      "popularList"
+    );
+
+
+  try {
+
+    const snapshot =
+      await get(
+        ref(
+          db,
+          "reviews"
+        )
+      );
+
+
+    if (!snapshot.exists()) {
+
+      list.innerHTML =
+        "<div style='color:#999;'>아직 리뷰가 없습니다.</div>";
+
+      return;
+
+    }
+
+
+    const reviews =
+      Object.values(
+        snapshot.val()
+      );
+
+
+    const menuScores = {};
+
+
+    reviews.forEach(
+      review => {
+
+        const rating =
+          Number(
+            review.rating || 0
+          );
+
+
+        const menus =
+          review.favoriteMenus
+          || [];
+
+
+        menus.forEach(
+          menu => {
+
+            if (
+              !menuScores[menu]
+            ) {
+
+              menuScores[menu] = {
+
+                count: 0,
+
+                total: 0
+
+              };
+
+            }
+
+
+            menuScores[menu].count++;
+
+            menuScores[menu].total +=
+              rating;
+
+          }
+        );
+
+      }
+    );
+
+
+    const popular =
+      Object
+        .entries(menuScores)
+        .map(
+          ([name, data]) => ({
+
+            name,
+
+            count:
+              data.count,
+
+            rating:
+              data.total /
+              data.count
+
+          })
+        )
+        .sort(
+          (a,b) =>
+            b.count - a.count
+        )
+        .slice(0, 10);
+
+
+    if (
+      popular.length === 0
+    ) {
+
+      list.innerHTML =
+        "<div style='color:#999;'>아직 인기 메뉴가 없습니다.</div>";
+
+      return;
+
+    }
+
+
+    list.innerHTML =
+      popular
+        .map(
+          item => `
+
+            <div class="popular-item">
+
+              <div class="popular-name">
+                🍽️ ${escapeHtml(item.name)}
+              </div>
+
+              <div class="popular-rating">
+                ⭐ ${item.rating.toFixed(1)}
+                (${item.count})
+              </div>
+
+            </div>
+
+          `
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    list.innerHTML =
+      "<div>인기 메뉴를 불러오지 못했습니다.</div>";
+
+  }
+
+}
+
+
+/* =====================================================
+   RECENT REVIEWS
+===================================================== */
+
+async function loadRecentReviews() {
+
+  const list =
+    document.getElementById(
+      "reviewList"
+    );
+
+
+  try {
+
+    const snapshot =
+      await get(
+        ref(
+          db,
+          "reviews"
+        )
+      );
+
+
+    if (!snapshot.exists()) {
+
+      list.innerHTML =
+        "<div style='color:#999;'>아직 리뷰가 없습니다.</div>";
+
+      return;
+
+    }
+
+
+    const reviews =
+      Object
+        .values(
+          snapshot.val()
+        )
+        .sort(
+          (a,b) =>
+            (b.createdAt || 0)
+            -
+            (a.createdAt || 0)
+        )
+        .slice(0, 10);
+
+
+    list.innerHTML =
+      reviews
+        .map(
+          review => {
+
+            const stars =
+              "★".repeat(
+                Number(
+                  review.rating || 0
+                )
+              );
+
+
+            return `
+
+              <div class="review-item">
+
+                <div class="review-top">
+
+                  <div class="review-student">
+                    ${escapeHtml(
+                      review.studentName ||
+                      "학생"
+                    )}
+                  </div>
+
+                  <div class="review-stars">
+                    ${stars}
+                  </div>
+
+                </div>
+
+                ${
+                  review.comment
+                    ?
+                    `<div class="review-comment">
+                      ${escapeHtml(
+                        review.comment
+                      )}
+                    </div>`
+                    :
+                    ""
+                }
+
+              </div>
+
+            `;
+
+          }
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    list.innerHTML =
+      "<div>리뷰를 불러오지 못했습니다.</div>";
+
+  }
+
+}
+
+
+/* =====================================================
+   FIREBASE KEY SAFE
+===================================================== */
+
+function encodeFirebaseKey(value) {
+
+  return String(value)
+
+    .replaceAll(
+      ".",
+      "_"
+    )
+
+    .replaceAll(
+      "#",
+      "_"
+    )
+
+    .replaceAll(
+      "$",
+      "_"
+    )
+
+    .replaceAll(
+      "[",
+      "_"
+    )
+
+    .replaceAll(
+      "]",
+      "_"
+    )
+
+    .replaceAll(
+      "/",
+      "_"
+    );
+
+}
+
+
+/* =====================================================
+   HTML ESCAPE
+===================================================== */
+
+function escapeHtml(value) {
+
+  return String(value)
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+/* =====================================================
+   OCR 초기화
+===================================================== */
+
+(async function initReviewPage() {
+  const raw = sessionStorage.getItem("currentStudent");
+  if (!raw) { window.location.href = "index.html"; return; }
+  try { currentStudent = JSON.parse(raw); } catch (e) { sessionStorage.removeItem("currentStudent"); window.location.href = "index.html"; return; }
+  const userNameEl = document.getElementById("userName");
+  const headerStatusEl = document.getElementById("headerStatus");
+  if (userNameEl) userNameEl.textContent = currentStudent.name || "학생";
+  if (headerStatusEl) headerStatusEl.textContent = "로그인 완료";
+  await loadMenus();
+  await loadPopularMenus();
+  await loadRecentReviews();
+  await loadStudentRecommendations();
+})();
+
+
+
+document.getElementById("logoutButton")?.addEventListener("click", () => { sessionStorage.removeItem("currentStudent"); window.location.href = "index.html"; });
+</script>
+</div>
+
+
+<script>
+(function () {
+  const reviewPage = document.getElementById("reviewPage");
+
+  function showReviewPage() {
+    if (!reviewPage) return;
+    reviewPage.style.display = "block";
+    document.body.classList.add("review-mode");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  function hideReviewPage() {
+    if (!reviewPage) return;
+    reviewPage.style.display = "none";
+    document.body.classList.remove("review-mode");
+  }
+
+  window.showReviewPage = showReviewPage;
+  window.hideReviewPage = hideReviewPage;
+
+  // If the login code stores currentStudent in sessionStorage,
+  // automatically enter the review page on refresh.
+  try {
+    const saved = sessionStorage.getItem("currentStudent");
+    if (saved) {
+      showReviewPage();
+    } else {
+      hideReviewPage();
+    }
+  } catch (e) {
+    hideReviewPage();
+  }
+})();
 </script>
 
-</body>
-</html>
-```
+</body></html>
