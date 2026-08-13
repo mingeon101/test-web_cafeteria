@@ -3459,18 +3459,26 @@ function normalizeHeader(value) {
 }
 
 function findNutritionColumn(row, aliases) {
-
   const keys = Object.keys(row);
+  const normalizedKeys = keys.map(key => ({
+    key,
+    normalized: normalizeHeader(key)
+  }));
 
   for (const alias of aliases) {
-
     const normalizedAlias = normalizeHeader(alias);
+    const exact = normalizedKeys.find(item => item.normalized === normalizedAlias);
+    if (exact) return exact.key;
+  }
 
-    const key = keys.find(item =>
-      normalizeHeader(item) === normalizedAlias
+  for (const alias of aliases) {
+    const normalizedAlias = normalizeHeader(alias);
+    if (!normalizedAlias) continue;
+    const partial = normalizedKeys.find(item =>
+      item.normalized.startsWith(normalizedAlias) ||
+      normalizedAlias.startsWith(item.normalized)
     );
-
-    if (key) return key;
+    if (partial) return partial.key;
   }
 
   return null;
@@ -3498,7 +3506,9 @@ function normalizeNutritionRows(rows) {
       if (!foodColumn) return null;
 
       const caloriesColumn = findNutritionColumn(row, [
-        "에너지", "열량", "칼로리", "kcal", "calories", "energy"
+        "에너지", "에너지(kcal)", "에너지(kcal/100g)", "에너지kcal",
+        "열량", "열량(kcal)", "열량kcal", "칼로리", "칼로리(kcal)",
+        "칼로리kcal", "kcal", "kcal/100g", "calories", "energy", "energykcal"
       ]);
 
       const carbohydrateColumn = findNutritionColumn(row, [
@@ -3575,6 +3585,12 @@ async function loadNutritionSheet(force = false) {
 
     foodNutritionData = normalized;
     nutritionSheetLoaded = true;
+
+    const calorieCount = foodNutritionData.filter(item => Number.isFinite(item.calories)).length;
+    console.log("Google Sheets 영양정보 확인:", `전체 ${foodNutritionData.length}개 / 열량값 ${calorieCount}개`);
+    if (!calorieCount) {
+      console.warn("Google Sheets에서 열량(kcal) 열을 찾지 못했습니다. 실제 헤더:", Object.keys(rows[0] || {}));
+    }
 
     if (sourceElement) {
       sourceElement.textContent =
@@ -4284,8 +4300,12 @@ async function generateAiMenu() {
       .filter(item => item.matchedFood)
       .length;
 
+    const calorieMatchedCount = (sheetNutrition.matches || [])
+      .filter(item => Number.isFinite(item?.nutrition?.calories))
+      .length;
+
     showStatus(
-      `✨ AI 식단이 생성되었습니다. Google Sheets ${matchedCount}/${(result.menus || []).length}개 메뉴 영양정보 매칭`
+      `✨ AI 식단 생성 완료 · Sheet 메뉴 ${matchedCount}/${(result.menus || []).length}개 매칭 · 열량 ${calorieMatchedCount}/${(result.menus || []).length}개 확인`
     );
 
 
