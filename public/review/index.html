@@ -2590,269 +2590,121 @@ function getMenuName(
 
 
 async function loadMenus() {
-
-  const list =
-    $("todayMenuList");
-
-  const choices =
-    $("choiceGrid");
-
+  const list = document.getElementById("todayMenuList");
+  const choiceGrid = document.getElementById("choiceGrid");
 
   try {
-
-    const snapshot =
-      await get(
-        ref(
-          db,
-          "menu"
-        )
-      );
-
+    const snapshot = await get(ref(db, "menu"));
 
     if (!snapshot.exists()) {
-
-      list.innerHTML =
-        `<div class="empty">
-          등록된 메뉴가 없습니다.
-        </div>`;
-
-      choices.innerHTML =
-        "";
-
+      list.innerHTML = "<p>등록된 급식 메뉴가 없습니다.</p>";
+      choiceGrid.innerHTML = "";
       return;
-
     }
 
+    const menu = snapshot.val();
 
-    menuData =
-      snapshot.val();
+    list.innerHTML = "";
+    choiceGrid.innerHTML = "";
 
+    // Firebase에 있는 실제 노드 이름
+    const categories = ["밥", "국", "김치"];
 
-    const emojis = {
-
-      "밥": "🍚",
-      "국": "🍲",
-      "메인": "🍗",
-      "반찬": "🥗",
-      "김치": "🥬",
-      "후식": "🍓"
-
+    // 화면에 표시할 이름
+    const displayCategory = {
+      "밥": "밥",
+      "국": "국",
+      "김치": "반찬"
     };
 
+    const emojis = {
+      "밥": "🍚",
+      "국": "🍲",
+      "김치": "🥬"
+    };
 
-    const categories =
+    categories.forEach(category => {
+      const categoryData = menu[category];
 
-      Object.keys(
-        menuData
-      );
+      if (!categoryData) return;
 
+      // menu/밥/메뉴이름
+      // menu/국/메뉴이름
+      // menu/김치/메뉴이름
+      Object.keys(categoryData).forEach(menuName => {
 
-    const allMenus =
-      [];
+        // =========================
+        // 오늘의 메뉴
+        // =========================
 
+        const row = document.createElement("div");
+        row.className = "menu-row";
 
-    list.innerHTML =
-      "";
+        row.innerHTML = `
+          <div class="menu-icon">
+            ${emojis[category]}
+          </div>
 
+          <div>
+            <div class="menu-category">
+              ${escapeHTML(displayCategory[category])}
+            </div>
 
-    categories.forEach(
-      category => {
+            <div class="menu-name">
+              ${escapeHTML(menuName)}
+            </div>
+          </div>
+        `;
 
-        const categoryData =
-          menuData[category];
-
-
-        if (
-          !categoryData
-        ) {
-
-          return;
-
-        }
-
-
-        /*
-          menu/{카테고리}/{메뉴}
-          구조를 그대로 읽는다.
-        */
-
-        if (
-          typeof categoryData ===
-          "object"
-        ) {
-
-          Object.entries(
-            categoryData
-          ).forEach(
-            ([key, value]) => {
-
-              const menuName =
-                getMenuName(
-                  value,
-                  key
-                );
+        list.appendChild(row);
 
 
-              if (!menuName) {
-                return;
-              }
+        // =========================
+        // 다음에도 먹고 싶은 메뉴
+        // =========================
+
+        const choice = document.createElement("div");
+        choice.className = "choice";
+
+        choice.innerHTML = `
+          <input
+            type="checkbox"
+            value="${escapeHTML(menuName)}"
+          >
+
+          <label>
+            ${emojis[category]}
+            ${escapeHTML(menuName)}
+          </label>
+        `;
+
+        choiceGrid.appendChild(choice);
+      });
+    });
 
 
-              allMenus.push(
-                menuName
-              );
-
-
-              list.insertAdjacentHTML(
-
-                "beforeend",
-
-                `
-
-                <div class="menu-row">
-
-                  <div class="menu-icon">
-                    ${emojis[category] || "🍽️"}
-                  </div>
-
-                  <div>
-
-                    <div class="menu-category">
-                      ${escapeHTML(category)}
-                    </div>
-
-                    <div class="menu-name">
-                      ${escapeHTML(menuName)}
-                    </div>
-
-                  </div>
-
-                </div>
-
-                `
-
-              );
-
-            }
-          );
-
-        }
-
-      }
-    );
-
-
-    if (
-      !list.children.length
-    ) {
-
-      list.innerHTML =
-        `<div class="empty">
-          메뉴가 없습니다.
-        </div>`;
-
+    // 메뉴가 하나도 없을 경우
+    if (list.children.length === 0) {
+      list.innerHTML = `
+        <p>오늘 급식 메뉴가 없습니다.</p>
+      `;
     }
 
-
-    const uniqueMenus =
-      [...new Set(
-        allMenus
-      )];
-
-
-    choices.innerHTML =
-
-      uniqueMenus.length
-
-        ? uniqueMenus
-            .map(
-              menu => `
-
-                <button
-                  type="button"
-                  class="choice"
-                  data-menu="${escapeHTML(menu)}"
-                >
-                  ${escapeHTML(menu)}
-                </button>
-
-              `
-            )
-            .join("")
-
-        : `<div class="empty">
-             선택할 메뉴가 없습니다.
-           </div>`;
-
-
-    choices
-      .querySelectorAll(".choice")
-      .forEach(
-        button => {
-
-          button.addEventListener(
-            "click",
-            () => {
-
-              const menu =
-                button.dataset.menu;
-
-
-              if (
-                selectedMenus.includes(
-                  menu
-                )
-              ) {
-
-                selectedMenus =
-                  selectedMenus.filter(
-                    item =>
-                      item !== menu
-                  );
-
-
-                button
-                  .classList
-                  .remove(
-                    "active"
-                  );
-
-              } else {
-
-                selectedMenus.push(
-                  menu
-                );
-
-
-                button
-                  .classList
-                  .add(
-                    "active"
-                  );
-
-              }
-
-            }
-          );
-
-        }
-      );
-
+    if (choiceGrid.children.length === 0) {
+      choiceGrid.innerHTML = `
+        <p>선택할 메뉴가 없습니다.</p>
+      `;
+    }
 
   } catch (error) {
+    console.error("메뉴 불러오기 오류:", error);
 
-    console.error(
-      error
-    );
+    list.innerHTML = `
+      <p>메뉴를 불러오지 못했습니다.</p>
+    `;
 
-
-    list.innerHTML =
-      `<div class="empty">
-        메뉴를 불러오지 못했습니다.
-      </div>`;
-
+    choiceGrid.innerHTML = "";
   }
-
 }
 
 
