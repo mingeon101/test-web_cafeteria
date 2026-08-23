@@ -194,6 +194,28 @@
       transition: border-color 0.15s ease;
     }
     .modal-field input:focus { border-color: var(--primary); }
+
+    .allergy-input-row { display:flex; align-items:center; gap:8px; margin-top:8px; }
+    .allergy-edit-btn {
+      border:1px solid #EEE7DE; background:#FAF8F5; color:var(--accent);
+      padding:8px 11px; border-radius:10px; font-size:12px; font-weight:800;
+      cursor:pointer; font-family:'Noto Sans KR',sans-serif; white-space:nowrap;
+      transition:all .15s ease;
+    }
+    .allergy-edit-btn:hover { border-color:var(--primary); color:var(--primary); transform:translateY(-1px); }
+    .allergy-summary { min-width:0; flex:1; color:var(--muted); font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .allergy-summary.has-value { color:var(--danger); font-weight:700; }
+    .allergy-modal-card { max-width:440px; }
+    .allergy-help {
+      background:#FFF7F2; border:1px solid #FFE0D2; color:#8B5A43;
+      border-radius:12px; padding:11px 13px; font-size:12px; line-height:1.6; margin-bottom:16px;
+    }
+    .allergy-modal-input {
+      width:100%; min-height:90px; resize:vertical; padding:12px 14px; border-radius:12px;
+      border:2px solid #EEE7DE; font-family:'Noto Sans KR',sans-serif; font-size:14px; outline:none;
+    }
+    .allergy-modal-input:focus { border-color:var(--primary); }
+
     .modal-field select {
       width: 100%; padding: 12px 14px; border-radius: 12px; border: 2px solid #EEE7DE;
       font-family: 'Noto Sans KR', sans-serif; font-size: 14px; outline: none;
@@ -315,19 +337,51 @@
     <div class="modal-field">
       <label>🍚 로봇 A — 밥</label>
       <input type="text" id="menu-input-밥" placeholder="예: 잡곡밥" maxlength="20" />
+      <div class="allergy-input-row">
+        <button type="button" class="allergy-edit-btn" data-allergy-category="밥">⚠️ 알레르기 사항 입력</button>
+        <span class="allergy-summary" id="allergy-summary-밥">입력된 알레르기 사항 없음</span>
+      </div>
     </div>
     <div class="modal-field">
       <label>🍲 로봇 B — 국</label>
       <input type="text" id="menu-input-국" placeholder="예: 된장국" maxlength="20" />
+      <div class="allergy-input-row">
+        <button type="button" class="allergy-edit-btn" data-allergy-category="국">⚠️ 알레르기 사항 입력</button>
+        <span class="allergy-summary" id="allergy-summary-국">입력된 알레르기 사항 없음</span>
+      </div>
     </div>
     <div class="modal-field">
       <label>🥬 로봇 C — 김치</label>
       <input type="text" id="menu-input-김치" placeholder="예: 배추김치" maxlength="20" />
+      <div class="allergy-input-row">
+        <button type="button" class="allergy-edit-btn" data-allergy-category="김치">⚠️ 알레르기 사항 입력</button>
+        <span class="allergy-summary" id="allergy-summary-김치">입력된 알레르기 사항 없음</span>
+      </div>
     </div>
 
     <div class="modal-actions">
       <button class="btn-secondary" id="menu-modal-cancel">취소</button>
       <button class="btn-primary" id="menu-modal-save">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 알레르기 사항 입력 모달 -->
+<div class="modal-overlay" id="allergy-modal-overlay">
+  <div class="modal-card allergy-modal-card">
+    <div class="modal-title">⚠️ 알레르기 사항 입력</div>
+    <div class="modal-sub" id="allergy-modal-sub">메뉴의 알레르기 유발 식품 정보를 직접 입력하세요.</div>
+    <div class="allergy-help">
+      예: <strong>1, 5, 6</strong> 또는 <strong>우유, 대두, 밀</strong><br>
+      여러 항목은 쉼표(,)로 구분해서 입력할 수 있습니다.
+    </div>
+    <div class="modal-field">
+      <label>알레르기 사항</label>
+      <textarea class="allergy-modal-input" id="allergy-modal-input" placeholder="예: 1, 5, 6&#10;또는 우유, 대두, 밀"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="allergy-modal-cancel">취소</button>
+      <button class="btn-primary" id="allergy-modal-save">저장</button>
     </div>
   </div>
 </div>
@@ -384,6 +438,7 @@ const CATEGORY_ICON = { "밥": "🍚", "국": "🍲", "김치": "🥬" };
 
 // 오늘의 메뉴 표시 이름 (기본값 = 카테고리명 그대로)
 let menuLabels = { "밥": "밥", "국": "국", "김치": "김치" };
+let menuAllergies = { "밥": "", "국": "", "김치": "" };
 
 // 최신 데이터 캐시 (메뉴/시스템 상태가 바뀌어도 즉시 다시 그릴 수 있도록 보관)
 let lastTotalEaten = { "밥": 0, "국": 0, "김치": 0 };
@@ -509,17 +564,6 @@ function renderRobots() {
             ${statusText}
           </span>
         </div>
-
-        <div class="robot-stat">
-          <span>배터리 잔량</span>
-          <span class="val" style="color:${
-            criticalBattery ? 'var(--danger)' :
-            needCharge ? '#FF9800' :
-            'inherit'
-          }">
-            ${battery}%
-          </span>
-        </div>
       </div>
     `;
   }).join('');
@@ -572,6 +616,15 @@ db.ref('menu').on('value', snap => {
   renderMenuToday();
   renderFood();
   renderRobots();
+});
+
+// 0-0-1. 메뉴별 알레르기 사항 감시
+db.ref('menuAllergies').on('value', snap => {
+  const a = snap.val() || {};
+  menuAllergies['밥'] = a['밥'] || '';
+  menuAllergies['국'] = a['국'] || '';
+  menuAllergies['김치'] = a['김치'] || '';
+  updateAllergySummaries();
 });
 
 // 0-1. 시스템 작동 상태 감시 (작동중지 기능)
@@ -677,17 +730,80 @@ db.ref('robots').on('value', snap => {
 const menuModal = document.getElementById('menu-modal-overlay');
 const menuToast = document.getElementById('menu-saved-toast');
 
+function updateAllergySummaries() {
+  FOOD_NAMES.forEach(cat => {
+    const el = document.getElementById(`allergy-summary-${cat}`);
+    if (!el) return;
+    const value = String(menuAllergies[cat] || '').trim();
+    if (value) {
+      el.textContent = `알레르기: ${value}`;
+      el.classList.add('has-value');
+    } else {
+      el.textContent = '입력된 알레르기 사항 없음';
+      el.classList.remove('has-value');
+    }
+  });
+}
+
 function openMenuModal() {
   if (document.getElementById('btn-open-menu-modal').disabled) return;
   document.getElementById('menu-input-밥').value = menuLabels['밥'] === '밥' ? '' : menuLabels['밥'];
   document.getElementById('menu-input-국').value = menuLabels['국'] === '국' ? '' : menuLabels['국'];
   document.getElementById('menu-input-김치').value = menuLabels['김치'] === '김치' ? '' : menuLabels['김치'];
+  updateAllergySummaries();
   menuModal.classList.add('open');
 }
 
 function closeMenuModal() {
   menuModal.classList.remove('open');
 }
+
+const allergyModal = document.getElementById('allergy-modal-overlay');
+const allergyModalInput = document.getElementById('allergy-modal-input');
+const allergyModalSub = document.getElementById('allergy-modal-sub');
+let editingAllergyCategory = null;
+
+function openAllergyModal(category) {
+  editingAllergyCategory = category;
+  const menuName = menuLabels[category] || category;
+  allergyModalSub.textContent = `${menuName}의 알레르기 유발 식품 정보를 직접 입력하세요.`;
+  allergyModalInput.value = menuAllergies[category] || '';
+  allergyModal.classList.add('open');
+  setTimeout(() => allergyModalInput.focus(), 50);
+}
+
+function closeAllergyModal() {
+  editingAllergyCategory = null;
+  allergyModal.classList.remove('open');
+}
+
+document.querySelectorAll('.allergy-edit-btn').forEach(btn => {
+  btn.addEventListener('click', () => openAllergyModal(btn.dataset.allergyCategory));
+});
+
+document.getElementById('allergy-modal-cancel').addEventListener('click', closeAllergyModal);
+
+allergyModal.addEventListener('click', e => {
+  if (e.target === allergyModal) closeAllergyModal();
+});
+
+document.getElementById('allergy-modal-save').addEventListener('click', () => {
+  if (!editingAllergyCategory) return;
+
+  const category = editingAllergyCategory;
+  const value = allergyModalInput.value.trim();
+  const saveBtn = document.getElementById('allergy-modal-save');
+  saveBtn.disabled = true;
+
+  db.ref(`menuAllergies/${category}`).set(value)
+    .then(() => {
+      menuAllergies[category] = value;
+      updateAllergySummaries();
+      closeAllergyModal();
+    })
+    .catch(err => alert('알레르기 사항 저장에 실패했습니다: ' + err.message))
+    .finally(() => { saveBtn.disabled = false; });
+});
 
 function showToast(el) {
   el.classList.add('show');
@@ -791,6 +907,7 @@ renderMenuToday();
 renderFood();
 renderRobots();
 renderSystemStatus();
+updateAllergySummaries();
 
 // 시계 업데이트
 setInterval(() => {
