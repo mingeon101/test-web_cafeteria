@@ -229,6 +229,25 @@
       display: flex; align-items: center; gap: 8px;
     }
     .stopped-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); flex-shrink: 0; }
+
+    /* ── 선주문 카드 (대시보드) ── */
+    .preorder-summary { display: flex; align-items: center; gap: 12px; }
+    .preorder-summary-chips { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; }
+    .preorder-chip { background: #e8f5e9; border: 1.5px solid #a5d6a7; color: #2e7d32; border-radius: 100px; padding: 6px 13px; font-size: 12px; font-weight: 700; }
+    .preorder-status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.4px; padding: 4px 12px; border-radius: 100px; margin-bottom: 12px; }
+    .preorder-status-pill.pending { background: #fff3e0; color: #e65100; }
+    .preorder-status-pill.fulfilled { background: #e8f5e9; color: #2e7d32; }
+    .preorder-empty { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+
+    /* ── 선주문 페이지 ── */
+    .preorder-food-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f5f0eb; }
+    .preorder-food-row:last-child { border-bottom: none; }
+    .preorder-food-label { display: flex; align-items: center; gap: 10px; flex: 1; font-weight: 700; font-size: 15px; }
+    .preorder-food-emoji { width: 38px; height: 38px; background: #fff8f3; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .preorder-food-counts { display: flex; gap: 6px; }
+    .btn-count-sm { width: 38px; height: 38px; border-radius: 10px; background: #f5f0eb; color: var(--accent); font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; }
+    .btn-count-sm:hover { background: var(--secondary); }
+    .btn-count-sm.active { background: var(--primary); color: white; }
   </style>
 </head>
 <body>
@@ -328,6 +347,12 @@
         </div>
       </div>
       <div class="card mb16">
+        <div class="card-title">🛒 오늘의 선주문</div>
+        <div id="preorder-card-body">
+          <div class="preorder-empty">오늘의 선주문 내역을 불러오는 중...</div>
+        </div>
+      </div>
+      <div class="card mb16">
         <div class="card-title">📊 식습관 현황</div>
         <canvas id="pie-canvas" width="220" height="220"></canvas>
         <div class="legend">
@@ -344,7 +369,6 @@
       </div>
       <button class="btn btn-primary btn-full" onclick="startServe()">배식 시작하기 →</button>
     </div>
-
     <!-- Page: Serve -->
     <div class="page fade-up" id="page-serve">
       <div class="card mb16">
@@ -461,6 +485,10 @@
 
   let recogStream = null;
 
+  /* ── 선주문(Preorder) 상태 ── */
+  let preorderCounts = [0, 0, 0];       // 선주문 페이지에서 편집 중인 값
+  let todayPreorder  = null;            // Firebase에서 불러온 오늘자 선주문 (없으면 null)
+
   /* ── Gemini Vision API ── */
   let GEMINI_API_KEY = "";
   const GEMINI_MODEL = "gemini-3.1-flash-lite";
@@ -510,6 +538,12 @@
     const progressPage = document.getElementById('page-progress');
     if (progressPage && progressPage.classList.contains('active')) {
       renderProgressList();
+    }
+
+    // 선주문 페이지가 열려 있으면 음식 이름도 즉시 갱신
+    const preorderPage = document.getElementById('page-preorder');
+    if (preorderPage && preorderPage.classList.contains('active')) {
+      renderPreorderPage();
     }
   });
 
@@ -644,10 +678,14 @@
         kimchi: counts[2] || 0,
         foods: { 밥: counts[0] || 0, 국: counts[1] || 0, 김치: counts[2] || 0 },
         total: (counts[0] || 0) + (counts[1] || 0) + (counts[2] || 0),
+        preordered: !!todayPreorder,
         updatedAt: Date.now()
       };
       await db.ref(`students/${user.uid}/serve`).push(serveData);
       console.log("배식 데이터 저장 완료");
+
+      // 오늘 선주문이 있었다면, 실제 배식 완료로 상태를 갱신해 둔다
+      await fulfillTodayPreorder();
     } catch (err) {
       console.error("배식 데이터 저장 실패:", err);
     }
@@ -752,6 +790,7 @@
 
     updateUserBar(null);
     resetOcrUI();
+    todayPreorder = null;
 
     const bar = document.getElementById('ocr-status-bar');
     if (bar) bar.classList.add('hidden');
@@ -983,6 +1022,162 @@
     const fillEl  = document.getElementById('confirm-hold-fill');
     if (badgeEl) badgeEl.classList.remove('visible');
     if (fillEl)  { fillEl.style.width = '0%'; fillEl.className = 'confirm-hold-fill'; }
+  }
+
+  /* ══════════════════════════════════════════
+     PRE-ORDER (선주문) — 신규 추가
+     Firebase 구조:
+       preorders/{날짜:YYYY-MM-DD}/{uid} = {
+         name, grade, classNum, number,
+         foods: { 밥, 국, 김치 }, total,
+         status: 'pending' | 'fulfilled',
+         createdAt, fulfilledAt, actual: { 밥, 국, 김치 }
+       }
+       students/{uid}/preorders/{날짜} = (위와 동일한 내용의 사본, 학생별 조회용)
+  ══════════════════════════════════════════ */
+  function todayDateKey() {
+    // 로케일에 상관없이 항상 'YYYY-MM-DD' 형식을 돌려주는 안전한 방법
+    return new Date().toLocaleDateString('sv-SE');
+  }
+
+  // 대시보드 진입 시 오늘자 선주문을 불러와 카드에 반영
+  async function loadTodayPreorder() {
+    const bodyEl = document.getElementById('preorder-card-body');
+    if (!user.uid) {
+      todayPreorder = null;
+      if (bodyEl) bodyEl.innerHTML = `<div class="preorder-empty">학생 인식이 완료되면 선주문 내역을 확인할 수 있어요.</div>`;
+      return;
+    }
+    if (bodyEl) bodyEl.innerHTML = `<div class="preorder-empty">오늘의 선주문 내역을 불러오는 중...</div>`;
+    try {
+      const snap = await db.ref(`students/${user.uid}/preorders/${todayDateKey()}`).once('value');
+      todayPreorder = snap.exists() ? snap.val() : null;
+    } catch (e) {
+      console.error('선주문 조회 실패:', e);
+      todayPreorder = null;
+    }
+    renderPreorderCard();
+  }
+
+  function renderPreorderCard() {
+    const bodyEl = document.getElementById('preorder-card-body');
+    if (!bodyEl) return;
+
+    if (!todayPreorder) {
+      bodyEl.innerHTML = `
+        <div class="preorder-empty">아직 오늘의 선주문이 없어요. 미리 양을 선택해두면 배식할 때 바로 불러올 수 있어요.</div>
+        <button class="btn btn-primary btn-full" onclick="openPreorderPage()">🛒 선주문 하기</button>
+      `;
+      return;
+    }
+
+    const isDone = todayPreorder.status === 'fulfilled';
+    const foods  = todayPreorder.foods || {};
+    const chips  = FOODS.map((food, i) =>
+      `<span class="preorder-chip">${EMOJIS[i]} ${menuLabels[food] || food} ${foods[food] || 0}회</span>`
+    ).join('');
+
+    bodyEl.innerHTML = `
+      <div class="preorder-status-pill ${isDone ? 'fulfilled' : 'pending'}">
+        ${isDone ? '✅ 배식 완료' : '⏳ 배식 대기 중'}
+      </div>
+      <div class="preorder-summary mb16">
+        <div class="preorder-summary-chips">${chips}</div>
+      </div>
+      ${isDone
+        ? ''
+        : `<button class="btn btn-secondary btn-full" onclick="openPreorderPage()">✏️ 선주문 수정하기</button>`}
+    `;
+  }
+
+  function openPreorderPage() {
+    preorderCounts = todayPreorder && todayPreorder.foods
+      ? FOODS.map(food => todayPreorder.foods[food] || 0)
+      : [0, 0, 0];
+    goPage('preorder');
+    renderPreorderPage();
+  }
+
+  function renderPreorderPage() {
+    const groupsEl = document.getElementById('preorder-food-groups');
+    if (!groupsEl) return;
+    groupsEl.innerHTML = FOODS.map((food, i) => `
+      <div class="preorder-food-row">
+        <div class="preorder-food-label">
+          <div class="preorder-food-emoji">${EMOJIS[i]}</div>
+          <span>${menuLabels[food] || food}</span>
+        </div>
+        <div class="preorder-food-counts" data-food-index="${i}">
+          ${[0,1,2,3].map(n => `
+            <button type="button" class="btn-count-sm ${preorderCounts[i] === n ? 'active' : ''}"
+              onclick="setPreorderCount(${i}, ${n})">${n}</button>
+          `).join('')}
+          <button type="button" class="btn-count-sm" onclick="setPreorderCount(${i}, ${preorderCounts[i] + 1})">+</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function setPreorderCount(foodIndex, n) {
+    preorderCounts[foodIndex] = Math.max(0, n);
+    renderPreorderPage();
+  }
+
+  async function submitPreorder() {
+    if (!user.uid) {
+      alert('선주문을 하려면 먼저 학생 인식이 필요해요.');
+      return;
+    }
+
+    const btn = document.getElementById('preorder-submit-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
+
+    const dateKey = todayDateKey();
+    const foods   = { 밥: preorderCounts[0] || 0, 국: preorderCounts[1] || 0, 김치: preorderCounts[2] || 0 };
+    const total   = (preorderCounts[0] || 0) + (preorderCounts[1] || 0) + (preorderCounts[2] || 0);
+
+    const preorderData = {
+      name:      user.name,
+      grade:     user.grade,
+      classNum:  user.classNum,
+      number:    user.number,
+      foods,
+      total,
+      status:    'pending',
+      createdAt: Date.now()
+    };
+
+    try {
+      await Promise.all([
+        db.ref(`preorders/${dateKey}/${user.uid}`).set(preorderData),
+        db.ref(`students/${user.uid}/preorders/${dateKey}`).set(preorderData)
+      ]);
+      todayPreorder = preorderData;
+      renderPreorderCard();
+      goPage('dashboard');
+    } catch (e) {
+      console.error('선주문 저장 실패:', e);
+      alert('선주문 저장에 실패했어요. 네트워크를 확인하고 다시 시도해 주세요.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '✅ 선주문 완료'; }
+    }
+  }
+
+  // 실제 배식이 끝났을 때, 오늘 선주문이 있었다면 상태를 'fulfilled'로 갱신
+  async function fulfillTodayPreorder() {
+    if (!todayPreorder || !user.uid) return;
+    const dateKey = todayDateKey();
+    const actual  = { 밥: counts[0] || 0, 국: counts[1] || 0, 김치: counts[2] || 0 };
+    const update  = { status: 'fulfilled', fulfilledAt: Date.now(), actual };
+    try {
+      await Promise.all([
+        db.ref(`preorders/${dateKey}/${user.uid}`).update(update),
+        db.ref(`students/${user.uid}/preorders/${dateKey}`).update(update)
+      ]);
+      todayPreorder = { ...todayPreorder, ...update };
+    } catch (e) {
+      console.error('선주문 완료 처리 실패:', e);
+    }
   }
 
   /* ══════════════════════════════════════════
@@ -1313,7 +1508,15 @@ ${historyText}
   ══════════════════════════════════════════ */
   function startServe() {
     serveStep = 0;
-    counts = Array(6).fill(0);
+    // 오늘 선주문이 있으면 그 값으로 미리 채워서 시작한다 (없으면 0부터 시작)
+    counts = todayPreorder && todayPreorder.foods
+      ? [
+          todayPreorder.foods['밥']   || 0,
+          todayPreorder.foods['국']   || 0,
+          todayPreorder.foods['김치'] || 0,
+          0, 0, 0
+        ]
+      : Array(6).fill(0);
     fingerLocked = false;
     isAdvancingServe = false;
     resetCountdownState();
@@ -1346,7 +1549,8 @@ ${historyText}
       return `<div class="food-step ${cls}">${content}</div>`;
     }).join('');
 
-    document.getElementById('serve-food-name').textContent = EMOJIS[serveStep] + ' ' + (menuLabels[FOODS[serveStep]] || FOODS[serveStep]);
+    document.getElementById('serve-food-name').textContent = EMOJIS[serveStep] + ' ' + (menuLabels[FOODS[serveStep]] || FOODS[serveStep]) +
+      (todayPreorder ? ' · 선주문 반영됨' : '');
 
     customMode = false;
     document.getElementById('serve-normal').style.display = '';
@@ -1482,6 +1686,7 @@ ${historyText}
     fingerLocked = false;
     counts = Array(6).fill(0);
     serveStep = 0;
+    todayPreorder = null;
     goPage('recognition');
     initRecognition();
   }
@@ -1497,6 +1702,7 @@ ${historyText}
 
     const obs = new MutationObserver(async () => {
       if (document.getElementById('page-dashboard').classList.contains('active')) {
+        await loadTodayPreorder();
         await drawPie();
         await generateMealComment();
       }
