@@ -1065,8 +1065,7 @@
 
     if (!todayPreorder) {
       bodyEl.innerHTML = `
-        <div class="preorder-empty">아직 오늘의 선주문이 없어요. 미리 양을 선택해두면 배식할 때 바로 불러올 수 있어요.</div>
-        <button class="btn btn-primary btn-full" onclick="openPreorderPage()">🛒 선주문 하기</button>
+        <div class="preorder-empty">주문 정보가 없습니다.</div>
       `;
       return;
     }
@@ -1086,7 +1085,7 @@
       </div>
       ${isDone
         ? ''
-        : `<button class="btn btn-secondary btn-full" onclick="openPreorderPage()">✏️ 선주문 수정하기</button>`}
+        : `<button class="btn btn-secondary btn-full" onclick="openPreorderPage()"></button>`}
     `;
   }
 
