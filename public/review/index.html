@@ -8,6 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <style>
 
@@ -246,6 +247,7 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
+  transform: scaleX(-1);
 }
 
 .scan-line {
@@ -718,6 +720,26 @@ body {
   border-color: var(--primary);
 }
 
+.review-visibility {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+.review-visibility label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px;
+  border: 2px solid #e8e0d8;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
 /* RECOMMEND */
 
 .recommend-card {
@@ -961,7 +983,7 @@ body {
         class="user-sub"
         id="barSub"
       >
-        학생증을 카메라에 보여주세요
+        얼굴을 카메라 정면에 맞춰주세요
       </div>
 
     </div>
@@ -977,7 +999,7 @@ body {
 
 
     <!-- =================================================
-         OCR LOGIN
+         FACE LOGIN
     ================================================== -->
 
     <section
@@ -986,7 +1008,7 @@ body {
     >
 
       <div class="card-title">
-        🔍 학생증 / 명찰 OCR 인식
+        🙂 얼굴 인식 로그인
       </div>
 
 
@@ -1043,7 +1065,7 @@ body {
       >
 
         <div class="ocr-result-label">
-          📝 인식된 이름
+          📝 식별 결과
         </div>
 
         <div
@@ -1070,7 +1092,7 @@ body {
         class="btn-capture"
         id="btnCapture"
       >
-        📷 학생증 인식
+        🙂 얼굴로 로그인
       </button>
 
 
@@ -1378,6 +1400,12 @@ body {
         </div>
 
 
+        <div class="review-visibility" role="radiogroup" aria-label="리뷰 공개 방식">
+          <label><input type="radio" name="reviewVisibility" value="anonymous" checked> 익명</label>
+          <label><input type="radio" name="reviewVisibility" value="public"> 공개</label>
+        </div>
+
+
         <button
           class="btn btn-primary btn-full"
           id="submitReview"
@@ -1587,6 +1615,13 @@ let selectedMenus = [];
 
 let recogStream = null;
 
+let faceModelsReady = false;
+
+const FACE_MODEL_URL =
+  "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights";
+
+const FACE_MATCH_THRESHOLD = 0.5;
+
 
 /* =====================================================
    GEMINI
@@ -1728,7 +1763,149 @@ setTodayDate();
 
 
 /* =====================================================
-   OCR CAMERA
+   FACE LOGIN
+===================================================== */
+
+async function loadFaceModels() {
+
+  setFirebaseStatus(
+    "loading",
+    "얼굴 인식 모델을 준비하고 있습니다..."
+  );
+
+  try {
+
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL),
+      faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL),
+      faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
+    ]);
+
+    faceModelsReady = true;
+    setFirebaseStatus("hidden");
+
+  } catch (error) {
+
+    console.error("얼굴 모델 로드 실패", error);
+    setFirebaseStatus("error", "얼굴 인식 모델을 불러오지 못했습니다.");
+
+  }
+
+}
+
+
+async function captureFaceLogin() {
+
+  const video = $("videoRecog");
+  const button = $("btnCapture");
+
+  button.disabled = true;
+  button.textContent = "얼굴 식별 중...";
+  setOcrStatus("loading", "등록된 학생 얼굴과 비교하고 있습니다...");
+
+  try {
+
+    if (!faceModelsReady) {
+      await loadFaceModels();
+    }
+
+    if (!video.videoWidth) {
+      throw new Error("카메라 준비를 기다려주세요.");
+    }
+
+    const detections =
+      await faceapi
+        .detectAllFaces(
+          video,
+          new faceapi.TinyFaceDetectorOptions({
+            inputSize: 320,
+            scoreThreshold: 0.5
+          })
+        )
+        .withFaceLandmarks()
+        .withFaceDescriptors();
+
+    if (detections.length === 0) {
+      throw new Error("얼굴을 찾지 못했습니다. 정면을 바라봐주세요.");
+    }
+
+    if (detections.length > 1) {
+      throw new Error("한 사람만 카메라에 나오게 해주세요.");
+    }
+
+    const snapshot = await get(ref(db, "students"));
+    let best = null;
+
+    if (snapshot.exists()) {
+
+      Object.entries(snapshot.val()).forEach(([uid, student]) => {
+
+        const saved = student?.faceDescriptor;
+
+        if (!Array.isArray(saved) || saved.length !== 128) {
+          return;
+        }
+
+        const distance = faceapi.euclideanDistance(
+          detections[0].descriptor,
+          new Float32Array(saved.map(Number))
+        );
+
+        if (!best || distance < best.distance) {
+
+          best = {
+            distance,
+            uid,
+            name: student.name || student["이름"] || "이름 없음",
+            grade: Number(student.grade ?? student["학년"]),
+            classNum: Number(
+              student.class ??
+              student.classNum ??
+              student.classNo ??
+              student["반"]
+            ),
+            number: Number(student.number ?? student["번호"])
+          };
+
+        }
+
+      });
+
+    }
+
+    if (!best || best.distance > FACE_MATCH_THRESHOLD) {
+      throw new Error("등록된 학생 얼굴과 일치하지 않습니다.");
+    }
+
+    currentStudent = best;
+    sessionStorage.setItem("reviewStudent", JSON.stringify(best));
+    $("ocrResultName").textContent = best.name;
+    $("ocrResultBox").classList.add("visible");
+    setOcrStatus("hidden");
+    setFirebaseStatus(
+      "found",
+      `✅ ${best.grade || ""}학년 ${best.classNum || ""}반 ${best.number || ""}번 · ${best.name}`
+    );
+    updateUserBar(best);
+    stopRecogCamera();
+    setTimeout(showReviewApp, 500);
+
+  } catch (error) {
+
+    console.error("얼굴 로그인 실패", error);
+    setOcrStatus("hidden");
+    setFirebaseStatus("error", error.message || "얼굴 식별에 실패했습니다.");
+    button.disabled = false;
+    button.textContent = "🙂 다시 얼굴 인식";
+    button.onclick = captureFaceLogin;
+
+  }
+
+}
+
+
+/* =====================================================
+   CAMERA
 ===================================================== */
 
 async function initRecognition() {
@@ -1759,9 +1936,7 @@ async function initRecognition() {
 
         video: {
 
-          facingMode: {
-            ideal: "environment"
-          },
+          facingMode: "user",
 
           width: {
             ideal: 1280
@@ -2890,13 +3065,28 @@ $("submitReview")
         );
 
 
+      const visibility =
+        document.querySelector(
+          'input[name="reviewVisibility"]:checked'
+        )?.value || "anonymous";
+
+
+      const isPublic =
+        visibility === "public";
+
+
       const reviewData = {
 
-        studentId:
-          currentStudent.uid,
+        ...(isPublic
+          ? {
+              studentId: currentStudent.uid,
+              studentName: currentStudent.name
+            }
+          : {
+              studentName: "익명"
+            }),
 
-        studentName:
-          currentStudent.name,
+        visibility,
 
         date:
           todayKey(),
@@ -2953,16 +3143,21 @@ $("submitReview")
 
             ref(
               db,
-              `menuPreferences/${safeKey}/${currentStudent.uid}`
+              `menuPreferences/${safeKey}/${isPublic ? currentStudent.uid : "anonymous-" + reviewRef.key}`
             ),
 
             {
 
-              studentId:
-                currentStudent.uid,
+              ...(isPublic
+                ? {
+                    studentId: currentStudent.uid,
+                    studentName: currentStudent.name
+                  }
+                : {
+                    studentName: "익명"
+                  }),
 
-              studentName:
-                currentStudent.name,
+              visibility,
 
               menu,
 
@@ -3086,6 +3281,15 @@ function resetReview() {
   $("reviewComment")
     .value =
     "";
+
+  const anonymousOption =
+    document.querySelector(
+      'input[name="reviewVisibility"][value="anonymous"]'
+    );
+
+  if (anonymousOption) {
+    anonymousOption.checked = true;
+  }
 
 }
 
@@ -3549,8 +3753,9 @@ async function loadRecentReviews() {
 
                   <span class="review-student">
                     ${escapeHTML(
-                      review.studentName ||
-                      "학생"
+                      review.visibility === "anonymous"
+                        ? "익명"
+                        : review.studentName || "학생"
                     )}
                   </span>
 
@@ -3688,7 +3893,7 @@ $("logoutButton")
 
       $("barSub")
         .textContent =
-        "학생증을 카메라에 보여주세요";
+        "얼굴을 카메라 정면에 맞춰주세요";
 
 
       $("btnCapture")
@@ -3698,12 +3903,12 @@ $("logoutButton")
 
       $("btnCapture")
         .textContent =
-        "📷 학생증 인식";
+        "🙂 얼굴로 로그인";
 
 
       $("btnCapture")
         .onclick =
-        captureAndOCR;
+        captureFaceLogin;
 
 
       setFirebaseStatus(
@@ -3723,7 +3928,7 @@ $("logoutButton")
 
 $("btnCapture")
   .onclick =
-  captureAndOCR;
+  captureFaceLogin;
 
 
 $("manualSearchButton")
@@ -3756,7 +3961,7 @@ $("manualNameInput")
 
 async function init() {
 
-  await initGeminiKey();
+  await loadFaceModels();
 
 
   const saved =
