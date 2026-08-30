@@ -3,27 +3,6 @@
 <section class="card"><h2 id="formTitle">학생 등록</h2><form class="form" id="studentForm"><div><label>이름</label><input id="name" required maxlength="30"></div><div><label>학년</label><input id="grade" required type="number" min="1" max="6"></div><div><label>반</label><input id="classNo" required type="number" min="1"></div><div><label>번호</label><input id="number" required type="number" min="1"></div><div><label>PIN (4~6자리)</label><input id="pin" required type="password" inputmode="numeric" pattern="[0-9]{4,6}" maxlength="6"></div><button type="submit">저장</button></form><button class="secondary" id="cancel" hidden>수정 취소</button><p class="status" id="status" aria-live="polite"></p></section>
 <section class="card"><div class="toolbar"><h2>등록 학생</h2><input id="search" placeholder="이름 또는 학년-반-번호 검색"></div><div class="tableWrap"><table><thead><tr><th>이름</th><th>학년</th><th>반</th><th>번호</th><th>얼굴</th><th>관리</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 <section class="card facePanel" id="facePanel"><h2 id="faceTitle">얼굴 등록</h2><div class="camera"><video id="faceVideo" autoplay muted playsinline></video><div class="faceGuide"></div></div><p>한 사람만 화면에 나오게 하고 정면을 바라봐 주세요. 다시 등록하면 이전 특징 데이터가 교체됩니다.</p><div class="faceButtons"><button id="captureFace">이 얼굴 등록</button><button class="secondary" id="closeFace">닫기</button></div><p class="status" id="faceStatus" aria-live="polite"></p></section>
-<section class="card"><h2>Firebase Realtime Database 보안 규칙 예시</h2><p>관리자 계정에 <code>admin: true</code> custom claim이 설정되어 있다는 전제입니다. 학생 페이지에서 안전하게 PIN을 검증하려면 Callable Cloud Function/서버 API를 추가해야 합니다.</p><pre class="rules">{
-  "rules": {
-    ".read": false,
-    ".write": false,
-    "students": {
-      ".indexOn": ["lookupKey"],
-      "$uid": {
-        ".read": "auth != null && auth.token.admin === true",
-        ".write": "auth != null && auth.token.admin === true",
-        ".validate": "newData.hasChildren(['name','grade','classNo','number','lookupKey','pin'])"
-      }
-    },
-    "menu": { ".read": true, ".write": "auth != null && auth.token.admin === true" },
-    "menuAllergies": { ".read": true, ".write": "auth != null && auth.token.admin === true" },
-    "system": { ".read": true, ".write": "auth != null && auth.token.admin === true" },
-    "preorders": {
-      ".read": "auth != null && auth.token.admin === true",
-      "$id": { ".write": "!data.exists()", ".validate": "newData.hasChildren(['studentUid','items','createdAt'])" }
-    }
-  }
-}</pre><p><strong>주의:</strong> 위 규칙 그대로라면 인증되지 않은 학생 페이지는 <code>students</code>를 읽을 수 없으므로 조회/PIN 확인이 동작하지 않습니다. 이를 공개 읽기로 바꾸면 모든 학생 이름과 PIN이 노출됩니다. 운영 환경에서는 서버 함수가 학년·반·번호·PIN을 검증하고 최소한의 학생 정보만 반환하도록 구성하세요.</p></section></main>
 <script>
 const firebaseConfig={apiKey:"AIzaSyC3SvV8-bTyQClyZlGWybhR3z5YvLGXYL0",authDomain:"smart-cafeteria-8a2ce.firebaseapp.com",databaseURL:"https://smart-cafeteria-8a2ce-default-rtdb.firebaseio.com",projectId:"smart-cafeteria-8a2ce",storageBucket:"smart-cafeteria-8a2ce.firebasestorage.app",messagingSenderId:"304671336012",appId:"1:304671336012:web:0fd90cf8e6cc06884176e9",measurementId:"G-JWNDVQC63K"};firebase.initializeApp(firebaseConfig);const db=firebase.database();let students={},editing=null,faceUid=null,faceStream=null,faceModelsReady=false;const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function render(){const q=$('search').value.trim().toLowerCase();$('rows').innerHTML=Object.entries(students).filter(([,s])=>!q||s.name?.toLowerCase().includes(q)||s.lookupKey?.includes(q)).sort((a,b)=>(a[1].lookupKey||'').localeCompare(b[1].lookupKey||'',undefined,{numeric:true})).map(([uid,s])=>`<tr><td>${esc(s.name)}</td><td>${esc(s.grade)}</td><td>${esc(s.classNo)}</td><td>${esc(s.number)}</td><td><span class="badge ${Array.isArray(s.faceDescriptor)?'ok':''}">${Array.isArray(s.faceDescriptor)?'등록됨':'미등록'}</span></td><td class="actions"><button data-face="${uid}">${Array.isArray(s.faceDescriptor)?'얼굴 재등록':'얼굴 등록'}</button><button data-edit="${uid}">수정</button><button class="danger" data-delete="${uid}">삭제</button></td></tr>`).join('')||'<tr><td colspan="6">등록된 학생이 없습니다.</td></tr>';document.querySelectorAll('[data-face]').forEach(b=>b.onclick=()=>openFace(b.dataset.face));document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>edit(b.dataset.edit));document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>removeStudent(b.dataset.delete))}
